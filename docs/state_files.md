@@ -21,6 +21,7 @@ the first time they are needed, from the empty versions in
 | `Job_Search_Notes.txt` | agent (`note`) | Running log of what each run did and learned. |
 | `rejection_patterns.csv` | engine (`sync`) | One line per rejection reason; soft context for later searches. |
 | `decisions_sync.json` | the weekly page ("Sync decisions") | Your Accept/Reject decisions, waiting to be applied. |
+| `.agent_home_id` | engine | Random ID of this agent home. The weekly page keeps its browser storage under it and only syncs into the folder that holds it, so two agent homes never mix decisions. |
 | `new_postings/` | agent | The JSON rows each search found, kept as a record. |
 | `sync_logs/` | engine | One audit file per sync plus `latest_state.json` for diffing. |
 | `search_progress/` | engine (`checkpoint`) | Per-run phase and employer checkpoints. |

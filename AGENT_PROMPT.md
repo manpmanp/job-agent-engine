@@ -201,7 +201,7 @@ pull; nothing reaches the agent until it runs:
 This applies only new or changed decisions (safe to repeat), moves
 rejected rows to the Rejected sheet and appends one line per reason to
 `rejection_patterns.csv`. If the file is missing, and a browser is
-connected, the agent may read `localStorage.getItem('jobAgentDecisions')`
+connected, the agent may read `localStorage.getItem('jobAgentDecisions:' + <the id in state/.agent_home_id>)`
 from the page, save it to the decisions file and run the sync. Otherwise
 note the skip; nothing is lost.
 

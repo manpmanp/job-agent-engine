@@ -11,7 +11,7 @@
 Applies Accept/Reject decisions made on the weekly page to the tracker.
 
 The page stores decisions in the browser (localStorage key
-'jobAgentDecisions', keyed by "<URL>||<Title>") and its "Sync decisions"
+'jobAgentDecisions:<home id>', keyed by "<URL>||<Title>") and its "Sync decisions"
 button writes them to the decisions file in the agent home:
 
     {
