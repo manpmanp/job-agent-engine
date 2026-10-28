@@ -4,7 +4,7 @@
 # Author:  manpmanp <manp.node@gmail.com>
 # Generated with Claude (Anthropic), under the author's direction and review.
 # License: MIT (see LICENSE)
-# Version: 0.2.0
+# Version: 0.3.0
 # Date:    2026-10-28
 
 """
@@ -28,6 +28,9 @@ which is how an existing folder layout is mapped without moving files):
         tailoring_checks.json          optional
         characteristics.md             optional
         references/                    optional, any files
+        intake/cv/  intake/cl/         drop existing CVs / letters here;
+                                       picked up by 'intake scan', the form's
+                                       Update button and every run
         candidate/
           profile.json                 written by the engine (merged view)
           sources/                     every form / CV / letter you submitted
@@ -65,6 +68,8 @@ DEFAULT_PATHS = {
     "characteristics": "inputs/characteristics.md",
     "references": "inputs/references",
     "candidate": "inputs/candidate",
+    "intake_cv": "inputs/intake/cv",
+    "intake_cl": "inputs/intake/cl",
     "tracker": "state/Job_Search_Tracker.xlsx",
     "notes": "state/Job_Search_Notes.txt",
     "rejection_log": "state/rejection_patterns.csv",

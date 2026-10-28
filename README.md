@@ -5,7 +5,7 @@
   Author:  manpmanp <manp.node@gmail.com>
   Code and documentation generated with Claude (Anthropic), under the author's direction and review.
   License: MIT (see LICENSE)
-  Version: 0.2.0
+  Version: 0.3.0
   Date:    2026-10-28
 -->
 
@@ -123,56 +123,58 @@ switch it on. A missing optional input is never an error.
 
 ## How to use it
 
-### 1. Install
+### 1. Install and open the input forms
 
 Requirements: Python 3.9 or newer, an internet connection for collection,
 and Node.js for .docx output (without Node, documents are written as
-Markdown). `./run.sh setup` installs the Python packages into a private
-virtual environment in the engine folder (`.venv/`), so nothing is
-installed system-wide and it works with Homebrew Python.
+Markdown).
 
 ```
-git clone <repository URL> job-agent-engine
+git clone https://github.com/manpmanp/job-agent-engine.git
 cd job-agent-engine
-./run.sh setup
+./run.sh --home ~/my_job_agent --setup
 ```
 
-### 2. Create your agent home
+`--setup` installs the Python packages into a private virtual environment
+in the engine folder (`.venv/`, nothing system-wide, works with Homebrew
+Python) and the Node package, creates your agent home, and opens the input
+forms in your browser. The forms are served from your own machine only
+(127.0.0.1) and save straight into your agent home. Stop with Ctrl+C;
+reopen later with `./run.sh --home ~/my_job_agent form`.
 
-Keep it outside this repository (or in `my_agent/`, which git ignores).
+Keep the agent home outside this repository (or in `my_agent/`, the
+default when `--home` is left out, which git ignores).
 
-```
-./run.sh --home ~/my_job_agent init
-```
+### 2. Set up the search (required)
 
-This creates blank inputs, empty state files, the `output/` folder and an
-empty weekly page (`output/jobs-on-market.html`). Any other command, or
-plain `./run.sh`, does the same automatically when something is missing.
-Nothing existing is ever overwritten.
-
-### 3. Set up the search (required)
-
-Open `forms/candidate_form.html` in a browser, fill in the **Search setup**
-tab, and save `search_config.json` into `~/my_job_agent/inputs/`. Or edit
-that file directly. Then check:
+In the **Search setup** tab, enter keywords and locations and click
+**Save search setup**. Then check:
 
 ```
 ./run.sh --home ~/my_job_agent status
 ./run.sh --home ~/my_job_agent plan
 ```
 
+### 3. The agent home
+
+The setup created blank inputs, empty state files, the `output/` folder,
+an empty weekly page (`output/jobs-on-market.html`) and two empty intake
+folders, `inputs/intake/cv/` and `inputs/intake/cl/`. Any command, or plain
+`./run.sh`, fills in whatever is missing. Nothing existing is ever
+overwritten.
+
 ### 4. Add candidate data (optional, any time)
 
-Either route works, and you can combine them:
+Any of these, and you can combine them:
 
-```
-./run.sh --home ~/my_job_agent intake cv path/to/my_cv.pdf
-./run.sh --home ~/my_job_agent intake form profile_form.json
-```
+- **Form:** the **Candidate profile** tab, then **Save candidate profile**.
+- **Existing documents, method 1:** `./run.sh --home ~/my_job_agent intake cv path/to/my_cv.pdf`
+- **Existing documents, method 2:** copy them into `inputs/intake/cv/` and
+  `inputs/intake/cl/`, then click **Update** in the third tab (or run
+  `./run.sh intake scan`; every run also picks them up).
 
-The form is the **Candidate** tab of `forms/candidate_form.html`. When a
-CV and the form disagree, the newest entry is used and the change is
-listed for you to confirm:
+When a CV and the form disagree, the newest entry is used and the change
+is listed for you to confirm:
 
 ```
 ./run.sh --home ~/my_job_agent intake conflicts

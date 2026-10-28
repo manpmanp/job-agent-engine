@@ -4,7 +4,7 @@
 // Author:  manpmanp <manp.node@gmail.com>
 // Generated with Claude (Anthropic), under the author's direction and review.
 // License: MIT (see LICENSE)
-// Version: 0.2.0
+// Version: 0.3.0
 // Date:    2026-10-28
 
 // Building blocks for CV and cover-letter .docx files (docx npm module).

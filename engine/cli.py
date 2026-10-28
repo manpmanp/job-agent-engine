@@ -4,7 +4,7 @@
 # Author:  manpmanp <manp.node@gmail.com>
 # Generated with Claude (Anthropic), under the author's direction and review.
 # License: MIT (see LICENSE)
-# Version: 0.2.0
+# Version: 0.3.0
 # Date:    2026-10-28
 
 """Command-line entry point. Use ./run.sh <command>; see docs/commands.md."""
@@ -53,7 +53,7 @@ def ensure_home(h):
         shutil.copy2(os.path.join(home_mod.INPUT_TEMPLATES_DIR, "candidate", "profile_form.json"), form)
         created.append(form)
     created += ensure_state(h)
-    for k in ("cv_out", "cl_out", "jd_out", "specs", "weekly_summary", "new_postings"):
+    for k in ("cv_out", "cl_out", "jd_out", "specs", "weekly_summary", "new_postings", "intake_cv", "intake_cl"):
         if not os.path.isdir(h.path(k)):
             os.makedirs(h.path(k), exist_ok=True)
             created.append(h.path(k))
@@ -159,7 +159,7 @@ def cmd_intake(h, args):
     it = Intake(h)
     a = args.intake_args
     if not a:
-        raise SystemExit("usage: intake cv|cl <file> | form <file> | fragment <file> --from <id> | set <field> <value> | conflicts | resolve <n> keep-new|keep-previous | sources | rebuild")
+        raise SystemExit("usage: intake cv|cl <file> | scan | form <file> | fragment <file> --from <id> | set <field> <value> | conflicts | resolve <n> keep-new|keep-previous | sources | rebuild")
     sub = a[0]
     if sub in ("cv", "cl"):
         it.add_document(sub, a[1])
@@ -179,6 +179,16 @@ def cmd_intake(h, args):
             print(f"{e['id']:<14} {e['submitted_at']}  {e.get('original') or e.get('data_file')}  {e.get('note') or ''}")
     elif sub == "rebuild":
         it.rebuild()
+    elif sub == "scan":
+        res = it.scan_intake_folders()
+        for i in res["imported"]:
+            print(f"imported {i['file']} as {i['id']}" + ("" if i["text_extracted"] else " (no text extracted; the agent reads the original)"))
+        for s in res["skipped"]:
+            print(f"already imported: {s}")
+        for u in res["unsupported"]:
+            print(f"not a supported type (.pdf .docx .txt .md): {u}")
+        if not any(res.values()):
+            print(f"no documents found; copy them into {h.path('intake_cv')} or {h.path('intake_cl')}")
     else:
         raise SystemExit(f"unknown intake command: {sub}")
 
@@ -310,6 +320,11 @@ def cmd_open(h, args):
         print(f"opened {path}")
 
 
+def cmd_form(h, args):
+    from .formserver import serve
+    serve(h, port=args.port, open_browser=not args.no_browser)
+
+
 def cmd_demo(h, args):
     from . import demo
     demo.build(args.home)
@@ -335,6 +350,7 @@ def main(argv=None):
     x = sp.add_parser("run"); x.add_argument("mode", nargs="?", default="auto", choices=["weekly", "daily", "auto"])
     sp.add_parser("schedule")
     sp.add_parser("open")
+    x = sp.add_parser("form"); x.add_argument("--port", type=int, default=8765); x.add_argument("--no-browser", action="store_true")
     sp.add_parser("demo")
     args = p.parse_args(argv)
     if not args.cmd:
@@ -353,7 +369,7 @@ def main(argv=None):
     {"init": cmd_init, "status": cmd_status, "plan": cmd_plan, "add-postings": cmd_add_postings,
      "weekly": cmd_weekly, "sync": cmd_sync, "intake": cmd_intake, "tailor": cmd_tailor,
      "checkpoint": cmd_checkpoint, "note": cmd_note, "collect": cmd_collect, "verify": cmd_verify,
-     "enrich": cmd_enrich, "run": cmd_run, "schedule": cmd_schedule, "open": cmd_open}[args.cmd](h, args)
+     "enrich": cmd_enrich, "run": cmd_run, "schedule": cmd_schedule, "open": cmd_open, "form": cmd_form}[args.cmd](h, args)
 
 
 if __name__ == "__main__":

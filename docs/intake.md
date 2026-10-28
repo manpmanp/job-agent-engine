@@ -5,7 +5,7 @@
   Author:  manpmanp <manp.node@gmail.com>
   Generated with Claude (Anthropic), under the author's direction and review.
   License: MIT (see LICENSE)
-  Version: 0.2.0
+  Version: 0.3.0
   Date:    2026-10-28
 -->
 
@@ -38,9 +38,20 @@ document states.
 
 The original document remains the wording reference for tailoring.
 
-**Route 2: a blank form.** Use the Candidate tab of
-`forms/candidate_form.html`, or edit `inputs/candidate/profile_form.json`
-directly, then:
+**Route 1b: copy documents into the intake folders.** Every agent home has
+two empty folders, `inputs/intake/cv/` and `inputs/intake/cl/`. Copy your
+CVs and cover letters there and click **Update** in the form (tab 3), or run:
+
+```
+./run.sh intake scan
+```
+
+Every run also picks up new files there. A file is imported once (by its
+content); the copy in the intake folder is left where it is.
+
+**Route 2: a blank form.** Use the Candidate tab of the input forms
+(`./run.sh --setup` opens them and saves straight into your agent home), or
+edit `inputs/candidate/profile_form.json` directly, then:
 
 ```
 ./run.sh intake form profile_form.json

@@ -4,7 +4,7 @@
 # Author:  manpmanp <manp.node@gmail.com>
 # Generated with Claude (Anthropic), under the author's direction and review.
 # License: MIT (see LICENSE)
-# Version: 0.2.0
+# Version: 0.3.0
 # Date:    2026-10-28
 
 """
@@ -62,6 +62,11 @@ def run(home, mode="auto"):
         day = str((cfg.get("weekly_list") or {}).get("full_search_day", "Monday")).lower()
         mode = "weekly" if today.strftime("%A").lower() == day else "daily"
     lines = [f"run {mode} {today.isoformat()}"]
+    from .profile import Intake
+    scan = Intake(home).scan_intake_folders()
+    if scan["imported"]:
+        lines.append(f"intake: {len(scan['imported'])} new document(s) imported from inputs/intake/ "
+                     "(the agent turns them into profile entries)")
     note = None
     if mode == "weekly":
         s = collect(home)

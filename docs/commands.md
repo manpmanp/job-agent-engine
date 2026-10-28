@@ -5,7 +5,7 @@
   Author:  manpmanp <manp.node@gmail.com>
   Generated with Claude (Anthropic), under the author's direction and review.
   License: MIT (see LICENSE)
-  Version: 0.2.0
+  Version: 0.3.0
   Date:    2026-10-28
 -->
 
@@ -22,7 +22,8 @@ before the command, or with the `JOB_AGENT_HOME` environment variable
 | Command | What it does |
 |---|---|
 | *(none)* | `./run.sh` on its own creates the agent home if needed and does today's run (`run auto`). |
-| `setup` | Creates `.venv/` in the engine folder and installs the Python dependencies there, then the Node dependencies. Nothing is installed system-wide. |
+| `--setup` (or `setup`) | Installs the dependencies the first time (Python into `.venv/` in the engine folder, nothing system-wide; Node into `node_modules/`), creates the agent home, then opens the input forms in your browser. |
+| `form [--port N] [--no-browser]` | Opens the input forms without the install step. Served locally (127.0.0.1 only), so Save writes straight into the agent home and Update imports documents from the intake folders. Stop with Ctrl+C. |
 | `test` | Runs the offline test suite. |
 | `init` | Creates a new agent home with blank inputs and empty state files, and lists what it created. Every other command does the same silently when something is missing (including `output/` and the weekly page). Never overwrites existing files. |
 | `status` | Lists every feature as on or off, why, and what would switch it on. |
@@ -37,6 +38,7 @@ before the command, or with the `JOB_AGENT_HOME` environment variable
 | `open` | Opens the weekly page from the local file in your default browser (builds it first if missing). |
 | `sync [file]` | Applies new or changed Accept/Reject decisions, then refreshes the page. |
 | `intake cv\|cl <file>` | Stores a prepared CV or cover letter and extracts its text. |
+| `intake scan` | Imports every new document copied into `inputs/intake/cv/` and `inputs/intake/cl/` (same as the form's Update button; every run does it too). |
 | `intake form <file>` | Submits a filled profile form. |
 | `intake fragment <file> --from <id>` | Submits a profile fragment extracted from an uploaded document. |
 | `intake set <field> <value>` | Sets one field, for example `identity.name`. |

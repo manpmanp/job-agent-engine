@@ -4,7 +4,7 @@
 # Author:  manpmanp <manp.node@gmail.com>
 # Generated with Claude (Anthropic), under the author's direction and review.
 # License: MIT (see LICENSE)
-# Version: 0.2.0
+# Version: 0.3.0
 # Date:    2026-10-28
 
 """Run with:  ./run.sh test
@@ -201,6 +201,32 @@ class TestCollect(unittest.TestCase):
         verify_mod.verify(self.h)
         after = tr.read_all_rows(self.h.path("tracker"))
         self.assertEqual([r["Notes"] for r in before], [r["Notes"] for r in after])
+
+
+class TestIntakeFolders(unittest.TestCase):
+    def setUp(self):
+        self.h = make_home()
+
+    def tearDown(self):
+        shutil.rmtree(self.h.root, ignore_errors=True)
+
+    def test_scan_imports_once(self):
+        from engine.profile import Intake
+        it = Intake(self.h)
+        self.assertTrue(os.path.isdir(self.h.path("intake_cv")))
+        with open(os.path.join(self.h.path("intake_cv"), "cv.md"), "w") as f:
+            f.write("# Test Person\nFPGA developer")
+        with open(os.path.join(self.h.path("intake_cl"), "letter.rtf"), "w") as f:
+            f.write("x")
+        r1 = it.scan_intake_folders()
+        self.assertEqual(len(r1["imported"]), 1)
+        self.assertEqual(r1["unsupported"], ["cl/letter.rtf"])
+        r2 = it.scan_intake_folders()
+        self.assertEqual(r2["imported"], [])
+        self.assertEqual(r2["skipped"], ["cv/cv.md"])
+        self.assertTrue(self.h.capabilities()["tailoring_full"][0])
+        listing = it.folder_listing()
+        self.assertEqual(listing["cv"]["files"][0]["imported_as"], r1["imported"][0]["id"])
 
 
 class TestEnrich(unittest.TestCase):

@@ -5,12 +5,12 @@
 # Author:  manpmanp <manp.node@gmail.com>
 # Generated with Claude (Anthropic), under the author's direction and review.
 # License: MIT (see LICENSE)
-# Version: 0.2.0
+# Version: 0.3.0
 # Date:    2026-10-28
 #
 # Single entry point for the job-search agent engine.
 #   ./run.sh [--home DIR] <command> [args]
-# Commands: setup, test, init, status, plan, collect, verify, enrich, run,
+# Commands: --setup (install + open the input forms), form, test, init, status, plan, collect, verify, enrich, run,
 #           schedule, open, add-postings, weekly, sync, intake, tailor, checkpoint,
 #           note, demo. See docs/commands.md.
 set -euo pipefail
@@ -27,20 +27,37 @@ if ! command -v "$BASE_PY" >/dev/null 2>&1 && [ ! -x "$VENV/bin/python" ]; then
   echo "python3 not found. Install Python 3.9 or newer." >&2; exit 1
 fi
 
-if [ "${1:-}" = "setup" ]; then
+# "setup" or "--setup" anywhere in the arguments: install the dependencies
+# into .venv (first time, or when requirements changed), create the agent
+# home, then open the input forms in the browser.
+SETUP=0; ARGS=()
+for a in "$@"; do
+  case "$a" in
+    setup|--setup) SETUP=1 ;;
+    *) ARGS+=("$a") ;;
+  esac
+done
+if [ "$SETUP" = 1 ]; then
   if [ ! -x "$VENV/bin/python" ]; then
     echo "creating virtual environment in $VENV"
     "$BASE_PY" -m venv "$VENV"
   fi
-  "$VENV/bin/python" -m pip install --quiet --upgrade pip
-  "$VENV/bin/python" -m pip install --quiet -r "$ENGINE_DIR/requirements.txt"
-  echo "Python dependencies installed in $VENV"
-  if command -v npm >/dev/null 2>&1; then
-    (cd "$ENGINE_DIR" && npm install --no-audit --no-fund --silent) && echo "Node dependencies installed"
-  else
-    echo "npm not found: documents will be written as Markdown until Node.js is installed."
+  STAMP="$VENV/.requirements.installed"
+  if [ ! -f "$STAMP" ] || ! cmp -s "$ENGINE_DIR/requirements.txt" "$STAMP"; then
+    "$VENV/bin/python" -m pip install --quiet --upgrade pip
+    "$VENV/bin/python" -m pip install --quiet -r "$ENGINE_DIR/requirements.txt"
+    cp "$ENGINE_DIR/requirements.txt" "$STAMP"
+    echo "Python dependencies installed in $VENV"
   fi
-  exit 0
+  if [ ! -d "$ENGINE_DIR/node_modules/docx" ]; then
+    if command -v npm >/dev/null 2>&1; then
+      (cd "$ENGINE_DIR" && npm install --no-audit --no-fund --silent) && echo "Node dependencies installed"
+    else
+      echo "npm not found: documents will be written as Markdown until Node.js is installed."
+    fi
+  fi
+  PY="$VENV/bin/python"
+  PYTHONPATH="$ENGINE_DIR${PYTHONPATH:+:$PYTHONPATH}" exec "$PY" -m engine.cli ${ARGS[@]+"${ARGS[@]}"} form
 fi
 
 if ! "$PY" -c "import openpyxl" >/dev/null 2>&1; then

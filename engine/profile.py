@@ -4,7 +4,7 @@
 # Author:  manpmanp <manp.node@gmail.com>
 # Generated with Claude (Anthropic), under the author's direction and review.
 # License: MIT (see LICENSE)
-# Version: 0.2.0
+# Version: 0.3.0
 # Date:    2026-10-28
 
 """
@@ -44,6 +44,7 @@ Every submission is kept. profile.json is rebuilt from all of them:
 - Every rebuilt profile.json that differs from the last one is preceded by
   a copy of the previous version in candidate/history/.
 """
+import hashlib
 import json
 import os
 import re
@@ -102,21 +103,28 @@ class Intake:
         with open(self.index_path, "w", encoding="utf-8") as f:
             json.dump(idx, f, indent=2, ensure_ascii=False)
 
-    def _register(self, kind, data_file=None, original=None, text_file=None, parent=None, note=""):
+    def _register(self, kind, data_file=None, original=None, text_file=None, parent=None, note="", **extra):
         idx = self._index()
         sid = f"{kind}-{len(idx) + 1:03d}"
         entry = {"id": sid, "kind": kind, "submitted_at": _now(), "data_file": data_file,
-                 "original": original, "text_file": text_file, "parent": parent, "note": note}
+                 "original": original, "text_file": text_file, "parent": parent, "note": note, **extra}
         idx.append(entry)
         self._save_index(idx)
         return entry
 
     # ---------------------------------------------------------------- intake
-    def add_document(self, kind, path):
-        """kind: 'cv' or 'cl'. Stores the original and extracted text."""
+    def add_document(self, kind, path, quiet=False):
+        """kind: 'cv' or 'cl'. Stores the original and extracted text.
+        A file whose content was already imported is skipped."""
         if not os.path.exists(path):
             print(f"file not found: {path}")
             return None
+        digest = _sha256(path)
+        for e in self._index():
+            if e.get("sha256") == digest:
+                if not quiet:
+                    print(f"already imported as {e['id']}: {os.path.basename(path)}")
+                return None
         d = os.path.join(self.src_dir, kind)
         os.makedirs(d, exist_ok=True)
         stamp = _now()
@@ -130,7 +138,10 @@ class Intake:
                 f.write(text)
         entry = self._register(kind, original=os.path.relpath(dest, self.dir),
                                text_file=os.path.relpath(text_file, self.dir) if text_file else None,
-                               note="awaiting extraction into a profile fragment")
+                               note="awaiting extraction into a profile fragment", sha256=digest,
+                               from_file=os.path.basename(path))
+        if quiet:
+            return entry
         print(f"stored {kind.upper()} as source {entry['id']}: {dest}")
         if text_file:
             print(f"extracted text: {text_file}")
@@ -276,8 +287,60 @@ class Intake:
     def sources(self):
         return self._index()
 
+    def scan_intake_folders(self):
+        """Imports every new CV / cover letter found in inputs/intake/cv and
+        inputs/intake/cl. Files already imported (same content) are skipped,
+        and the files in the intake folders are left where they are.
+        Returns {"imported": [...], "skipped": [...], "unsupported": [...]}."""
+        res = {"imported": [], "skipped": [], "unsupported": []}
+        for kind in ("cv", "cl"):
+            d = self.home.path(f"intake_{kind}")
+            os.makedirs(d, exist_ok=True)
+            for name in sorted(os.listdir(d)):
+                path = os.path.join(d, name)
+                if name.startswith(".") or not os.path.isfile(path):
+                    continue
+                if os.path.splitext(name)[1].lower() not in SUPPORTED_DOCS:
+                    res["unsupported"].append(f"{kind}/{name}")
+                    continue
+                e = self.add_document(kind, path, quiet=True)
+                if e:
+                    res["imported"].append({"id": e["id"], "file": f"{kind}/{name}",
+                                            "text_extracted": bool(e.get("text_file"))})
+                else:
+                    res["skipped"].append(f"{kind}/{name}")
+        return res
+
+    def folder_listing(self):
+        """What is in the intake folders and whether each file is imported."""
+        known = {e.get("sha256"): e["id"] for e in self._index() if e.get("sha256")}
+        out = {}
+        for kind in ("cv", "cl"):
+            d = self.home.path(f"intake_{kind}")
+            os.makedirs(d, exist_ok=True)
+            items = []
+            for name in sorted(os.listdir(d)):
+                path = os.path.join(d, name)
+                if name.startswith(".") or not os.path.isfile(path):
+                    continue
+                ok = os.path.splitext(name)[1].lower() in SUPPORTED_DOCS
+                items.append({"file": name, "supported": ok, "imported_as": known.get(_sha256(path)) if ok else None})
+            out[kind] = {"folder": d, "files": items}
+        return out
+
 
 # ------------------------------------------------------------------ helpers
+SUPPORTED_DOCS = (".pdf", ".docx", ".txt", ".md")
+
+
+def _sha256(path):
+    h = hashlib.sha256()
+    with open(path, "rb") as f:
+        for chunk in iter(lambda: f.read(65536), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
 def _load_json(path, default):
     if os.path.exists(path):
         with open(path, "r", encoding="utf-8") as f:

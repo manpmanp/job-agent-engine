@@ -10,7 +10,7 @@ description: Write a tailored CV and cover letter for one accepted job posting f
   Author:  manpmanp <manp.node@gmail.com>
   Generated with Claude (Anthropic), under the author's direction and review.
   License: MIT (see LICENSE)
-  Version: 0.2.0
+  Version: 0.3.0
   Date:    2026-10-28
 -->
 

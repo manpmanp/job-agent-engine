@@ -5,7 +5,7 @@
   Author:  manpmanp <manp.node@gmail.com>
   Generated with Claude (Anthropic), under the author's direction and review.
   License: MIT (see LICENSE)
-  Version: 0.2.0
+  Version: 0.3.0
   Date:    2026-10-28
 -->
 
@@ -50,6 +50,7 @@ A blank value keeps the default.
 | `inputs/employers.json` | Your named employers: `{"name", "urls": [...]}`. Careers URLs on Greenhouse, Lever, Ashby, Workday or SmartRecruiters are read through their job-board APIs automatically; other URLs as pages; `indeed:` / LinkedIn entries are left to the agent. An entry can force a source with `"ats": {"type": "greenhouse", "board": "..."}` (or `lever`/`company`, `ashby`/`org`, `workday`/`host`,`tenant`,`site`, `smartrecruiters`/`company`). `mode: "extend"` adds to the presets (same name replaces the preset entry); `"override"` uses only yours; `exclude` removes names. |
 | `inputs/secrets.json` | Optional API key for `enrich`. Keep it private; never commit it. |
 | `inputs/candidate/` | Your profile and uploaded documents. Managed with `./run.sh intake`; see `intake.md`. |
+| `inputs/intake/cv/`, `inputs/intake/cl/` | Drop folders for existing CVs and cover letters, imported by the form's Update button, `./run.sh intake scan` and every run. |
 | `inputs/characteristics.md` | How you work, with real examples. Only shapes cover-letter motivation; never quoted. |
 | `inputs/tailoring_rules.md` | Your own mandatory rules for documents (entries that must always appear, exact wording for specific projects, style corrections). |
 | `inputs/tailoring_checks.json` | Mechanical checks: `cv_must_contain`, `cl_must_contain`, `must_not_contain`. `tailor render` refuses a spec that fails them. |

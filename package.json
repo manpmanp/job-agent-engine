@@ -1,6 +1,6 @@
 {
   "name": "job-agent-engine",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "description": "Document renderer for the job-search agent engine (CV / cover letter .docx). Generated with Claude (Anthropic) under the author's direction.",
   "dependencies": {

@@ -6,7 +6,7 @@
   Author:  manpmanp <manp.node@gmail.com>
   Generated with Claude (Anthropic), under the author's direction and review.
   License: MIT (see LICENSE)
-  Version: 0.2.0
+  Version: 0.3.0
   Date:    2026-10-28
 -->
 <html lang="en">
@@ -53,6 +53,12 @@
   .bar label.btn { display:inline-block; margin:0; }
   .bar input[type=file] { display:none; }
   .status { font-size:12px; color:var(--muted); }
+  .mode { margin-top:8px !important; font-size:12px; padding:6px 10px; border-radius:5px; background:var(--accent-soft); color:var(--accent); display:inline-block; }
+  .method { border:1px solid var(--border); border-radius:6px; padding:12px 14px; margin:12px 0; background:var(--bg); }
+  .method h3 { margin:0 0 6px; font-size:14px; color:var(--accent); }
+  table.files { border-collapse:collapse; width:100%; font-size:12px; margin-top:8px; }
+  table.files td, table.files th { text-align:left; padding:4px 8px; border-bottom:1px solid var(--border); }
+  .ok { color:#2f7d4a; } .warn { color:var(--danger); }
   code { background:var(--accent-soft); padding:1px 5px; border-radius:3px; font-family:"Courier New", monospace; font-size:12px; }
   pre { background:var(--accent-soft); padding:10px; border-radius:5px; font-family:"Courier New", monospace; font-size:12px; overflow-x:auto; }
   .check { display:flex; gap:6px; align-items:center; margin-top:8px; font-size:13px; color:var(--text); }
@@ -62,7 +68,8 @@
 <body>
 <header>
   <h1>Agent input forms</h1>
-  <p>Fill in what you want the agent to use and save it as a file. Only the search keywords and locations are required; everything else is optional and can be added or changed at any time. Nothing leaves this page: the files are saved on your own computer.</p>
+  <p>Fill in what you want the agent to use. Only the search keywords and locations are required; everything else is optional and can be added or changed at any time. Nothing leaves your computer.</p>
+  <p class="mode" id="mode-line"></p>
 </header>
 <main>
   <div class="tabs">
@@ -100,11 +107,11 @@
     <input type="text" id="s-presets" placeholder="name of a file in defaults/employer_presets/">
 
     <div class="bar">
-      <button type="button" onclick="saveSearch()">Save search_config.json</button>
+      <button type="button" onclick="saveSearch()">Save search setup</button>
       <label class="btn">Load existing search_config.json<input type="file" accept=".json" onchange="loadSearch(this)"></label>
       <span class="status" id="search-status"></span>
     </div>
-    <p class="hint">Put the saved file at <code>inputs/search_config.json</code> in your agent home.</p>
+    <p class="hint">Started with <code>./run.sh --setup</code>, Save writes <code>inputs/search_config.json</code> in your agent home directly. Opened as a plain file, it downloads the file for you to put there.</p>
   </section>
 
   <!-- ===================== CANDIDATE ===================== -->
@@ -153,21 +160,41 @@
     <textarea id="c-targets"></textarea>
 
     <div class="bar">
-      <button type="button" onclick="saveProfile()">Save profile_form.json</button>
+      <button type="button" onclick="saveProfile()">Save candidate profile</button>
       <label class="btn">Load a saved form or profile.json<input type="file" accept=".json" onchange="loadProfile(this)"></label>
       <span class="status" id="profile-status"></span>
     </div>
-    <p class="hint">Submit the saved file at any time; every submission is kept and the newest entry wins:</p>
+    <p class="hint">Started with <code>./run.sh --setup</code>, Save submits the profile to your agent home directly. Opened as a plain file, it downloads <code>profile_form.json</code>; submit that with the command below. Every submission is kept and the newest entry wins.</p>
     <pre>./run.sh intake form profile_form.json</pre>
   </section>
 
   <!-- ===================== UPLOAD ===================== -->
   <section class="pane" id="pane-upload">
     <h2>Start from a CV or cover letter you already have</h2>
-    <p class="hint">A browser page cannot place files in your agent home, so prepared documents go in with the runner. The original is kept as the wording reference for tailoring, and its text is extracted for the agent to turn into a profile.</p>
-    <pre>./run.sh intake cv  path/to/my_cv.pdf
+    <p class="hint">The original is kept as the wording reference for tailoring, and its text is extracted for the agent to turn into profile entries. Supported: .pdf, .docx, .txt, .md. A file already imported (same content) is never imported twice.</p>
+
+    <div class="method">
+      <h3>Method 1: from the command line</h3>
+      <pre>./run.sh intake cv  path/to/my_cv.pdf
 ./run.sh intake cl  path/to/a_letter_I_sent.docx</pre>
-    <p class="hint">Supported: .docx, .pdf, .txt, .md. You can combine both routes: upload a CV now, add form entries later. When a newer entry differs from an older one from the other route, the newest is used and the change is listed for you to confirm:</p>
+    </div>
+
+    <div class="method">
+      <h3>Method 2: copy the files into the intake folders</h3>
+      <p class="hint">Copy your CVs into the <code>cv</code> folder and your cover letters into the <code>cl</code> folder below (both are created empty with your agent home), then click <b>Update</b>. Every scheduled run also picks up new files there.</p>
+      <table class="files">
+        <tr><th>CV folder</th><td><code id="dir-cv">inputs/intake/cv/</code></td></tr>
+        <tr><th>Cover-letter folder</th><td><code id="dir-cl">inputs/intake/cl/</code></td></tr>
+      </table>
+      <div class="bar">
+        <button type="button" id="btn-update" onclick="updateIntake()">Update: find and add new documents</button>
+        <span class="status" id="intake-status"></span>
+      </div>
+      <table class="files" id="intake-files"></table>
+      <p class="hint" id="intake-offline" style="display:none">The Update button needs the form to be started with <code>./run.sh --setup</code> (or <code>./run.sh form</code>). Opened as a plain file, use this instead after copying the files:<br><code>./run.sh intake scan</code></p>
+    </div>
+
+    <p class="hint">You can combine routes: documents now, form entries later. When a newer entry differs from an older one from the other route, the newest is used and the change is listed for you to confirm:</p>
     <pre>./run.sh intake conflicts
 ./run.sh intake resolve 1 keep-previous</pre>
   </section>
@@ -189,6 +216,15 @@ document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () =>
 }));
 
 const $ = id => document.getElementById(id);
+const API = window.JOB_AGENT_API || null;   // set when served by ./run.sh --setup
+let loadedLocations = [];
+
+async function api(method, path, body) {
+  const r = await fetch(path, { method, headers: { 'Content-Type': 'application/json', 'X-Agent-Token': API.token },
+                                body: body ? JSON.stringify(body) : undefined });
+  if (!r.ok) throw new Error((await r.json().catch(() => ({}))).error || ('HTTP ' + r.status));
+  return r.json();
+}
 const lines = v => (v || '').split('\n').map(s => s.trim()).filter(Boolean);
 const csv = v => (v || '').split(',').map(s => s.trim()).filter(Boolean);
 
@@ -244,7 +280,10 @@ function saveSearch() {
   const cfg = {
     schema_version: 1,
     keywords: kw,
-    locations: loc.map((n, i) => ({ name: n, priority: i + 1 })),
+    locations: loc.map((n, i) => {
+      const prev = loadedLocations.find(l => (typeof l === 'string' ? l : l.name) === n);
+      return Object.assign(typeof prev === 'object' && prev ? Object.assign({}, prev) : {}, { name: n, priority: i + 1 });
+    }),
     weekly_list: { enabled: true, full_search_day: 'Monday', summary_markdown: true },
     roles_description: $('s-roles').value.trim(),
     categories: lines($('s-categories').value),
@@ -254,14 +293,22 @@ function saveSearch() {
     employer_presets: csv($('s-presets').value),
     document_market: $('s-market').value.trim(),
   };
+  const idle = (!kw.length || !loc.length) ? ' Without keywords and locations the search stays idle; the weekly list still works.' : '';
+  if (API) {
+    api('POST', '/api/search_config', cfg)
+      .then(r => { $('search-status').textContent = 'Saved to ' + r.saved + '.' + idle; })
+      .catch(e => { $('search-status').textContent = 'Not saved: ' + e.message; });
+    return;
+  }
   download('search_config.json', cfg);
-  $('search-status').textContent = (!kw.length || !loc.length)
-    ? 'Saved. Without keywords and locations the search stays idle; the weekly list still works.'
-    : 'Saved.';
+  $('search-status').textContent = 'Downloaded. Put it at inputs/search_config.json in your agent home.' + idle;
 }
 
-function loadSearch(input) {
-  readFile(input, c => {
+function loadSearch(input) { readFile(input, applySearch); }
+
+function applySearch(c) {
+  {
+    loadedLocations = c.locations || [];
     $('s-keywords').value = (c.keywords || []).join('\n');
     $('s-locations').value = (c.locations || []).map(l => typeof l === 'string' ? l : l.name).join('\n');
     $('s-roles').value = c.roles_description || '';
@@ -276,7 +323,7 @@ function loadSearch(input) {
     $('s-presets').value = (c.employer_presets || []).join(', ');
     $('s-market').value = c.document_market || '';
     $('search-status').textContent = 'Loaded.';
-  });
+  }
 }
 
 function saveProfile() {
@@ -291,12 +338,20 @@ function saveProfile() {
     training: lines($('c-training').value), references: $('c-refs').value.trim(),
     preferences: { own_seniority_level: $('c-level').value.trim(), target_roles: lines($('c-targets').value) },
   };
+  if (API) {
+    api('POST', '/api/profile', p)
+      .then(r => { $('profile-status').textContent = 'Submitted to your agent home.' + (r.open_conflicts ? ' ' + r.open_conflicts + ' conflict(s) with earlier entries to confirm: ./run.sh intake conflicts' : ''); })
+      .catch(e => { $('profile-status').textContent = 'Not saved: ' + e.message; });
+    return;
+  }
   download('profile_form.json', p);
-  $('profile-status').textContent = 'Saved. Submit it with ./run.sh intake form profile_form.json';
+  $('profile-status').textContent = 'Downloaded. Submit it with ./run.sh intake form profile_form.json';
 }
 
-function loadProfile(input) {
-  readFile(input, p => {
+function loadProfile(input) { readFile(input, applyProfile); }
+
+function applyProfile(p) {
+  {
     const i = p.identity || {};
     $('c-name').value = i.name || ''; $('c-headline').value = i.headline || ''; $('c-email').value = i.email || '';
     $('c-phone').value = i.phone || ''; $('c-location').value = i.location || ''; $('c-links').value = (i.links || []).join('\n');
@@ -305,10 +360,61 @@ function loadProfile(input) {
     $('c-training').value = (p.training || []).join('\n'); $('c-refs').value = p.references || '';
     const pr = p.preferences || {}; $('c-level').value = pr.own_seniority_level || ''; $('c-targets').value = (pr.target_roles || []).join('\n');
     $('profile-status').textContent = 'Loaded. Change what you need and save again.';
-  });
+  }
+}
+
+function renderIntake(info) {
+  const t = $('intake-files');
+  $('dir-cv').textContent = info.intake.cv.folder;
+  $('dir-cl').textContent = info.intake.cl.folder;
+  const rows = [];
+  for (const kind of ['cv', 'cl']) {
+    for (const f of info.intake[kind].files) {
+      const state = !f.supported ? '<span class="warn">not a supported type</span>'
+        : f.imported_as ? '<span class="ok">added (' + esc(f.imported_as) + ')</span>' : '<span class="warn">new, click Update</span>';
+      rows.push('<tr><td>' + kind.toUpperCase() + '</td><td>' + esc(f.file) + '</td><td>' + state + '</td></tr>');
+    }
+  }
+  t.innerHTML = rows.length ? '<tr><th>Type</th><th>File</th><th>Status</th></tr>' + rows.join('')
+                            : '<tr><td>No documents in the intake folders yet.</td></tr>';
+}
+
+function updateIntake() {
+  if (!API) { $('intake-offline').style.display = 'block'; return; }
+  $('intake-status').textContent = 'Searching the intake folders...';
+  api('POST', '/api/intake/scan')
+    .then(r => {
+      const res = r.result, n = res.imported.length;
+      $('intake-status').textContent = n ? n + ' document(s) added. The agent turns them into profile entries on its next run.'
+        : (res.skipped.length ? 'Nothing new: all documents are already added.' : 'No documents found. Copy them into the folders above.');
+      if (res.unsupported.length) $('intake-status').textContent += ' Not supported: ' + res.unsupported.join(', ');
+      renderIntake(r.info);
+    })
+    .catch(e => { $('intake-status').textContent = 'Update failed: ' + e.message; });
+}
+
+async function initFromHome() {
+  if (!API) {
+    $('mode-line').textContent = 'Opened as a file: saving downloads files. Start with ./run.sh --setup to save straight into your agent home.';
+    $('intake-offline').style.display = 'block';
+    $('btn-update').disabled = true;
+    return;
+  }
+  try {
+    const info = await api('GET', '/api/info');
+    $('mode-line').textContent = 'Connected to your agent home: ' + info.home + '. Saving writes there directly.';
+    applySearch(await api('GET', '/api/search_config'));
+    $('search-status').textContent = info.search_ready ? 'Loaded from your agent home.' : 'Add keywords and locations to start the search.';
+    const prof = await api('GET', '/api/profile');
+    if (Object.keys(prof).some(k => k !== 'schema_version')) { applyProfile(prof); $('profile-status').textContent = 'Loaded your current profile.'; }
+    renderIntake(info);
+  } catch (e) {
+    $('mode-line').textContent = 'Could not reach the local engine (' + e.message + '). Is ./run.sh --setup still running?';
+  }
 }
 
 for (const k of ['experience', 'education', 'languages']) addItem(k);
+initFromHome();
 </script>
 </body>
 </html>
