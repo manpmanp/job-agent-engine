@@ -32,7 +32,8 @@ before the command, or with the `JOB_AGENT_HOME` environment variable
 | `run weekly\|daily\|auto` | A complete run without an agent. `weekly`: collect, verify, sync, enrich, templates, page and summary. `daily`: sync, templates, page. `auto`: weekly on your search day, daily otherwise. |
 | `schedule` | Prints the cron line and the macOS launchd file to run `run auto` every morning. |
 | `add-postings <file.json>` | Merges found or updated posting rows into the tracker. |
-| `weekly ["note"]` | Writes the weekly page and the weekly summary. |
+| `weekly ["note"]` | Writes the weekly page (`output/jobs-on-market.html`) and the weekly summary. |
+| `open` | Opens the weekly page from the local file in your default browser (builds it first if missing). |
 | `sync [file]` | Applies new or changed Accept/Reject decisions, then refreshes the page. |
 | `intake cv\|cl <file>` | Stores a prepared CV or cover letter and extracts its text. |
 | `intake form <file>` | Submits a filled profile form. |

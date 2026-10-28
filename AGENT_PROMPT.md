@@ -179,7 +179,7 @@ preferred levels is flagged, never discarded.
 ./run.sh weekly ["note"]
 ```
 
-Writes `output/weekly-job-search.html` and `output/weekly_summary/
+Writes `output/jobs-on-market.html` and `output/weekly_summary/
 weekly_<date>.md`. On the full weekly pass this is **mandatory, every
 time**, even with zero new postings; pass a note such as `"No new postings
 in this week's search (<date>)."` so the user can see the run happened.

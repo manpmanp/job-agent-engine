@@ -199,7 +199,8 @@ for LinkedIn, Indeed and fully tailored documents.
 
 ### 6. Decide and review
 
-Open `~/my_job_agent/output/weekly-job-search.html` in your normal browser.
+Open the page in your normal browser with
+`./run.sh --home ~/my_job_agent open` (it is `output/jobs-on-market.html`).
 Accept or Reject each posting, then click **Sync decisions** (you pick the
 `state` folder once). The next sync applies the decisions, and accepted
 postings get documents in `output/CV/`, `output/CL/` and `output/JD/`.

@@ -11,7 +11,7 @@
 # Single entry point for the job-search agent engine.
 #   ./run.sh [--home DIR] <command> [args]
 # Commands: setup, test, init, status, plan, collect, verify, enrich, run,
-#           schedule, add-postings, weekly, sync, intake, tailor, checkpoint,
+#           schedule, open, add-postings, weekly, sync, intake, tailor, checkpoint,
 #           note, demo. See docs/commands.md.
 set -euo pipefail
 ENGINE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

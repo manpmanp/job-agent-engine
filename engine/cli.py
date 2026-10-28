@@ -281,6 +281,19 @@ def cmd_schedule(h, args):
     print(schedule_text(h))
 
 
+def cmd_open(h, args):
+    """Opens the weekly page in the default browser, from the local file."""
+    import webbrowser
+    path = h.path("weekly_html")
+    if not os.path.exists(path):
+        cmd_weekly(h, argparse.Namespace(note=None))
+    url = "file://" + os.path.abspath(path)
+    if not webbrowser.open(url):
+        print(f"open this in your browser: {url}")
+    else:
+        print(f"opened {path}")
+
+
 def cmd_demo(h, args):
     from . import demo
     demo.build(args.home)
@@ -305,6 +318,7 @@ def main(argv=None):
     sp.add_parser("enrich")
     x = sp.add_parser("run"); x.add_argument("mode", nargs="?", default="auto", choices=["weekly", "daily", "auto"])
     sp.add_parser("schedule")
+    sp.add_parser("open")
     sp.add_parser("demo")
     args = p.parse_args(argv)
     if not args.cmd:
@@ -316,7 +330,7 @@ def main(argv=None):
     {"init": cmd_init, "status": cmd_status, "plan": cmd_plan, "add-postings": cmd_add_postings,
      "weekly": cmd_weekly, "sync": cmd_sync, "intake": cmd_intake, "tailor": cmd_tailor,
      "checkpoint": cmd_checkpoint, "note": cmd_note, "collect": cmd_collect, "verify": cmd_verify,
-     "enrich": cmd_enrich, "run": cmd_run, "schedule": cmd_schedule}[args.cmd](h, args)
+     "enrich": cmd_enrich, "run": cmd_run, "schedule": cmd_schedule, "open": cmd_open}[args.cmd](h, args)
 
 
 if __name__ == "__main__":

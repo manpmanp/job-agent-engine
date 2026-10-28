@@ -68,7 +68,7 @@ def build(_home_arg=None):
 
     prev = os.path.join(REPO_DIR, "demo", "preview")
     os.makedirs(prev, exist_ok=True)
-    shutil.copy2(h.path("weekly_html"), os.path.join(prev, "weekly-job-search.html"))
+    shutil.copy2(h.path("weekly_html"), os.path.join(prev, "jobs-on-market.html"))
     summaries = sorted(os.listdir(h.path("weekly_summary")))
     if summaries:
         shutil.copy2(os.path.join(h.path("weekly_summary"), summaries[-1]), os.path.join(prev, "weekly_summary_example.md"))

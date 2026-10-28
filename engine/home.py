@@ -41,7 +41,7 @@ which is how an existing folder layout is mapped without moving files):
         new_postings/                  inbox: rows the search step found
         sync_logs/  search_progress/
       output/
-        weekly-job-search.html
+        jobs-on-market.html
         weekly_summary/  specs/  CV/  CL/  JD/
 """
 import json
@@ -72,7 +72,7 @@ DEFAULT_PATHS = {
     "new_postings": "state/new_postings",
     "sync_logs": "state/sync_logs",
     "search_progress": "state/search_progress",
-    "weekly_html": "output/weekly-job-search.html",
+    "weekly_html": "output/jobs-on-market.html",
     "weekly_summary": "output/weekly_summary",
     "specs": "output/specs",
     "cv_out": "output/CV",
