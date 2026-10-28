@@ -41,6 +41,21 @@ def _d(s):
     return m.group(1) if m else ""
 
 
+_DEADLINE_TEXT = re.compile(
+    r"(?:posting end date|application deadline|last (?:day|date) to apply|last application date|apply (?:no later than|by)|"
+    r"sista ans[oö]kningsdag(?:en)?|sista dag (?:att|f[oö]r att) s[oö]ka|ans[oö]k senast)\s*(?:is|[aä]r)?\s*[:\-]?\s*(\d{4}-\d{2}-\d{2})",
+    re.I)
+
+
+def stated_deadline(text):
+    """The deadline the posting text itself states ('Posting End Date
+    2026-11-12', 'Sista ansökningsdag: 2026-11-30'), or ''. ATS end dates
+    can differ by a day from what the employer wrote (time zones,
+    exclusive end dates), so the stated date is preferred."""
+    m = _DEADLINE_TEXT.search(str(text or ""))
+    return m.group(1) if m else ""
+
+
 # --------------------------------------------------------------- JobTech / AF
 def jobtech(keywords, max_per_keyword=200):
     """Arbetsformedlingen Platsbanken via the open JobSearch API (no key)."""

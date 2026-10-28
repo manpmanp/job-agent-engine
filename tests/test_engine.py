@@ -142,11 +142,36 @@ class TestNamingAndSkills(unittest.TestCase):
                                           "https://arbetsformedlingen.se/platsbanken/annonser/12345678"),
                          "Example_AB_ASIC_Engineer_Uppsala_12345678")
         self.assertEqual(d.build_basename("Example AB", "FPGA Engineer", "Västerås, Sverige"), "Example_AB_FPGA_Engineer_Västerås")
+        # Workday style "Country - City", city already in the title
+        self.assertEqual(d.build_basename("Example AB", "SoC Architect, Lund", "Sweden - Lund",
+                                          "https://x.wd3.myworkdayjobs.com/Ext/job/Sweden---Lund/SoC-Architect--Lund_R-123784"),
+                         "Example_AB_SoC_Architect_Lund_R-123784")
+        self.assertEqual(d.city_of("Region Skåne, Malmö"), "Malmö")
+        self.assertEqual(d.city_of("Skåne län - Lund"), "Lund")
 
     def test_spaced_headings(self):
         from engine.profile import _join_spaced_headings
         self.assertEqual(_join_spaced_headings("PR OF ES SI ON AL  PR OF ILE"), "PROFESSIONAL PROFILE")
         self.assertEqual(_join_spaced_headings("Normal line of text"), "Normal line of text")
+        for raw, want in (("PR OF ES SI ON AL PR OF ILE", "PROFESSIONAL PROFILE"), ("EDU CATION", "EDUCATION"),
+                          ("TECHN ICAL S KIL LS", "TECHNICAL SKILLS"), ("RE FE R EN CES", "REFERENCES"),
+                          ("AXI AHB APB", "AXI AHB APB"), ("CPF UPF", "CPF UPF")):
+            self.assertEqual(_join_spaced_headings(raw), want)
+
+    def test_stated_deadline_and_junior_note(self):
+        self.assertEqual(sources.stated_deadline("Type of Employment\nPermanent\n Posting End Date\n2026-11-12 "), "2026-11-12")
+        self.assertEqual(sources.stated_deadline("Sista ansökningsdag: 2026-11-30"), "2026-11-30")
+        self.assertEqual(sources.stated_deadline("Founded 2001-01-01"), "")
+        self.assertTrue(match.welcomes_junior("We welcome both junior and senior engineers who bring"))
+        self.assertTrue(match.welcomes_junior("Vi söker juniora och seniora ingenjörer"))
+        self.assertFalse(match.welcomes_junior("Senior engineer with 10 years of experience"))
+
+    def test_jd_snapshot_html(self):
+        import datetime, tempfile
+        from engine import documents
+        self.assertEqual(documents._date_only(datetime.datetime(2026, 10, 22)), "2026-10-22")
+        self.assertEqual(documents._date_only("2026-11-13 00:00:00"), "2026-11-13")
+        self.assertEqual(documents._text_to_html(" a \n b \n\n \n c "), "<p>a<br>b</p><p>c</p>")
 
     def test_skills_from_description(self):
         s = match.skills_summary("SystemVerilog and UVM, C and C++ on Linux. Go-to person. C-level contact.", match.default_vocabulary())

@@ -131,6 +131,24 @@ def match_location(location_text, locations, remote_ok=True, is_remote=False):
     return None
 
 
+_JUNIOR_WELCOME = [
+    r"\bjunior\b[^.\n]{0,30}\b(?:and|or|as well as|&)\b[^.\n]{0,20}\bsenior\b",
+    r"\bsenior\b[^.\n]{0,20}\b(?:and|or|as well as|&)\b[^.\n]{0,30}\bjunior\b",
+    r"\bwelcome[sd]?\b[^.\n]{0,20}\bjunior\b",
+    r"\ball (?:experience|seniority|career) levels\b",
+    r"\bjunior(?:a)? (?:och|eller) senior(?:a)?\b",
+    r"\bsenior(?:a)? (?:och|eller) junior(?:a)?\b",
+]
+
+
+def welcomes_junior(description):
+    """True when the posting text says junior applicants are welcome too
+    (e.g. 'We welcome both junior and senior engineers'). Used only to add
+    a note to a senior-flagged posting; it never changes the flag."""
+    t = fold(description or "")
+    return any(re.search(p, t) for p in _JUNIOR_WELCOME)
+
+
 def seniority(title):
     t = fold(title)
     for label, pat in SENIORITY_PATTERNS:

@@ -169,6 +169,10 @@ def _filter_and_build(cfg, home, candidates, keywords, locations, run_date):
                 loc = "unknown"  # leads and location-less listings are kept for confirmation
             else:
                 continue
+        stated = sources.stated_deadline(c.get("description"))
+        board_deadline = c.get("deadline") or ""
+        if stated:
+            c["deadline"] = stated
         sen = match.seniority(c["title"])
         skills = ", ".join(c.get("skills") or []) or match.skills_summary(c.get("description"), vocab)
         notes = [f"Source: {c['source']}", f"auto-collected {run_date}", f"matched {', '.join(hit)} in {where}"]
@@ -178,6 +182,10 @@ def _filter_and_build(cfg, home, candidates, keywords, locations, run_date):
             notes.append("link from careers page, open to confirm it is a live posting")
         if c.get("posted_text") and not c.get("published"):
             notes.append(f"posted: {c['posted_text']}")
+        if stated and board_deadline and stated != board_deadline:
+            notes.append(f"deadline {stated} as stated in the posting (job board says {board_deadline})")
+        if tr.seniority_bucket(sen, cfg.get("seniority")) == "senior" and match.welcomes_junior(c.get("description")):
+            notes.append(f"seniority flag ({sen}) may not apply: the posting says junior applicants are welcome")
         if c.get("apply_url") and c["apply_url"] != c["url"]:
             notes.append(f"apply: {c['apply_url']}")
         row = {

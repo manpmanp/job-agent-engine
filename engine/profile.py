@@ -374,17 +374,49 @@ def _short(v, n=110):
     return s if len(s) <= n else s[:n] + "..."
 
 
+_HEADING_WORDS = {
+    "ABOUT", "ACADEMIC", "ACHIEVEMENTS", "ACTIVITIES", "ADDITIONAL", "AND", "AREAS", "AWARDS", "CAREER",
+    "CERTIFICATES", "CERTIFICATIONS", "COMPETENCES", "COMPETENCIES", "CONTACT", "CONTRIBUTIONS", "CORE",
+    "COURSES", "DETAILS", "EDUCATION", "EMPLOYMENT", "EXPERIENCE", "EXPERTISE", "GRANTS", "HIGHLIGHTS",
+    "HISTORY", "HONORS", "HONOURS", "INFORMATION", "INTERESTS", "KEY", "KNOWLEDGE", "LANGUAGES",
+    "LEADERSHIP", "ME", "OBJECTIVE", "OF", "OTHER", "PATENTS", "PERSONAL", "PROFESSIONAL", "PROFILE",
+    "PROJECTS", "PUBLICATIONS", "QUALIFICATIONS", "REFERENCES", "RESEARCH", "SCIENTIFIC", "SELECTED",
+    "SKILLS", "SUMMARY", "SUPERVISION", "TALKS", "TEACHING", "TECHNICAL", "TOOLS", "TRAINING",
+    "VOLUNTEERING", "WORK",
+    # Swedish
+    "ARBETSLIVSERFARENHET", "ERFARENHET", "KOMPETENSER", "KUNSKAPER", "OCH", "PROFIL", "PUBLIKATIONER",
+    "REFERENSER", "SAMMANFATTNING", "SPRÅK", "UTBILDNING", "ÖVRIGT",
+}
+
+
+def _segment_heading(letters):
+    """Splits 'PROFESSIONALPROFILE' into known heading words, or None."""
+    n = len(letters)
+    best = [None] * (n + 1)
+    best[0] = []
+    for i in range(n):
+        if best[i] is None:
+            continue
+        for j in range(i + 2, n + 1):
+            if letters[i:j] in _HEADING_WORDS and best[j] is None:
+                best[j] = best[i] + [letters[i:j]]
+    return best[n]
+
+
 def _join_spaced_headings(text):
-    """Letter-spaced headings come out of PDFs as 'PR OF ES SI ON AL  PR OF ILE'.
-    Lines made only of short upper-case fragments are joined back, keeping
-    double spaces as word gaps."""
+    """Letter-spaced headings come out of PDFs split at random points:
+    'PR OF ES SI ON AL PR OF ILE', 'EDU CATION', 'TECHN ICAL S KIL LS'.
+    A line made only of upper-case letter groups is joined back when the
+    letters split exactly into known heading words. Lines such as
+    'AXI AHB APB' do not, so they are left as they are."""
     out = []
     for line in text.splitlines():
         s = line.strip()
         frags = s.split()
-        if (len(frags) >= 3 and all(f.isupper() and len(f) <= 3 for f in frags)):
-            words = re.split(r"\s{2,}", s)
-            line = " ".join(w.replace(" ", "") for w in words)
+        if 2 <= len(frags) <= 20 and len(s) <= 80 and all(f.isalpha() and f.isupper() for f in frags):
+            words = _segment_heading("".join(frags))
+            if words and len(words) < len(frags):
+                line = " ".join(words)
         out.append(line)
     return "\n".join(out)
 
@@ -412,7 +444,7 @@ def extract_text(path):
                     return _join_spaced_headings(r.stdout.decode("utf-8", errors="replace").strip())
             try:
                 from pypdf import PdfReader  # optional
-                return "\n".join((p.extract_text() or "") for p in PdfReader(path).pages).strip()
+                return _join_spaced_headings("\n".join((p.extract_text() or "") for p in PdfReader(path).pages).strip())
             except Exception:
                 return ""
     except Exception as e:

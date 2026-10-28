@@ -280,25 +280,54 @@ def to_markdown(spec):
 
 
 # ---------------------------------------------------------------- JD snapshot
+def _date_only(v):
+    """Tracker cells can hold datetimes; the snapshot shows the date only."""
+    if v is None:
+        return ""
+    if hasattr(v, "date") and hasattr(v, "hour"):
+        return v.date().isoformat()
+    return re.sub(r"^(\d{4}-\d{2}-\d{2})[ T]00:00(:00)?$", r"\1", str(v).strip())
+
+
+def _text_to_html(text):
+    """Description text to paragraphs: blank lines separate paragraphs,
+    single line breaks are kept inside a paragraph, edge spaces dropped."""
+    blocks, cur = [], []
+    for line in str(text or "").replace("\r", "").split("\n"):
+        line = line.strip()
+        if line:
+            cur.append(html.escape(line))
+        elif cur:
+            blocks.append(cur)
+            cur = []
+    if cur:
+        blocks.append(cur)
+    return "".join("<p>" + "<br>".join(b) + "</p>" for b in blocks)
+
+
 def jd_snapshot(row, out_pdf, full_text=None):
     """Writes the job description as HTML next to out_pdf and converts it to
     PDF when a converter is available. Returns the path written."""
     os.makedirs(os.path.dirname(os.path.abspath(out_pdf)), exist_ok=True)
     html_path = os.path.splitext(out_pdf)[0] + ".html"
     meta = [("Employer", row.get("Employer")), ("Title", row.get("Title")), ("Location", row.get("Location")),
-            ("Announced", row.get("Announce Date")), ("Deadline", row.get("Deadline")),
+            ("Announced", _date_only(row.get("Announce Date"))), ("Deadline", _date_only(row.get("Deadline"))),
             ("Work arrangement", row.get("Remote/Hybrid/Onsite")), ("URL", row.get("URL")),
             ("Snapshot taken", date.today().isoformat())]
-    body = html.escape(full_text) if full_text else html.escape(str(row.get("Required Skills (summary)") or "")) + \
-        "<p><em>Full description not captured; only the tracker summary is shown.</em></p>"
+    body = _text_to_html(full_text) if full_text else "<p>" + html.escape(str(row.get("Required Skills (summary)") or "")) + \
+        "</p><p><em>Full description not captured; only the tracker summary is shown.</em></p>"
     doc = ("<!DOCTYPE html><html><head><meta charset='utf-8'><title>JD snapshot</title>"
-           "<style>body{font-family:Arial,sans-serif;max-width:780px;margin:32px auto;color:#222;font-size:13px}"
-           "h1{font-size:18px;color:#1B3A5C}table{border-collapse:collapse;margin-bottom:18px}"
-           "td{padding:3px 10px 3px 0;vertical-align:top}td:first-child{color:#666}pre{white-space:pre-wrap;font-family:inherit}</style>"
+           "<style>@page{size:A4;margin:18mm}body{font-family:Arial,sans-serif;max-width:780px;margin:0 auto;color:#222;"
+           "font-size:11pt;line-height:1.35}h1{font-size:15pt;color:#1B3A5C;margin:0 0 10px}"
+           "table{border-collapse:collapse;margin-bottom:14px;width:100%}"
+           "td{padding:2px 10px 2px 0;vertical-align:top}td.k{color:#666;width:130px;white-space:nowrap}"
+           "td.v{word-break:break-all}p{margin:0 0 8px}</style>"
            "</head><body>"
-           f"<h1>{html.escape(str(row.get('Title') or ''))} - {html.escape(str(row.get('Employer') or ''))}</h1><table>"
-           + "".join(f"<tr><td>{k}</td><td>{html.escape(str(v or ''))}</td></tr>" for k, v in meta)
-           + f"</table><pre>{body}</pre></body></html>")
+           f"<h1>{html.escape(str(row.get('Title') or ''))} - {html.escape(str(row.get('Employer') or ''))}</h1>"
+           "<table>"
+           + "".join(f"<tr><td class='k' width='130'>{k.replace(' ', '&nbsp;')}</td><td class='v'>{html.escape(str(v or ''))}</td></tr>"
+                     for k, v in meta)
+           + f"</table>{body}</body></html>")
     with open(html_path, "w", encoding="utf-8") as f:
         f.write(doc)
     if _html_to_pdf(html_path, out_pdf):

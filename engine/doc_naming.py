@@ -50,12 +50,28 @@ def slugify(text):
     return text.strip("_")
 
 
+_NOT_A_CITY = re.compile(
+    r"^(sweden|sverige|denmark|danmark|norway|norge|finland|suomi|germany|deutschland|netherlands|"
+    r"united kingdom|uk|usa|united states|europe|emea|remote|hybrid)$|\b(l[aä]n|county|kommun)$|^region\b",
+    re.I)
+
+
+def city_of(location):
+    """The city part of a location string: 'Lund, Skåne län, Sverige',
+    'Sweden - Lund' and 'Lund' all give 'Lund'. Countries, counties and
+    regions are skipped; the first remaining part is used."""
+    parts = [p.strip() for p in re.split(r"\s+-\s+|[,;/|]", str(location or "")) if p.strip()]
+    for p in parts:
+        if not _NOT_A_CITY.search(p):
+            return p
+    return parts[0] if parts else ""
+
+
 def build_basename(employer, title, location, url=None, job_id=None):
     if job_id is None:
         job_id = extract_job_id(url)
-    city = str(location or "").split(",")[0].strip()
     t = slugify(title)
-    loc = slugify(city)
+    loc = slugify(city_of(location))
     if loc and loc.lower() in t.lower().split("_"):
         loc = ""  # the title already names the place
     parts = [slugify(employer), t, loc]
