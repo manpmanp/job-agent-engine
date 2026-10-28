@@ -35,7 +35,7 @@
     "named_employers": true,
     "extra_sites": []
   },
-  "match_scope": "title_or_description",
+  "match_scope": "title",
   "exclude_terms": [],
   "skill_terms": [],
   "category_rules": {},

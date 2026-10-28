@@ -63,8 +63,8 @@ engine cannot do by rules alone.
     careers URL belongs to Greenhouse, Lever, Ashby, Workday or
     SmartRecruiters; otherwise from the careers page itself, using its
     structured job data, or its job links as leads to confirm.
-  - Keeps postings whose title (or description, with a matching role word
-    in the title) matches a keyword and whose location matches one of
+  - Keeps postings whose title matches a keyword (optionally also the
+    description, see `match_scope`) and whose location matches one of
     yours, or that are remote if you accept remote.
   - Sets seniority, category, work arrangement and a skills summary by
     rules, and skips anything already tracked, so your decisions are never

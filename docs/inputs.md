@@ -27,7 +27,7 @@ creates blank versions. Keys beginning with `_` are help text and ignored.
 | `work_arrangement` | no | `remote_ok`, `hybrid_ok`, `onsite_ok`. |
 | `max_commute` | no | Free text, for example `1.5h one-way`. |
 | `sources` | no | Built into the engine: `jobtech` (Arbetsformedlingen API), `employer_sites` (job boards and careers pages of named employers). Used by the AI agent: `indeed`, `linkedin_read_only`, `web_search`, `named_employers`, `extra_sites`. |
-| `match_scope` | no | `title_or_description` (default: a keyword in the title, or in the description when the title has a matching role word) or `title`. |
+| `match_scope` | no | `title` (default: a keyword must be in the posting title) or `title_or_description` (also accept postings whose description contains the keyword as a phrase; finds more, but also software or other roles that only mention the term). |
 | `exclude_terms` | no | Titles containing any of these are skipped (for example `sales`, `säljare`). |
 | `skill_terms` | no | Extra terms to pick out for the skills summary (search keywords and profile skills are always used). |
 | `category_rules` | no | `{"<category>": ["term", ...]}`: first rule whose term appears in title or description sets the category. |

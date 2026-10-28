@@ -68,7 +68,7 @@
   "stale_after_days": 42,
   "act_asap_after_days": 7,
   "document_market": "nordic",
-  "match_scope": "title_or_description",
+  "match_scope": "title",
   "sources": {
     "jobtech": true,
     "employer_sites": true,

@@ -144,7 +144,7 @@ def collect(home, run_date=None, only=None):
 
 
 def _filter_and_build(cfg, home, candidates, keywords, locations, run_date):
-    scope = cfg.get("match_scope", "title_or_description")
+    scope = cfg.get("match_scope", "title")
     exclude = cfg.get("exclude_terms") or []
     remote_ok = (cfg.get("work_arrangement") or {}).get("remote_ok", True)
     cats = cfg.get("categories") or []
