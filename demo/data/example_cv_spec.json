@@ -1,0 +1,17 @@
+{
+  "type": "cv",
+  "mode": "full",
+  "banner": {"name": "Robin Example", "title": "FPGA Engineer", "subtitle": "M.Sc. in Electrical Engineering", "contact": "robin@example.com  |  Linkoping, Sweden"},
+  "sections": [
+    {"heading": "Profile", "paragraphs": ["FPGA developer working on video-processing pipelines in VHDL on Xilinx devices, with Python-based regression testing. Looking to apply that experience to high-speed FPGA design at Nordlys Semiconductors."]},
+    {"heading": "Work Experience", "entries": [
+      {"title": "FPGA Developer", "dates": "2022 – Present", "org": "Placeholder Systems AB, Linkoping",
+       "bullets": ["Implemented VHDL modules for a video-processing pipeline on Xilinx devices and closed timing at 250 MHz.",
+                   "Wrote Python test benches with cocotb for regression testing."]}
+    ]},
+    {"heading": "Technical Skills", "table": [["HDL and tools", "VHDL, SystemVerilog (basic), Vivado, cocotb"]]},
+    {"heading": "Education", "entries": [{"title": "M.Sc. in Electrical Engineering", "dates": "2017 – 2022", "org": "Kvarn Institute of Technology, Linkoping"}]},
+    {"heading": "Languages", "table": [["Swedish", "Native"], ["English", "Fluent"]]},
+    {"heading": "References", "paragraphs": ["References available upon request."]}
+  ]
+}

@@ -1,0 +1,8 @@
+{"jobs": [
+ {"id": "a1", "title": "Digital Design Engineer, ASIC", "employmentType": "FullTime", "location": "Uppsala, Sweden", "secondaryLocations": [],
+  "publishedAt": "2026-10-18T10:00:00.000+00:00", "isListed": true, "isRemote": false, "workplaceType": "OnSite",
+  "jobUrl": "https://jobs.ashbyhq.com/exampleai/a1", "applyUrl": "https://jobs.ashbyhq.com/exampleai/a1/application",
+  "descriptionPlain": "RTL design in SystemVerilog, synthesis and timing closure. On-site in Uppsala."},
+ {"id": "a2", "title": "Marketing Manager", "location": "Remote - Europe", "isListed": true, "isRemote": true,
+  "jobUrl": "https://jobs.ashbyhq.com/exampleai/a2", "descriptionPlain": "Marketing."}
+]}

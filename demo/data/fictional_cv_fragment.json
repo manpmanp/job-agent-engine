@@ -1,0 +1,5 @@
+{
+  "_help": "FICTIONAL example of a fragment extracted from an uploaded CV. Here the CV states a different headline than the form, which produces a conflict to confirm.",
+  "identity": {"headline": "FPGA Developer, M.Sc. Electrical Engineering"},
+  "languages": [{"language": "Swedish", "level": "Native"}, {"language": "English", "level": "Fluent"}, {"language": "German", "level": "Basic"}]
+}

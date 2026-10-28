@@ -1,0 +1,10 @@
+# Job-search agent engine
+# File:    requirements.txt
+# Purpose: Python dependencies.
+# Author:  manpmanp <manp.node@gmail.com>
+# Generated with Claude (Anthropic), under the author's direction and review.
+# License: MIT (see LICENSE)
+# Version: 0.2.0
+# Date:    2026-10-28
+
+openpyxl>=3.1

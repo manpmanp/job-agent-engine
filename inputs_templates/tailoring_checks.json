@@ -1,0 +1,6 @@
+{
+  "_help": "OPTIONAL. Mechanical checks run by './run.sh tailor check' on every generated CV/CL spec. Use it for rules you never want broken (for example: your current job must always appear). Plain substring matching, case-insensitive.",
+  "cv_must_contain": [],
+  "cl_must_contain": [],
+  "must_not_contain": []
+}

@@ -1,0 +1,8 @@
+Job search notes
+================
+
+Running log written by the agent at the end of every run. Observations
+only: what was searched, which sources worked or returned noise, whether
+the browser was connected, whether decisions were synced, and anything
+that could not be completed. The agent never changes the search criteria
+on its own; changes go into inputs/search_config.json by the user.

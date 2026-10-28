@@ -1,0 +1,19 @@
+{"total": {"value": 3}, "positions": 3, "hits": [
+ {"id": "90000001", "webpage_url": "https://arbetsformedlingen.se/platsbanken/annonser/90000001", "headline": "Hardware Developer FPGA",
+  "application_deadline": "2027-01-15T23:59:59", "description": {"text": "We develop FPGA designs in VHDL and SystemVerilog for radar. Hybrid work possible."},
+  "employment_type": {"label": "Tillsvidareanställning"}, "working_hours_type": {"label": "Heltid"},
+  "employer": {"name": "Example Radar AB", "workplace": "Example Radar, Västerås"},
+  "application_details": {"via_af": false, "url": "https://example-radar.example/jobs/42"},
+  "workplace_model": {"label": "Hybrid"},
+  "workplace_address": {"municipality": "Västerås", "region": "Västmanlands län", "country": "Sverige", "city": null},
+  "must_have": {"skills": [{"label": "VHDL"}]}, "publication_date": "2026-10-21T11:25:06", "removed": false},
+ {"id": "90000002", "webpage_url": "https://arbetsformedlingen.se/platsbanken/annonser/90000002", "headline": "Senior FPGA Engineer",
+  "application_deadline": "2026-12-01T23:59:59", "description": {"text": "Senior role leading FPGA work."},
+  "employer": {"name": "Far Away AB"}, "application_details": {"url": null}, "workplace_model": {"label": "Arbete på plats"},
+  "workplace_address": {"municipality": "Kiruna", "region": "Norrbottens län", "country": "Sverige"},
+  "must_have": {"skills": []}, "publication_date": "2026-10-20T09:00:00", "removed": false},
+ {"id": "90000003", "webpage_url": "https://arbetsformedlingen.se/platsbanken/annonser/90000003", "headline": "Säljare",
+  "description": {"text": "Sell products. Some FPGA customers."}, "employer": {"name": "Sales AB"}, "application_details": {},
+  "workplace_address": {"municipality": "Uppsala", "region": "Uppsala län", "country": "Sverige"}, "must_have": {"skills": []},
+  "publication_date": "2026-10-22T09:00:00", "removed": false}
+]}

@@ -1,0 +1,62 @@
+{
+  "schema_version": 1,
+  "_help": "REQUIRED for the search service: keywords and locations. Everything else has defaults. See docs/inputs.md.",
+
+  "keywords": [],
+  "locations": [],
+
+  "weekly_list": {
+    "enabled": true,
+    "full_search_day": "Monday",
+    "summary_markdown": true
+  },
+
+  "roles_description": "",
+  "categories": [],
+  "seniority": {
+    "preferred": [],
+    "flag_as_too_senior": [],
+    "flag_as_too_junior": []
+  },
+  "work_arrangement": {
+    "remote_ok": true,
+    "hybrid_ok": true,
+    "onsite_ok": true
+  },
+  "max_commute": "",
+
+  "sources": {
+    "_help": "jobtech and employer_sites are collected by the engine itself ('./run.sh collect'). indeed, linkedin_read_only and web_search are used by the AI agent, if you run one.",
+    "jobtech": true,
+    "employer_sites": true,
+    "indeed": true,
+    "linkedin_read_only": true,
+    "web_search": true,
+    "named_employers": true,
+    "extra_sites": []
+  },
+  "match_scope": "title_or_description",
+  "exclude_terms": [],
+  "skill_terms": [],
+  "category_rules": {},
+  "enrichment": {
+    "_help": "OPTIONAL AI review of collected postings. Needs an Anthropic API key in ANTHROPIC_API_KEY or inputs/secrets.json. Costs are per use on your API account.",
+    "enabled": false,
+    "model": "claude-haiku-5-5",
+    "send_profile": false,
+    "max_per_run": 25
+  },
+  "credible_sources": [],
+  "employer_presets": [],
+  "rejection_reasons": [],
+
+  "document_market": "",
+  "calendar": {
+    "enabled": false,
+    "calendar_id": ""
+  },
+  "git": {
+    "commit_state": false,
+    "push": false
+  }
+}

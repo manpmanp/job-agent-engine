@@ -1,0 +1,6 @@
+{
+  "_help": "OPTIONAL. Your own named-employer list. 'mode' decides how it combines with any employer_presets named in search_config.json: 'extend' (add to the presets, same name replaces the preset entry), or 'override' (use only this list). Names in 'exclude' are dropped from the final list. See docs/inputs.md.",
+  "mode": "extend",
+  "employers": [],
+  "exclude": []
+}

@@ -1,0 +1,4 @@
+{"mode": "extend", "employers": [
+  {"name": "Nordlys Semiconductors AB", "urls": ["https://example.com/nordlys/careers"]},
+  {"name": "Example Robotics AB", "urls": ["https://example.com/robotics/jobs"]}
+], "exclude": []}

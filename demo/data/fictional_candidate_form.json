@@ -1,0 +1,16 @@
+{
+  "_help": "FICTIONAL candidate used only by the demo. Not a real person.",
+  "schema_version": 1,
+  "identity": {"name": "Robin Example", "headline": "M.Sc. in Electrical Engineering", "email": "robin@example.com", "phone": "", "location": "Linkoping, Sweden", "links": []},
+  "summary": "",
+  "experience": [
+    {"title": "FPGA Developer", "organization": "Placeholder Systems AB", "location": "Linkoping", "start": "2022", "end": "", "current": true,
+     "bullets": ["Implemented VHDL modules for a video-processing pipeline on Xilinx devices and closed timing at 250 MHz.", "Wrote Python test benches with cocotb for regression testing."],
+     "keywords": ["VHDL", "Vivado", "cocotb", "timing closure"]}
+  ],
+  "education": [{"degree": "M.Sc. in Electrical Engineering", "institution": "Kvarn Institute of Technology", "location": "Linkoping", "start": "2017", "end": "2022", "thesis": "", "note": ""}],
+  "skills": [{"group": "HDL and tools", "items": ["VHDL", "SystemVerilog (basic)", "Vivado", "cocotb"]}],
+  "languages": [{"language": "Swedish", "level": "Native"}, {"language": "English", "level": "Fluent"}],
+  "references": "References available upon request.",
+  "preferences": {"own_seniority_level": "Experienced", "target_roles": ["FPGA engineer"]}
+}

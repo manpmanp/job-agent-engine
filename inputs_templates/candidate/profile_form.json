@@ -1,0 +1,55 @@
+{
+  "_help": "OPTIONAL blank form. Fill in whatever you want the agent to use; leave anything else empty. Submit it at any time with: ./run.sh intake form <this file>. You can also use forms/candidate_form.html, which writes the same format. Nothing here is required.",
+  "schema_version": 1,
+  "identity": {
+    "name": "",
+    "headline": "",
+    "email": "",
+    "phone": "",
+    "location": "",
+    "links": [],
+    "work_authorization": ""
+  },
+  "summary": "",
+  "experience": [
+    {
+      "title": "",
+      "organization": "",
+      "location": "",
+      "start": "",
+      "end": "",
+      "current": false,
+      "bullets": [],
+      "keywords": []
+    }
+  ],
+  "education": [
+    {
+      "degree": "",
+      "institution": "",
+      "location": "",
+      "start": "",
+      "end": "",
+      "thesis": "",
+      "note": ""
+    }
+  ],
+  "skills": [
+    {"group": "", "items": []}
+  ],
+  "projects": [
+    {"name": "", "description": "", "personal": false}
+  ],
+  "publications": [
+    {"title": "", "venue": "", "year": "", "status": "", "role": ""}
+  ],
+  "training": [],
+  "languages": [
+    {"language": "", "level": ""}
+  ],
+  "references": "",
+  "preferences": {
+    "own_seniority_level": "",
+    "target_roles": []
+  }
+}

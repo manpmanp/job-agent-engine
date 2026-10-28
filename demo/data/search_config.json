@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "_help": "FICTIONAL example configuration for the demo.",
+  "keywords": ["FPGA engineer", "ASIC design engineer", "embedded hardware engineer"],
+  "locations": [
+    {"name": "Linkoping", "country": "SE", "priority": 1},
+    {"name": "Stockholm", "country": "SE", "priority": 2}
+  ],
+  "weekly_list": {"enabled": true, "full_search_day": "Monday", "summary_markdown": true},
+  "roles_description": "Industry hardware design roles (FPGA, ASIC, embedded hardware), design prioritized over verification-only. Academic research engineer roles in the same areas.",
+  "categories": ["Industry - ASIC/FPGA Design", "Industry - Embedded/Digital Hardware", "Academia - Research Engineer/Assistant", "Other"],
+  "max_commute": "1h one-way",
+  "employer_presets": [],
+  "page_title": "Demo - Job Search Tracker"
+}

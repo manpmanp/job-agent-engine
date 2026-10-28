@@ -1,0 +1,4 @@
+{
+  "https://example.com/nordlys/jobs/view/1001/||FPGA Engineer": {"decision": "accepted", "ts": "2026-10-20T08:10:00.000Z"},
+  "https://example.com/robotics/jobs?id=RB-2201||Senior ASIC Architect": {"decision": "rejected", "reasons": ["Seniority level mismatch"], "note": "", "ts": "2026-10-20T08:11:00.000Z"}
+}
