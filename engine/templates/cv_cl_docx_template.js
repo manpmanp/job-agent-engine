@@ -77,6 +77,8 @@ function makeTemplate(userStyle = {}) {
   function sectionHeader(text, opts = {}) {
     return new Paragraph({
       pageBreakBefore: !!opts.pageBreakBefore,
+      keepNext: true,  // never leave a heading alone at the bottom of a page
+      keepLines: true,
       spacing: { before: 260, after: 100 },
       border: { bottom: { color: ACCENT, space: 4, style: BorderStyle.SINGLE, size: 6 } },
       children: [new TextRun({ text: String(text).toUpperCase(), bold: true, color: ACCENT, size: 20, font: FONT, characterSpacing: 20 })],
@@ -98,6 +100,7 @@ function makeTemplate(userStyle = {}) {
 
   function jobHeaderRow(titleLeft, dateRight) {
     return new Paragraph({
+      keepNext: true,
       tabStops: [{ type: TabStopType.RIGHT, position: TabStopPosition.MAX }],
       spacing: { before: 260, after: 30 },
       children: [
@@ -108,7 +111,7 @@ function makeTemplate(userStyle = {}) {
   }
 
   function companyLine(text) {
-    return new Paragraph({ spacing: { after: 140 },
+    return new Paragraph({ keepNext: true, spacing: { after: 140 },
       children: [new TextRun({ text: text || "", italics: true, size: 19, font: FONT, color: GRAY })] });
   }
 

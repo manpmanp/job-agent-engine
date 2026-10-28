@@ -151,7 +151,7 @@ def template_specs(row, profile=None, style=None, description=None, vocabulary=N
     cl = {"type": "cl", "mode": "template", "template_note": TEMPLATE_NOTE,
           "banner": {"name": name, "title": title, "subtitle": "", "contact": banner["contact"]},
           "date": date.today().isoformat(),
-          "recipient": [employer, row.get("Location") or "[Location]"],
+          "recipient": [employer, ", ".join(dict.fromkeys(x.strip() for x in str(row.get("Location") or "[Location]").split(",") if x.strip()))],
           "salutation": "Dear Hiring Team,",
           "paragraphs": [
               f"[Opening: name the role ({title}) and state, in one or two sentences, the strongest real connection "
