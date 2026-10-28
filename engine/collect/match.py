@@ -28,6 +28,7 @@ COUNTRY_NAMES = {
 }
 
 SENIORITY_PATTERNS = [
+    ("Manager", r"\b(manager|head of|director|chef|avdelningschef|gruppchef)\b"),
     ("Principal", r"\bprincipal\b"),
     ("Staff", r"\bstaff\b"),
     ("Lead", r"\b(lead|tech lead|team lead)\b"),
@@ -186,8 +187,10 @@ def skills_summary(description, vocabulary, limit=10):
         ft = fold(term)
         if not ft or term in found:
             continue
-        # very short terms (C, Go, R) only count with their exact capitalisation
-        hit = (re.search(r"(?<![\w+#-])" + re.escape(term) + r"(?![\w+#-])", raw) is not None) if len(term) <= 2 else _has(ft, d)
+        # very short terms (C, Go, R) and all-caps acronyms (CAN, DSP) only count
+        # with their exact spelling, so "can" or "Go-to" are not skills
+        exact = len(term) <= 2 or (term.isupper() and len(term) <= 5)
+        hit = (re.search(r"(?<![\w+#-])" + re.escape(term) + r"(?![\w+#-])", raw) is not None) if exact else _has(ft, d)
         if hit:
             found.append(term)
         if len(found) >= limit:
@@ -195,5 +198,14 @@ def skills_summary(description, vocabulary, limit=10):
     return ", ".join(found)
 
 
+COMPANY_SUFFIXES = r"\b(aktiebolag|ab|publ|inc|incorporated|ltd|limited|llc|plc|gmbh|ag|a/s|as|aps|oy|oyj|bv|nv|sa|sas|srl|spa|corp|corporation|co|company|group|sverige|sweden|danmark|denmark|norge|norway)\b"
+
+
+def norm_employer(employer):
+    e = fold(employer).replace("(", " ").replace(")", " ")
+    e = re.sub(COMPANY_SUFFIXES, " ", e)
+    return re.sub(r"[^a-z0-9]+", "", e)
+
+
 def norm_key(employer, title):
-    return (re.sub(r"[^a-z0-9]+", "", fold(employer))[:40], re.sub(r"[^a-z0-9]+", "", fold(title)))
+    return (norm_employer(employer)[:40], re.sub(r"[^a-z0-9]+", "", fold(title)))

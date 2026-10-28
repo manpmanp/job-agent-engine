@@ -374,6 +374,21 @@ def _short(v, n=110):
     return s if len(s) <= n else s[:n] + "..."
 
 
+def _join_spaced_headings(text):
+    """Letter-spaced headings come out of PDFs as 'PR OF ES SI ON AL  PR OF ILE'.
+    Lines made only of short upper-case fragments are joined back, keeping
+    double spaces as word gaps."""
+    out = []
+    for line in text.splitlines():
+        s = line.strip()
+        frags = s.split()
+        if (len(frags) >= 3 and all(f.isupper() and len(f) <= 3 for f in frags)):
+            words = re.split(r"\s{2,}", s)
+            line = " ".join(w.replace(" ", "") for w in words)
+        out.append(line)
+    return "\n".join(out)
+
+
 def extract_text(path):
     """Plain text from .docx (stdlib), .pdf (pdftotext or pypdf if present),
     .txt/.md. Returns '' when nothing could be extracted."""
@@ -394,7 +409,7 @@ def extract_text(path):
             if shutil.which("pdftotext"):
                 r = subprocess.run(["pdftotext", "-layout", path, "-"], capture_output=True, timeout=60)
                 if r.returncode == 0:
-                    return r.stdout.decode("utf-8", errors="replace").strip()
+                    return _join_spaced_headings(r.stdout.decode("utf-8", errors="replace").strip())
             try:
                 from pypdf import PdfReader  # optional
                 return "\n".join((p.extract_text() or "") for p in PdfReader(path).pages).strip()

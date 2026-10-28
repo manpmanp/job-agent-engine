@@ -160,6 +160,8 @@ def _filter_and_build(cfg, home, candidates, keywords, locations, run_date):
         hit, where = match_keywords_for(c, keywords, scope, exclude)
         if not hit:
             continue
+        if c.get("_wd_path") and not c.get("description"):
+            sources.workday_details(c)  # only for matched listings: one request each
         loc = match.match_location(c.get("location_text"), locations, remote_ok, c.get("is_remote"))
         if loc is None:
             vague = re.match(r"^\s*\d+\s+locations?\s*$", str(c.get("location_text") or ""), re.I)
@@ -188,7 +190,8 @@ def _filter_and_build(cfg, home, candidates, keywords, locations, run_date):
             "Status": "Unverified" if c.get("lead") else "New", "Notes": "; ".join(notes),
         }
         out.append((row, c))
-        full.append({**{k: v for k, v in c.items() if k != "description"}, "description": (c.get("description") or "")[:6000]})
+        full.append({**{k: v for k, v in c.items() if k != "description" and not k.startswith("_")},
+                     "description": (c.get("description") or "")[:6000]})
     return out, full
 
 

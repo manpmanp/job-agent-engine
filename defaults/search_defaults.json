@@ -11,6 +11,7 @@
   ],
   "seniority": {
     "levels": [
+      "Manager",
       "Senior",
       "Staff",
       "Lead",
@@ -33,7 +34,8 @@
       "Lead",
       "Principal",
       "Architect",
-      "architect"
+      "architect",
+      "Manager"
     ],
     "flag_as_too_junior": [
       "Graduate",

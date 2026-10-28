@@ -87,6 +87,8 @@ ROUTES = [
     ("boards-api.greenhouse.io/v1/boards/examplegh", 200, lambda: fx("greenhouse_board.json")),
     ("api.lever.co/v0/postings/examplelever", 200, lambda: fx("lever_board.json")),
     ("examplewd.wd3.myworkdayjobs.com/wday/cxs/examplewd/External/jobs", 200, lambda: fx("workday_jobs.json")),
+    ("examplewd.wd3.myworkdayjobs.com/wday/cxs/examplewd/External/job/", 200,
+     b'{"jobPostingInfo": {"jobDescription": "<p>RTL design in SystemVerilog, UVM testbenches.</p>", "startDate": "2026-10-25", "remoteType": "Hybrid"}}'),
     ("/robots.txt", 404, b""),
     ("jsonld.example/careers", 200, lambda: fx("career_jsonld.html")),
     ("links.example/careers", 200, lambda: fx("career_links.html")),
@@ -113,7 +115,13 @@ class TestMatching(unittest.TestCase):
         self.assertEqual(match.match_location("Remote - Sweden", locs), "remote")
         self.assertIsNone(match.match_location("Remote - USA", locs))
 
+    def test_employer_suffixes(self):
+        self.assertEqual(match.norm_key("Example Systems Aktiebolag", "FPGA Engineer"),
+                         match.norm_key("Example Systems", "FPGA Engineer"))
+        self.assertEqual(match.norm_employer("Example A/S"), match.norm_employer("Example"))
+
     def test_seniority(self):
+        self.assertEqual(match.seniority("ASIC Design Engineering Manager"), "Manager")
         self.assertEqual(match.seniority("Senior FPGA Engineer"), "Senior")
         self.assertEqual(match.seniority("FPGA Engineer"), "Not stated")
         self.assertEqual(match.seniority("Graduate Digital Design Engineer"), "Graduate")
@@ -135,11 +143,17 @@ class TestNamingAndSkills(unittest.TestCase):
                          "Example_AB_ASIC_Engineer_Uppsala_12345678")
         self.assertEqual(d.build_basename("Example AB", "FPGA Engineer", "Västerås, Sverige"), "Example_AB_FPGA_Engineer_Västerås")
 
+    def test_spaced_headings(self):
+        from engine.profile import _join_spaced_headings
+        self.assertEqual(_join_spaced_headings("PR OF ES SI ON AL  PR OF ILE"), "PROFESSIONAL PROFILE")
+        self.assertEqual(_join_spaced_headings("Normal line of text"), "Normal line of text")
+
     def test_skills_from_description(self):
         s = match.skills_summary("SystemVerilog and UVM, C and C++ on Linux. Go-to person. C-level contact.", match.default_vocabulary())
         for t in ("SystemVerilog", "UVM", "C", "C++", "Linux"):
             self.assertIn(t, s)
         self.assertNotIn("Go", s.split(", "))
+        self.assertEqual(match.skills_summary("you can do it", match.default_vocabulary()), "")
 
     def test_template_uses_description(self):
         from engine import documents
@@ -181,6 +195,8 @@ class TestCollect(unittest.TestCase):
         self.assertEqual(rows["Hardware Developer FPGA"]["Remote/Hybrid/Onsite"], "Hybrid")
         self.assertEqual(rows["ASIC Design Engineer"]["URL"],
                          "https://examplewd.wd3.myworkdayjobs.com/External/job/Sweden---Uppsala/ASIC-Design-Engineer_R-555001")
+        self.assertIn("SystemVerilog", rows["ASIC Design Engineer"]["Required Skills (summary)"])  # Workday details
+        self.assertEqual(rows["ASIC Design Engineer"]["Remote/Hybrid/Onsite"], "Hybrid")
         self.assertIn("Indeed Only", s["skipped_agent_only"])
         self.assertEqual(s["errors"], [])
         # second run: nothing new, existing rows untouched

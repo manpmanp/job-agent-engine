@@ -198,11 +198,31 @@ def workday(host, tenant, site, employer, keywords):
                             "url": f"https://{host}/{site}{path}", "apply_url": f"https://{host}/{site}{path}",
                             "published": _workday_posted(j.get("postedOn")), "deadline": "",
                             "description": "", "is_remote": False, "workplace": "", "employment_type": "",
-                            "skills": [], "source": "Workday career site", "posted_text": j.get("postedOn") or ""})
+                            "skills": [], "source": "Workday career site", "posted_text": j.get("postedOn") or "",
+                            "_wd_host": host, "_wd_tenant": tenant, "_wd_site": site, "_wd_path": path})
             offset += 20
             if offset >= (data.get("total") or 0) or not posts:
                 break
     return out, ("; ".join(errors) or None)
+
+
+def workday_details(c):
+    """Fills description and posted date of one Workday candidate from its
+    job-detail endpoint. Returns an error string or None."""
+    host, tenant, site, path = c.get("_wd_host"), c.get("_wd_tenant"), c.get("_wd_site"), c.get("_wd_path")
+    if not (host and tenant and site and path):
+        return None
+    r, data = http.get_json(f"https://{host}/wday/cxs/{tenant}/{site}{path}")
+    if data is None:
+        return f"Workday details '{c.get('title')}': {r.error or 'HTTP ' + str(r.status)}"
+    info = data.get("jobPostingInfo") or {}
+    c["description"] = strip_html(info.get("jobDescription") or "")
+    c["published"] = c.get("published") or _d(info.get("startDate") or info.get("postedOn"))
+    c["deadline"] = c.get("deadline") or _d(info.get("endDate"))
+    c["workplace"] = info.get("remoteType") or c.get("workplace") or ""
+    if info.get("location") and not c.get("location_text"):
+        c["location_text"] = info["location"]
+    return None
 
 
 def smartrecruiters(company, employer):

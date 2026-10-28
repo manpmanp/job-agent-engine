@@ -44,7 +44,7 @@ ROW_FIELDS = FLAT_LAYOUT
 ISO_DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 
 DEFAULT_SENIORITY = {
-    "flag_as_too_senior": ["Senior", "Staff", "Lead", "Principal", "Architect", "architect"],
+    "flag_as_too_senior": ["Senior", "Staff", "Lead", "Principal", "Architect", "architect", "Manager"],
     "flag_as_too_junior": ["Graduate", "Entry"],
     "preferred": ["Experienced", "Mid", "mid"],
 }
