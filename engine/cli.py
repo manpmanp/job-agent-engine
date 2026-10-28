@@ -367,8 +367,9 @@ def main(argv=None):
     if args.cmd == "init":
         args._created = created
     elif created:
-        print(f"agent home created at {h.root} ({len(created)} new files and folders); "
-              "add your keywords and locations to inputs/search_config.json")
+        fresh = h.path("search_config") in created
+        print(f"agent home {'created' if fresh else 'completed'} at {h.root}: {len(created)} missing file(s)/folder(s) created"
+              + ("; add your keywords and locations to inputs/search_config.json" if not h.capabilities()["search"][0] else ""))
     {"init": cmd_init, "status": cmd_status, "plan": cmd_plan, "add-postings": cmd_add_postings,
      "weekly": cmd_weekly, "sync": cmd_sync, "intake": cmd_intake, "tailor": cmd_tailor,
      "checkpoint": cmd_checkpoint, "note": cmd_note, "collect": cmd_collect, "verify": cmd_verify,

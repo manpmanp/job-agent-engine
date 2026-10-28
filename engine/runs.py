@@ -74,7 +74,8 @@ def run(home, mode="auto"):
     if mode == "weekly":
         s = collect(home)
         v = verify_mod.verify(home)
-        lines.append(f"collect: {s['candidates']} listings, {s['new']} new, {s['duplicates']} already tracked")
+        lines.append(f"collect: {s['candidates']} listings, {s['kept']} matched, {s['new']} new, "
+                     f"{s.get('already_tracked', 0)} already tracked, {s.get('repeated_in_run', 0)} found twice")
         lines.append(f"verify: {v['expired']} expired, {v['unknown']} not checkable")
         if s["errors"]:
             lines.append("source errors: " + "; ".join(s["errors"][:10]))
