@@ -10,7 +10,7 @@
 #
 # Single entry point for the job-search agent engine.
 #   ./run.sh [--home DIR] <command> [args]
-# Commands: --setup [--browser] (install + open the input forms), form, fetch, test, init, status, plan, collect, verify, enrich, run,
+# Commands: --setup [--browser] (install + open the app), app, form, fetch, test, init, status, plan, collect, verify, enrich, run,
 #           schedule, open, add-postings, weekly, sync, intake, tailor, checkpoint,
 #           note, demo. See docs/commands.md.
 set -euo pipefail
@@ -30,49 +30,52 @@ fi
 # "setup" or "--setup" anywhere in the arguments: install the dependencies
 # into .venv (first time, or when requirements changed), create the agent
 # home, then open the input forms in the browser.
-SETUP=0; BROWSER=0; ARGS=()
+SETUP=0; BROWSER=0; NOBROWSER=0; ARGS=()
 for a in "$@"; do
   case "$a" in
     setup|--setup) SETUP=1 ;;
     --browser) BROWSER=1 ;;
+    --remove-browser) NOBROWSER=1 ;;
     *) ARGS+=("$a") ;;
   esac
 done
-if [ "$SETUP" = 1 ]; then
+
+# Install or update the Python packages whenever requirements.txt changed
+# (first start, or after 'git pull'). Nothing outside .venv is touched.
+install_deps() {
   if [ ! -x "$VENV/bin/python" ]; then
     echo "creating virtual environment in $VENV"
     "$BASE_PY" -m venv "$VENV"
   fi
   STAMP="$VENV/.requirements.installed"
   if [ ! -f "$STAMP" ] || ! cmp -s "$ENGINE_DIR/requirements.txt" "$STAMP"; then
-    "$VENV/bin/python" -m pip install --quiet --upgrade pip
-    "$VENV/bin/python" -m pip install --quiet -r "$ENGINE_DIR/requirements.txt"
+    echo "installing Python packages into $VENV ..."
+    "$VENV/bin/python" -m pip install --quiet --disable-pip-version-check -r "$ENGINE_DIR/requirements.txt" || {
+      echo "installing packages failed; check the internet connection and try again" >&2; exit 1; }
     cp "$ENGINE_DIR/requirements.txt" "$STAMP"
-    echo "Python dependencies installed in $VENV"
-  fi
-  if [ ! -d "$ENGINE_DIR/node_modules/docx" ]; then
-    if command -v npm >/dev/null 2>&1; then
-      (cd "$ENGINE_DIR" && npm install --no-audit --no-fund --silent) && echo "Node dependencies installed"
-    else
-      echo "npm not found: documents will be written as Markdown until Node.js is installed."
-    fi
-  fi
-  if [ "$BROWSER" = 1 ]; then
-    # Optional: Playwright + Chromium, to read posting pages built in the browser.
-    if ! "$VENV/bin/python" -c "import playwright" >/dev/null 2>&1; then
-      "$VENV/bin/python" -m pip install --quiet playwright
-    fi
-    "$VENV/bin/python" -m playwright install chromium && echo "headless browser installed (Playwright + Chromium in $VENV)"
   fi
   PY="$VENV/bin/python"
+}
+install_deps
+
+if [ "$BROWSER" = 1 ]; then
+  # Optional: Playwright's headless Chromium (about 100 MB, once), used to
+  # read posting pages that are built in the browser.
+  "$PY" -c "import playwright" >/dev/null 2>&1 || "$PY" -m pip install --quiet playwright
+  "$PY" -m playwright install --only-shell chromium && echo "headless browser installed"
+fi
+if [ "$NOBROWSER" = 1 ]; then
+  # Removes only the browsers this engine's Playwright installed (others keep theirs).
+  "$PY" -m playwright uninstall >/dev/null 2>&1 || true
+  "$PY" -m pip uninstall --quiet -y playwright >/dev/null 2>&1 || true
+  echo "headless browser removed (an installed Chrome or Edge is still used when present)"
+  [ "$SETUP" = 0 ] && [ ${#ARGS[@]} -eq 0 ] && exit 0
+fi
+if [ "$SETUP" = 1 ]; then
   PYTHONPATH="$ENGINE_DIR${PYTHONPATH:+:$PYTHONPATH}" exec "$PY" -m engine.cli ${ARGS[@]+"${ARGS[@]}"} form
 fi
-
-if ! "$PY" -c "import openpyxl" >/dev/null 2>&1; then
-  echo "Python dependencies are not installed. Run:" >&2
-  echo "  $ENGINE_DIR/run.sh setup" >&2
-  exit 1
-fi
+if [ "$BROWSER" = 1 ] && [ ${#ARGS[@]} -eq 0 ]; then exit 0; fi
+set -- ${ARGS[@]+"${ARGS[@]}"}
 
 if [ "${1:-}" = "test" ]; then
   cd "$ENGINE_DIR" && exec "$PY" -m unittest discover -s tests

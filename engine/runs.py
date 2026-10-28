@@ -4,7 +4,7 @@
 # Author:  manpmanp <manp.node@gmail.com>
 # Generated with Claude (Anthropic), under the author's direction and review.
 # License: MIT (see LICENSE)
-# Version: 0.3.0
+# Version: 0.4.0
 # Date:    2026-10-28
 
 """
@@ -12,7 +12,7 @@
                       template documents (if no candidate material) -> weekly page + summary
 ./run.sh run daily    sync -> template documents -> weekly page
 ./run.sh run auto     weekly on search_config.weekly_list.full_search_day, daily otherwise
-./run.sh schedule     prints a crontab line / macOS launchd file to run 'auto' every day
+./run.sh schedule     installs or shows the daily run (engine/schedule.py)
 
 These runs need no AI agent. An agent, when used, adds what the engine
 cannot do on its own (LinkedIn and Indeed through its own tools, judgement
@@ -100,36 +100,6 @@ def run(home, mode="auto"):
     lines.append(f"page: {home.path('weekly_html')}")
     weekly.append_note(home, "\n".join(lines))
     print("\n".join(lines))
-
-
-def schedule_text(home):
-    runner = os.path.join(REPO_DIR, "run.sh")
-    log = os.path.join(os.path.dirname(home.path("notes")), "run.log")
-    path = "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"
-    cron = f'2 8 * * * PATH={path} "{runner}" --home "{home.root}" run auto >> "{log}" 2>&1'
-    plist = f"""<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0"><dict>
-  <key>Label</key><string>local.job-agent-engine</string>
-  <key>ProgramArguments</key><array>
-    <string>{runner}</string><string>--home</string><string>{home.root}</string><string>run</string><string>auto</string>
-  </array>
-  <key>EnvironmentVariables</key><dict><key>PATH</key><string>{path}</string></dict>
-  <key>StartCalendarInterval</key><dict><key>Hour</key><integer>8</integer><key>Minute</key><integer>2</integer></dict>
-  <key>StandardOutPath</key><string>{log}</string>
-  <key>StandardErrorPath</key><string>{log}</string>
-</dict></plist>"""
-    return (
-        "Run the engine every day at 08:02 ('auto' does the full weekly pass on your full_search_day and a sync on other days).\n\n"
-        "Linux / macOS with cron, add this line with 'crontab -e':\n\n"
-        f"{cron}\n\n"
-        "macOS launchd (also runs after the Mac wakes if 08:02 was missed): save as\n"
-        "~/Library/LaunchAgents/local.job-agent-engine.plist, then run\n"
-        "launchctl load ~/Library/LaunchAgents/local.job-agent-engine.plist\n\n"
-        f"{plist}\n\n"
-        "run.sh uses the engine's own .venv for Python. If node lives elsewhere on your machine,\n"
-        "add its folder to PATH above (see 'which node').\n"
-    )
 
 
 if __name__ == "__main__":

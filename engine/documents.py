@@ -24,13 +24,14 @@ template  No candidate material (not even a name is required). The engine
           is invented. Any profile fields that do exist (name, contact,
           education...) are filled in as given.
 
-Rendering uses Node.js + the docx module when available, otherwise a
+Rendering uses python-docx (engine/docx_render.py); if it is missing a
 Markdown file is written instead, so the step never fails for lack of
 tooling.
 """
 import html
 import json
 import os
+import pathlib
 import re
 import shutil
 import subprocess
@@ -217,27 +218,19 @@ def spec_text(spec):
 
 # ------------------------------------------------------------------ rendering
 def render(spec, out_docx, style=None, style_path=None):
-    """Writes out_docx via Node, or a .md fallback. Returns the written path."""
+    """Writes out_docx with python-docx (engine/docx_render.py), or a .md
+    fallback when python-docx is missing. Returns the written path."""
     os.makedirs(os.path.dirname(os.path.abspath(out_docx)), exist_ok=True)
+    if style is None and style_path and os.path.exists(style_path):
+        with open(style_path, "r", encoding="utf-8") as f:
+            style = json.load(f)
     ok, _ = docx_renderer_status()
     if ok:
-        tmp = tempfile.mkdtemp(prefix="jobagent_render_")
-        tmp_spec = os.path.join(tmp, "spec.json")
-        with open(tmp_spec, "w", encoding="utf-8") as f:
-            json.dump(spec, f, indent=2, ensure_ascii=False)
-        cmd = [shutil.which("node"), os.path.join(REPO_DIR, "engine", "templates", "render_docx.js"), tmp_spec, out_docx]
-        if style is not None:
-            tmp_style = os.path.join(tmp, "style.json")
-            with open(tmp_style, "w", encoding="utf-8") as f:
-                json.dump(style, f)
-            cmd.append(tmp_style)
-        elif style_path:
-            cmd.append(style_path)
-        r = subprocess.run(cmd, cwd=REPO_DIR, capture_output=True, text=True)
-        shutil.rmtree(tmp, ignore_errors=True)
-        if r.returncode == 0:
-            return out_docx
-        print(f"[warn] docx rendering failed, writing Markdown instead: {r.stderr.strip()[:300]}")
+        try:
+            from .docx_render import render_docx
+            return render_docx(spec, out_docx, style=style)
+        except Exception as e:
+            print(f"[warn] docx rendering failed, writing Markdown instead: {type(e).__name__}: {e}")
     md_path = os.path.splitext(out_docx)[0] + ".md"
     with open(md_path, "w", encoding="utf-8") as f:
         f.write(to_markdown(spec))
@@ -342,14 +335,12 @@ def jd_snapshot(row, out_pdf, full_text=None):
 
 
 def _html_to_pdf(html_path, pdf_path):
-    candidates = [shutil.which(c) for c in ("google-chrome", "chromium", "chromium-browser", "chrome")]
-    mac_chrome = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
-    if os.path.exists(mac_chrome):
-        candidates.append(mac_chrome)
+    from .collect.extract import find_browser
+    candidates = [find_browser()]
     for c in [c for c in candidates if c]:
         try:
             r = subprocess.run([c, "--headless", "--disable-gpu", f"--print-to-pdf={pdf_path}", "--no-pdf-header-footer",
-                                "file://" + os.path.abspath(html_path)], capture_output=True, timeout=90)
+                                pathlib.Path(os.path.abspath(html_path)).as_uri()], capture_output=True, timeout=90)
             if r.returncode == 0 and os.path.exists(pdf_path):
                 return True
         except Exception:

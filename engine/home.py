@@ -4,7 +4,7 @@
 # Author:  manpmanp <manp.node@gmail.com>
 # Generated with Claude (Anthropic), under the author's direction and review.
 # License: MIT (see LICENSE)
-# Version: 0.3.0
+# Version: 0.4.0
 # Date:    2026-10-28
 
 """
@@ -319,16 +319,11 @@ class Home:
 
 
 def docx_renderer_status():
-    node = shutil.which("node")
-    if not node:
-        return (False, "Node.js not found; documents are written as Markdown instead of .docx")
     try:
-        r = subprocess.run([node, "-e", "require('docx')"], cwd=REPO_DIR, capture_output=True, timeout=20)
-        if r.returncode == 0:
-            return (True, "Node.js + docx module")
-    except Exception:
-        pass
-    return (False, "run 'npm install' in the engine folder; documents are written as Markdown until then")
+        import docx  # noqa: F401  (python-docx)
+        return (True, "python-docx")
+    except ImportError:
+        return (False, "python-docx not installed (run setup); documents are written as Markdown until then")
 
 
 def resolve_home(arg=None):

@@ -6,7 +6,7 @@
   Author:  manpmanp <manp.node@gmail.com>
   Generated with Claude (Anthropic), under the author's direction and review.
   License: MIT (see LICENSE)
-  Version: 0.3.0
+  Version: 0.4.0
   Date:    2026-10-28
 -->
 <html lang="en">
@@ -216,7 +216,11 @@ document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () =>
 }));
 
 const $ = id => document.getElementById(id);
-const API = window.JOB_AGENT_API || null;   // set when served by ./run.sh --setup
+const API = window.JOB_AGENT_API || null;   // set when served by the app or ./run.sh --setup
+if (window.JOB_AGENT_EMBEDDED) {              // inside the app: the app has its own upload and header
+  document.querySelector('.tab[data-pane="upload"]').style.display = 'none';
+  const hd = document.querySelector('header'); if (hd) hd.style.display = 'none';
+}
 let loadedLocations = [];
 
 async function api(method, path, body) {

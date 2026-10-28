@@ -71,8 +71,8 @@ profile as it is now (section 7.1 for how new material comes in).
 1. **Read-only on job sites.** On LinkedIn and every other site: read
    postings only. Never apply, message, connect, comment, like, follow,
    edit a profile or touch notifications. Skip any page that requires it.
-2. **Write only inside the agent home** (and the engine folder for
-   `npm install`). Nowhere else, not even temporary files.
+2. **Write only inside the agent home.** Nowhere else, not even
+   temporary files.
 3. **Calendar:** only if `search_config.calendar.enabled` is true, and only
    the calendar whose ID is configured. Never the primary calendar.
 4. **Nothing is sent or submitted on the user's behalf.** Drafting is fine

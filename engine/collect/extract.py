@@ -256,13 +256,31 @@ def browser_available():
     return "chrome" if _chrome() else None
 
 
+BROWSER_PATHS = [
+    "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+    "/Applications/Chromium.app/Contents/MacOS/Chromium",
+    "/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge",
+    os.path.expandvars(r"%ProgramFiles%\Google\Chrome\Application\chrome.exe"),
+    os.path.expandvars(r"%ProgramFiles(x86)%\Google\Chrome\Application\chrome.exe"),
+    os.path.expandvars(r"%LocalAppData%\Google\Chrome\Application\chrome.exe"),
+    os.path.expandvars(r"%ProgramFiles(x86)%\Microsoft\Edge\Application\msedge.exe"),
+    os.path.expandvars(r"%ProgramFiles%\Microsoft\Edge\Application\msedge.exe"),
+]
+
+
 def _chrome():
-    for c in ("google-chrome", "chromium", "chromium-browser", "chrome"):
+    """A Chrome-family browser that can run headless (Chrome, Chromium, Edge)."""
+    for c in ("google-chrome", "google-chrome-stable", "chromium", "chromium-browser", "chrome", "msedge", "microsoft-edge"):
         p = shutil.which(c)
         if p:
             return p
-    mac = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
-    return mac if os.path.exists(mac) else None
+    for p in BROWSER_PATHS:
+        if p and "%" not in p and os.path.exists(p):
+            return p
+    return None
+
+
+find_browser = _chrome
 
 
 def render_dom(url, timeout=BROWSER_TIMEOUT):

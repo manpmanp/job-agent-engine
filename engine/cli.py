@@ -254,6 +254,7 @@ def cmd_tailor(h, args):
         if "--text" in a:
             with open(a[a.index("--text") + 1], "r", encoding="utf-8") as f:
                 text = f.read()
+        text = text or documents.saved_description(h, r.get("URL")) or None
         names = documents.filenames_for(r)
         print(f"wrote {documents.jd_snapshot(r, os.path.join(h.path('jd_out'), names['jd']), text)}")
         return
@@ -312,8 +313,34 @@ def cmd_run(h, args):
 
 
 def cmd_schedule(h, args):
-    from .runs import schedule_text
-    print(schedule_text(h))
+    from . import schedule as sched
+    act = args.action or "show"
+    if act == "install":
+        ok, msg = sched.install(h)
+    elif act == "remove":
+        ok, msg = sched.remove(h)
+    elif act == "status":
+        ok, msg = sched.status(h)
+        msg = "on: " + msg if ok else "off"
+        ok = True
+    else:
+        print(sched.describe(h))
+        return
+    print(msg)
+    if not ok:
+        sys.exit(1)
+
+
+def cmd_app(h, args):
+    from .app import serve, find_running
+    import webbrowser
+    port = find_running(args.port)
+    if port:
+        print(f"Job agent is already running: http://127.0.0.1:{port}/")
+        if not args.no_browser:
+            webbrowser.open(f"http://127.0.0.1:{port}/")
+        return
+    serve(h, port=args.port, open_browser=not args.no_browser)
 
 
 def cmd_open(h, args):
@@ -359,15 +386,18 @@ def main(argv=None):
     sp.add_parser("verify")
     sp.add_parser("enrich")
     x = sp.add_parser("run"); x.add_argument("mode", nargs="?", default="auto", choices=["weekly", "daily", "auto"])
-    sp.add_parser("schedule")
+    x = sp.add_parser("schedule"); x.add_argument("action", nargs="?", choices=["show", "install", "remove", "status"])
+    x = sp.add_parser("app"); x.add_argument("--port", type=int, default=8765); x.add_argument("--no-browser", action="store_true")
     sp.add_parser("open")
     x = sp.add_parser("form"); x.add_argument("--port", type=int, default=8765); x.add_argument("--no-browser", action="store_true")
     sp.add_parser("demo")
     args = p.parse_args(argv)
     if not args.cmd:
-        # Plain ./run.sh: set up the agent home if needed and do today's run.
+        # Plain ./run.sh: in a terminal, open the app; from a scheduler (no
+        # terminal), set up the agent home if needed and do today's run.
         base = list(argv) if argv is not None else sys.argv[1:]
-        args = p.parse_args(base + ["run", "auto"])
+        interactive = argv is None and sys.stdin is not None and sys.stdin.isatty()
+        args = p.parse_args(base + (["app"] if interactive else ["run", "auto"]))
     if args.cmd == "demo":
         return cmd_demo(None, args)
     h = home_mod.resolve_home(args.home)
@@ -381,7 +411,7 @@ def main(argv=None):
     {"init": cmd_init, "status": cmd_status, "plan": cmd_plan, "add-postings": cmd_add_postings,
      "weekly": cmd_weekly, "sync": cmd_sync, "intake": cmd_intake, "tailor": cmd_tailor,
      "checkpoint": cmd_checkpoint, "note": cmd_note, "collect": cmd_collect, "fetch": cmd_fetch, "verify": cmd_verify,
-     "enrich": cmd_enrich, "run": cmd_run, "schedule": cmd_schedule, "open": cmd_open, "form": cmd_form}[args.cmd](h, args)
+     "enrich": cmd_enrich, "run": cmd_run, "schedule": cmd_schedule, "open": cmd_open, "form": cmd_form, "app": cmd_app}[args.cmd](h, args)
 
 
 if __name__ == "__main__":

@@ -5,14 +5,14 @@
   Author:  manpmanp <manp.node@gmail.com>
   Generated with Claude (Anthropic), under the author's direction and review.
   License: MIT (see LICENSE)
-  Version: 0.3.0
+  Version: 0.4.0
   Date:    2026-10-28
 -->
 
 # Document spec
 
 CVs and cover letters are written as JSON specs and rendered by
-`engine/templates/render_docx.js`. Content is data, so no per-application
+`engine/docx_render.py` (python-docx). Content is data, so no per-application
 code is needed and the same checks run on every document.
 
 ## CV

@@ -428,3 +428,118 @@ class TestExtractAndSources(unittest.TestCase):
         self.assertEqual(tr.to_date(rows[0]["Deadline"]).isoformat(), "2026-11-30")  # stated in the text
         from engine import documents
         self.assertIn("ARM Cortex-M", documents.saved_description(self.h, "https://plain.example/jobs/1"))
+
+
+class TestApp(unittest.TestCase):
+    """The local app's API, against a real server on a free port."""
+
+    @classmethod
+    def setUpClass(cls):
+        import threading, base64  # noqa: F401
+        from engine import app as app_mod
+        cls.h = make_home()
+        rows = [{"Date Found": "2026-11-02", "Title": "FPGA Engineer", "Employer": "Example AB", "Location": "Uppsala",
+                 "Category": "Other", "Seniority Level": "Not stated", "Announce Date": "2026-10-30", "Deadline": "2026-12-01",
+                 "Remote/Hybrid/Onsite": "Onsite", "Required Skills (summary)": "VHDL", "URL": "https://example.com/j/1",
+                 "Calendar Event Added (Y/N)": "N", "CV/Cover Letter Drafted (Y/N)": "N", "Status": "New", "Notes": "test"}]
+        tr.update(cls.h.path("tracker"), rows)
+        cls.token = "testtoken"
+        jobs = app_mod.Jobs()
+        ref = [None]
+        from http.server import ThreadingHTTPServer
+        cls.httpd = ThreadingHTTPServer(("127.0.0.1", 0), app_mod._make_handler(cls.h, cls.token, jobs, ref))
+        ref[0] = cls.httpd
+        cls.port = cls.httpd.server_address[1]
+        threading.Thread(target=cls.httpd.serve_forever, daemon=True).start()
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.httpd.shutdown()
+        shutil.rmtree(cls.h.root, ignore_errors=True)
+
+    def call(self, path, body=None, token=True, host=None):
+        import urllib.request, urllib.error
+        req = urllib.request.Request(f"http://127.0.0.1:{self.port}{path}", method="GET" if body is None else "POST",
+                                     data=None if body is None else json.dumps(body).encode())
+        req.add_header("Content-Type", "application/json")
+        if token:
+            req.add_header("X-Agent-Token", self.token)
+        if host:
+            req.add_header("Host", host)
+        try:
+            with urllib.request.urlopen(req, timeout=20) as r:
+                return r.status, r.read()
+        except urllib.error.HTTPError as e:
+            return e.code, e.read()
+
+    def j(self, *a, **k):
+        code, body = self.call(*a, **k)
+        return code, json.loads(body or b"{}")
+
+    def test_guards(self):
+        self.assertEqual(self.call("/api/status", token=False)[0], 403)
+        self.assertEqual(self.call("/api/status", host="evil.example")[0], 403)
+        code, page = self.call("/", token=False)
+        self.assertEqual(code, 200)
+        self.assertIn(b'"token": "testtoken"', page)                        # injected for the page itself
+        self.assertEqual(self.call("/file?p=../inputs/search_config.json&t=testtoken")[0], 404)  # outside output/
+
+    def test_status_decide_undo(self):
+        code, st = self.j("/api/status")
+        self.assertEqual(code, 200)
+        self.assertEqual(st["counts"]["undecided"], 1)
+        key = "https://example.com/j/1||FPGA Engineer"
+        self.assertEqual(self.j("/api/decision", {"key": key, "decision": "accepted"})[0], 200)
+        _, p = self.j("/api/postings")
+        self.assertTrue(p["postings"][0]["status"].startswith("Approved"))
+        self.assertEqual(self.j("/api/decision", {"key": key, "decision": "undo"})[0], 200)
+        self.assertEqual(self.j("/api/postings")[1]["postings"][0]["status"], "New")
+        self.assertEqual(self.j("/api/decision", {"key": key, "decision": "rejected", "reasons": ["Seniority level mismatch"]})[0], 200)
+        self.assertTrue(self.j("/api/postings")[1]["postings"][0]["status"].startswith("Rejected: Seniority"))
+        self.j("/api/decision", {"key": key, "decision": "undo"})
+
+    def test_upload_and_settings(self):
+        import base64
+        code, r = self.j("/api/intake/upload", {"name": "cv.txt", "kind": "cv", "data": base64.b64encode(b"Jane Example\nFPGA engineer").decode()})
+        self.assertEqual(code, 200)
+        self.assertEqual(self.j("/api/intake/upload", {"name": "x.exe", "data": ""})[0], 400)
+        _, st = self.j("/api/status")
+        self.assertEqual(len(st["awaiting_extraction"]), 1)
+        _, s = self.j("/api/settings", {"secrets": {"anthropic_api_key": "sk-test"}, "sources": {"jsearch": True}})
+        self.assertTrue(s["secrets"]["anthropic_api_key"])
+        self.assertNotIn("sk-test", json.dumps(s))                         # keys are never sent back
+        self.assertTrue(self.h.search_config()["sources"]["jsearch"])
+        self.assertTrue(self.h.search_config()["sources"].get("jobtech", True))
+        self.j("/api/settings", {"secrets": {"anthropic_api_key": "__clear__"}, "sources": {"jsearch": False}})
+
+    def test_template_job(self):
+        import time
+        key = "https://example.com/j/1||FPGA Engineer"
+        self.j("/api/decision", {"key": key, "decision": "accepted"})
+        code, r = self.j("/api/documents/template", {"key": key})
+        self.assertEqual(code, 200)
+        for _ in range(100):
+            job = self.j("/api/job")[1]["job"]
+            if job["done"]:
+                break
+            time.sleep(0.2)
+        self.assertTrue(job["ok"], job["lines"])
+        docs = self.j("/api/postings")[1]["postings"][0]["docs"]
+        self.assertTrue(any(d["template"] and d["kind"] == "cv" for d in docs))
+        code, data = self.call("/file?p=" + docs[0]["rel"] + "&t=testtoken", token=False)
+        self.assertEqual(code, 200)
+        self.assertTrue(data[:2] == b"PK" or data[:1] == b"#")          # .docx (zip) or Markdown fallback
+        self.j("/api/decision", {"key": key, "decision": "undo"})
+
+    def test_ai_answer_parsing(self):
+        from engine import ai_docs
+        row = {"Title": "FPGA Engineer", "Employer": "Example AB", "Location": "Uppsala", "URL": "https://example.com/j/1"}
+        spec = {"banner": {"name": "Jane Example", "title": "FPGA Engineer"}, "sections": [{"heading": "Profile", "paragraphs": ["FPGA work."]}]}
+        cl = {"banner": {"name": "Jane Example"}, "paragraphs": ["Dear team, ..."], "recipient": ["Example AB"]}
+        bad = ai_docs.apply_tailor_answer(self.h, row, json.dumps({"cv": dict(spec, sections=[{"heading": "P", "paragraphs": ["a \u2014 b"]}]), "cl": cl}))
+        self.assertTrue(bad["problems"])                                    # em dash rejected, nothing written
+        self.assertEqual(bad["files"], [])
+        good = ai_docs.apply_tailor_answer(self.h, row, "Here you go:\n```json\n" + json.dumps({"cv": spec, "cl": cl, "report": "ok"}) + "\n```")
+        self.assertEqual(good["problems"], [])
+        self.assertTrue(any(f.endswith((".docx", ".md")) for f in good["files"]))
+        self.assertIn("Never invent", ai_docs.tailor_prompt(self.h, row))

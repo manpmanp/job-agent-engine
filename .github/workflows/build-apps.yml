@@ -1,0 +1,55 @@
+# Job-search agent engine
+# File:    .github/workflows/build-apps.yml
+# Purpose: Builds the double-click apps (macOS, Windows, Linux) with PyInstaller; attaches them to a release on version tags.
+# Author:  manpmanp <manp.node@gmail.com>
+# Generated with Claude (Anthropic), under the author's direction and review.
+# License: MIT (see LICENSE)
+# Version: 0.4.0
+# Date:    2026-10-28
+name: build-apps
+on:
+  workflow_dispatch:
+  push:
+    tags: ["v*"]
+permissions:
+  contents: write
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install -r requirements.txt && python -m unittest discover -s tests
+  build:
+    needs: test
+    strategy:
+      matrix:
+        include:
+          - { os: macos-latest, asset: JobAgent-macOS.zip }
+          - { os: windows-latest, asset: JobAgent-Windows.zip }
+          - { os: ubuntu-latest, asset: JobAgent-Linux.zip }
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install pyinstaller -r requirements.txt
+      - run: pyinstaller --noconfirm packaging/job_agent.spec
+      - name: Smoke test
+        shell: bash
+        run: |
+          if [ "$RUNNER_OS" = "macOS" ]; then BIN="dist/Job Agent.app/Contents/MacOS/JobAgent";
+          elif [ "$RUNNER_OS" = "Windows" ]; then BIN="dist/JobAgent.exe"; else BIN="dist/JobAgent"; fi
+          "$BIN" --home "$RUNNER_TEMP/home" --cli status
+      - name: Package
+        shell: bash
+        run: |
+          cd dist
+          if [ "$RUNNER_OS" = "macOS" ]; then ditto -c -k --keepParent "Job Agent.app" "../${{ matrix.asset }}";
+          elif [ "$RUNNER_OS" = "Windows" ]; then 7z a "../${{ matrix.asset }}" JobAgent.exe; else zip "../${{ matrix.asset }}" JobAgent; fi
+      - uses: actions/upload-artifact@v4
+        with: { name: "${{ matrix.asset }}", path: "${{ matrix.asset }}" }
+      - if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with: { files: "${{ matrix.asset }}" }

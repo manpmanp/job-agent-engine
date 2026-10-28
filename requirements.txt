@@ -4,7 +4,9 @@
 # Author:  manpmanp <manp.node@gmail.com>
 # Generated with Claude (Anthropic), under the author's direction and review.
 # License: MIT (see LICENSE)
-# Version: 0.3.0
+# Version: 0.4.0
 # Date:    2026-10-28
 
 openpyxl>=3.1
+python-docx>=1.1
+pypdf>=4.0

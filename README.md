@@ -132,93 +132,63 @@ switch it on. A missing optional input is never an error.
 
 ---
 
-## How to use it
+## Get started (no terminal needed)
 
-### 1. Install and open the input forms
+### 1. Get it
 
-Requirements: Python 3.9 or newer, an internet connection for collection,
-and Node.js for .docx output (without Node, documents are written as
-Markdown).
+Pick one:
 
-```
-git clone https://github.com/manpmanp/job-agent-engine.git
-cd job-agent-engine
-./run.sh --home ~/my_job_agent --setup
-```
+- **Ready-made app** (nothing else to install): download the file for
+  your computer from the [Releases page](https://github.com/manpmanp/job-agent-engine/releases):
+  `JobAgent-macOS.zip`, `JobAgent-Windows.zip` or `JobAgent-Linux.zip`,
+  and unzip it.
+- **From the code**: on the repository page click **Code > Download ZIP**
+  and unzip it (or `git clone` it). This needs Python 3.9 or newer
+  ([python.org](https://www.python.org/downloads/); on Windows tick
+  "Add python.exe to PATH").
 
-`--setup` installs the Python packages into a private virtual environment
-in the engine folder (`.venv/`, nothing system-wide, works with Homebrew
-Python) and the Node package, creates your agent home, and opens the input
-forms in your browser. The forms are served from your own machine only
-(127.0.0.1) and save straight into your agent home. Stop with Ctrl+C;
-reopen later with `./run.sh --home ~/my_job_agent form`.
+### 2. Open it
 
-Keep the agent home outside this repository (or in `my_agent/`, the
-default when `--home` is left out, which git ignores).
+Double-click:
 
-### 2. Set up the search (required)
+| Computer | Ready-made app | From the code |
+|---|---|---|
+| Mac | **Job Agent** | **Job Agent.command** |
+| Windows | **JobAgent.exe** | **Job Agent.bat** |
+| Linux | **JobAgent** | **job-agent.sh** |
 
-In the **Search setup** tab, enter keywords and locations and click
-**Save search setup**. Then check:
+The app opens in your web browser. It runs only on your own computer
+(nothing is put online) and keeps your job search in a **JobAgent**
+folder in your home folder.
 
-```
-./run.sh --home ~/my_job_agent status
-./run.sh --home ~/my_job_agent plan
-```
+The first start from the code takes about a minute while it prepares
+itself. The ready-made apps are not signed by Apple or Microsoft yet, so
+the first time: on a Mac, right-click the app and choose **Open**; on
+Windows, click **More info > Run anyway**.
 
-### 3. The agent home
+### 3. Use it
 
-The setup created blank inputs, empty state files, the `output/` folder,
-an empty weekly page (`output/jobs-on-market.html`) and two empty intake
-folders, `inputs/intake/cv/` and `inputs/intake/cl/`. Any command, or plain
-`./run.sh`, fills in whatever is missing. Nothing existing is ever
-overwritten.
+1. **Setup:** type what to search for (job titles or skills) and where
+   (towns, regions or countries). Optionally drop in your CV.
+2. **Home > Search now.** New postings appear under **Postings**.
+3. **Postings:** **Accept** the ones you want; **Reject** the others with a
+   reason (future searches learn from it).
+4. **Documents:** for each accepted posting, make a **template** (your
+   details plus the posting's keywords, experience left as placeholders),
+   or, if you added your CV, a **tailored draft**:
+   - **Copy for Claude**: copies everything to your clipboard. Paste it
+     into any Claude chat, then paste the answer back with **Paste
+     Claude's answer**. No key needed.
+   - **Write with AI**: does the same in one click, with your own
+     Anthropic API key (Settings).
+   Drafts are Word files in your folder. Nothing is ever sent or applied
+   for you.
+5. **Settings > Run every morning:** the search then runs by itself
+   every day, even when the app is closed.
 
-### 4. Add candidate data (optional, any time)
+**Add a posting** reads any job link you found yourself and adds it.
 
-Any of these, and you can combine them:
-
-- **Form:** the **Candidate profile** tab, then **Save candidate profile**.
-- **Existing documents, method 1:** `./run.sh --home ~/my_job_agent intake cv path/to/my_cv.pdf`
-- **Existing documents, method 2:** copy them into `inputs/intake/cv/` and
-  `inputs/intake/cl/`, then click **Update** in the third tab (or run
-  `./run.sh intake scan`; every run also picks them up).
-
-When a CV and the form disagree, the newest entry is used and the change
-is listed for you to confirm:
-
-```
-./run.sh --home ~/my_job_agent intake conflicts
-```
-
-### 5. Run it
-
-```
-./run.sh --home ~/my_job_agent collect
-./run.sh --home ~/my_job_agent weekly
-```
-
-or the whole pass at once, and then every morning automatically:
-
-```
-./run.sh --home ~/my_job_agent run weekly
-./run.sh --home ~/my_job_agent schedule
-```
-
-`schedule` prints the cron line (or the macOS launchd file) to install.
-Setting `JOB_AGENT_HOME=~/my_job_agent` saves typing `--home`.
-
-Optionally, give an AI agent `AGENT_PROMPT.md` and the agent-home path, as
-a scheduled task or in a chat ("run the weekly pass", "sync my decisions"),
-for LinkedIn, Indeed and fully tailored documents.
-
-### 6. Decide and review
-
-Open the page in your normal browser with
-`./run.sh --home ~/my_job_agent open` (it is `output/jobs-on-market.html`).
-Accept or Reject each posting, then click **Sync decisions** (you pick the
-`state` folder once). The next sync applies the decisions, and accepted
-postings get documents in `output/CV/`, `output/CL/` and `output/JD/`.
+Close the app with **Settings > Quit the app** (or close its window).
 
 ### Try it first with fictional data
 
@@ -226,16 +196,51 @@ postings get documents in `output/CV/`, `output/CL/` and `output/JD/`.
 ./run.sh demo
 ```
 
-This builds a fictional agent home in `demo/home/` and runs every step.
-Example output is in `demo/preview/`.
+builds a fictional job search in `demo/home/`; open it with
+`./run.sh --home demo/home app`. Example documents are in `demo/preview/`.
+
+## Using the terminal (optional)
+
+Everything the app does is also a command, for scripting and for AI agents:
+
+```
+git clone https://github.com/manpmanp/job-agent-engine.git
+cd job-agent-engine
+./run.sh --home ~/my_job_agent app        # the app (also: plain ./run.sh)
+./run.sh --home ~/my_job_agent status     # what is on and off, and why
+./run.sh --home ~/my_job_agent run weekly # collect, verify, sync, page
+./run.sh --home ~/my_job_agent fetch <url> --add
+./run.sh --home ~/my_job_agent schedule install
+```
+
+`run.sh` installs its Python packages into a private `.venv/` in the
+engine folder the first time (nothing system-wide; works with Homebrew
+Python) and again whenever `requirements.txt` changes. Setting
+`JOB_AGENT_HOME=~/my_job_agent` saves typing `--home`. Every command is in
+`docs/commands.md`.
+
+Candidate data can also come from files: `./run.sh intake cv my_cv.pdf`,
+or by copying them into `inputs/intake/cv/` and `inputs/intake/cl/` (every
+run picks them up). When sources disagree, the newest wins and the change
+is listed for you to confirm (`intake conflicts`, or on the app's Home).
+
+Optionally, give an AI agent `AGENT_PROMPT.md` and the agent-home path,
+as a scheduled task or in a chat ("run the weekly pass", "sync my
+decisions"), for LinkedIn, Indeed and fully tailored documents.
+
+The static weekly page (`output/jobs-on-market.html`, `./run.sh open`)
+still works without the app: Accept or Reject there, click **Sync
+decisions** (pick the `state` folder once), then `./run.sh sync`.
 
 ---
 
 ## Repository layout
 
 ```
-run.sh                  the single entry point
-engine/                 Python engine and the .docx renderer (Node)
+start.py, Job Agent.*    double-click launchers (macOS, Windows, Linux)
+run.sh                  terminal entry point
+app/                    the local app (one web page)
+engine/                 Python engine, the app server and the .docx renderer
 engine/collect/         online collectors, matching rules, liveness checks
 AGENT_PROMPT.md         instructions for the AI agent
 skills/tailor-documents the CV / cover-letter procedure
@@ -246,6 +251,7 @@ defaults/               engine defaults and employer presets
 demo/                   fictional data and example output
 docs/                   inputs, intake, commands, state files, document spec
 tests/                  offline tests with recorded API responses
+packaging/, .github/    builds of the ready-made apps
 ```
 
 More detail: `docs/commands.md` (every command), `docs/inputs.md` (every

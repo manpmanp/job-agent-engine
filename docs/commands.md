@@ -22,7 +22,7 @@ before the command, or with the `JOB_AGENT_HOME` environment variable
 | Command | What it does |
 |---|---|
 | *(none)* | `./run.sh` on its own creates the agent home if needed and does today's run (`run auto`). |
-| `--setup` (or `setup`) | Installs the dependencies the first time (Python into `.venv/` in the engine folder, nothing system-wide; Node into `node_modules/`), creates the agent home, then opens the input forms in your browser. Add `--browser` to also install Playwright with Chromium into `.venv/`, used to read posting pages that are built in the browser (optional; an installed Chrome is used otherwise). |
+| `--setup` (or `setup`) | Installs the dependencies the first time (Python packages into `.venv/` in the engine folder, nothing system-wide), creates the agent home, then opens the input forms in your browser. Add `--browser` to also install Playwright with Chromium into `.venv/`, used to read posting pages that are built in the browser (optional; an installed Chrome is used otherwise). |
 | `form [--port N] [--no-browser]` | Opens the input forms without the install step. Served locally (127.0.0.1 only), so Save writes straight into the agent home and Update imports documents from the intake folders. Stop with Ctrl+C. |
 | `test` | Runs the offline test suite. |
 | `init` | Creates a new agent home with blank inputs and empty state files, and lists what it created. Every other command does the same silently when something is missing (including `output/` and the weekly page). Never overwrites existing files. |
@@ -33,7 +33,8 @@ before the command, or with the `JOB_AGENT_HOME` environment variable
 | `verify` | Checks that tracked postings are still open; closed ones become Expired (accepted ones only get a note). |
 | `enrich` | Optional AI review of collected postings through your Anthropic API key. |
 | `run weekly\|daily\|auto` | A complete run without an agent. `weekly`: collect, verify, sync, enrich, templates, page and summary. `daily`: sync, templates, page. `auto`: weekly on your search day, daily otherwise. |
-| `schedule` | Prints the cron line and the macOS launchd file to run `run auto` every morning. |
+| `schedule [install\|remove\|status]` | Installs or removes the daily run at 08:02 (launchd on macOS, cron on Linux, Task Scheduler on Windows), or shows it. Without an argument it prints what would be installed. The app's Settings has the same switch. |
+| `app [--port N] [--no-browser]` | Opens the local app in your browser (127.0.0.1 only). Plain `./run.sh` in a terminal does the same. If it is already running, the browser is pointed at it. |
 | `add-postings <file.json>` | Merges found or updated posting rows into the tracker. |
 | `weekly ["note"]` | Writes the weekly page (`output/jobs-on-market.html`) and the weekly summary. |
 | `open` | Opens the weekly page from the local file in your default browser (builds it first if missing). |
