@@ -32,7 +32,10 @@ def _row_by_key(h, key):
 
 
 # --------------------------------------------------------------------- init
-def cmd_init(h, args):
+def ensure_home(h):
+    """Creates every missing folder and file of an agent home (inputs from
+    the blank templates, empty state files, output folders and the weekly
+    page). Never overwrites anything. Returns the paths it created."""
     created = []
     for key, tmpl in [("search_config", "search_config.json"), ("employers", "employers.json"),
                       ("document_style", "document_style.json"), ("tailoring_rules", "tailoring_rules.md"),
@@ -51,7 +54,20 @@ def cmd_init(h, args):
         created.append(form)
     created += ensure_state(h)
     for k in ("cv_out", "cl_out", "jd_out", "specs", "weekly_summary", "new_postings"):
-        os.makedirs(h.path(k), exist_ok=True)
+        if not os.path.isdir(h.path(k)):
+            os.makedirs(h.path(k), exist_ok=True)
+            created.append(h.path(k))
+    if not os.path.exists(h.path("weekly_html")):
+        from . import webpage
+        webpage.generate(h)
+        created.append(h.path("weekly_html"))
+    return created
+
+
+def cmd_init(h, args):
+    created = getattr(args, "_created", None)
+    if created is None:
+        created = ensure_home(h)
     print(f"agent home: {h.root}")
     for c in created:
         print(f"  created {os.path.relpath(c, h.root)}")
@@ -322,11 +338,18 @@ def main(argv=None):
     sp.add_parser("demo")
     args = p.parse_args(argv)
     if not args.cmd:
-        p.print_help()
-        return
+        # Plain ./run.sh: set up the agent home if needed and do today's run.
+        base = list(argv) if argv is not None else sys.argv[1:]
+        args = p.parse_args(base + ["run", "auto"])
     if args.cmd == "demo":
         return cmd_demo(None, args)
     h = home_mod.resolve_home(args.home)
+    created = ensure_home(h)
+    if args.cmd == "init":
+        args._created = created
+    elif created:
+        print(f"agent home created at {h.root} ({len(created)} new files and folders); "
+              "add your keywords and locations to inputs/search_config.json")
     {"init": cmd_init, "status": cmd_status, "plan": cmd_plan, "add-postings": cmd_add_postings,
      "weekly": cmd_weekly, "sync": cmd_sync, "intake": cmd_intake, "tailor": cmd_tailor,
      "checkpoint": cmd_checkpoint, "note": cmd_note, "collect": cmd_collect, "verify": cmd_verify,

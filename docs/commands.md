@@ -21,9 +21,10 @@ before the command, or with the `JOB_AGENT_HOME` environment variable
 
 | Command | What it does |
 |---|---|
+| *(none)* | `./run.sh` on its own creates the agent home if needed and does today's run (`run auto`). |
 | `setup` | Creates `.venv/` in the engine folder and installs the Python dependencies there, then the Node dependencies. Nothing is installed system-wide. |
 | `test` | Runs the offline test suite. |
-| `init` | Creates a new agent home with blank inputs and empty state files. Never overwrites existing files. |
+| `init` | Creates a new agent home with blank inputs and empty state files, and lists what it created. Every other command does the same silently when something is missing (including `output/` and the weekly page). Never overwrites existing files. |
 | `status` | Lists every feature as on or off, why, and what would switch it on. |
 | `plan` | Prints the search plan from the search config, employer list and rejection history. |
 | `collect [--only jobtech\|employers]` | Fetches postings online (Arbetsformedlingen API, employer job boards and careers pages), filters, classifies and adds new ones to the tracker. |

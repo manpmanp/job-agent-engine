@@ -83,12 +83,12 @@ def run(home, mode="auto"):
     t = _templates_if_needed(home)
     if t:
         lines.append(f"templates: {t}")
-    if mode == "weekly" or res.get("applied") or t:
-        webpage.generate(home, weekly_note=note)
-        if mode == "weekly" and (cfg.get("weekly_list") or {}).get("summary_markdown", True):
-            weekly.weekly_summary(home, note=note)
+    webpage.generate(home, weekly_note=note)
+    if mode == "weekly" and (cfg.get("weekly_list") or {}).get("summary_markdown", True):
+        weekly.weekly_summary(home, note=note)
     if mode == "weekly":
         lines.append(checkpoint.report(home, today.isoformat()).splitlines()[0])
+    lines.append(f"page: {home.path('weekly_html')}")
     weekly.append_note(home, "\n".join(lines))
     print("\n".join(lines))
 

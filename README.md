@@ -145,8 +145,10 @@ Keep it outside this repository (or in `my_agent/`, which git ignores).
 ./run.sh --home ~/my_job_agent init
 ```
 
-This creates blank inputs and empty state files. Nothing existing is ever
-overwritten.
+This creates blank inputs, empty state files, the `output/` folder and an
+empty weekly page (`output/jobs-on-market.html`). Any other command, or
+plain `./run.sh`, does the same automatically when something is missing.
+Nothing existing is ever overwritten.
 
 ### 3. Set up the search (required)
 
