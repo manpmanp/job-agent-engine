@@ -150,7 +150,7 @@ def _filter_and_build(cfg, home, candidates, keywords, locations, run_date):
     cats = cfg.get("categories") or []
     rules = cfg.get("category_rules") or {}
     prof = home.profile()
-    vocab = list(cfg.get("skill_terms") or []) + list(keywords)
+    vocab = list(cfg.get("skill_terms") or []) + list(keywords) + match.default_vocabulary()
     for g in prof.get("skills") or []:
         vocab += list(g.get("items") or [])
     out, full = [], []

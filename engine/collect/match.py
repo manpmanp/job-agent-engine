@@ -167,12 +167,28 @@ def category(title, description, categories, rules=None):
     return "Other" if "Other" in categories or not categories else categories[0]
 
 
+def default_vocabulary():
+    import json, os
+    p = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
+                     "defaults", "skill_vocabulary.json")
+    try:
+        with open(p, "r", encoding="utf-8") as f:
+            return list(json.load(f).get("terms", []))
+    except (OSError, ValueError):
+        return []
+
+
 def skills_summary(description, vocabulary, limit=10):
     d = fold(description)
+    raw = str(description or "")
     found = []
     for term in vocabulary:
         ft = fold(term)
-        if ft and _has(ft, d) and term not in found:
+        if not ft or term in found:
+            continue
+        # very short terms (C, Go, R) only count with their exact capitalisation
+        hit = (re.search(r"(?<![\w+#-])" + re.escape(term) + r"(?![\w+#-])", raw) is not None) if len(term) <= 2 else _has(ft, d)
+        if hit:
             found.append(term)
         if len(found) >= limit:
             break

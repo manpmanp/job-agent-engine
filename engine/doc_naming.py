@@ -24,6 +24,7 @@ JOB_ID_PATTERNS = [
     re.compile(r'_R-?\d+', re.IGNORECASE),
     re.compile(r'[?&]id=([A-Za-z0-9\-]+)'),
     re.compile(r'jobs/view/(\d+)'),
+    re.compile(r'platsbanken/annonser/(\d+)'),
     re.compile(r'/(\d{6,})[/\-]'),
 ]
 
@@ -52,7 +53,12 @@ def slugify(text):
 def build_basename(employer, title, location, url=None, job_id=None):
     if job_id is None:
         job_id = extract_job_id(url)
-    parts = [slugify(employer), slugify(title), slugify(location)]
+    city = str(location or "").split(",")[0].strip()
+    t = slugify(title)
+    loc = slugify(city)
+    if loc and loc.lower() in t.lower().split("_"):
+        loc = ""  # the title already names the place
+    parts = [slugify(employer), t, loc]
     if job_id:
         parts.append(slugify(job_id))
     return "_".join(p for p in parts if p)

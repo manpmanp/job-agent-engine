@@ -46,10 +46,13 @@ TEMPLATE_NOTE = ("Template generated from the posting's keywords. Replace every 
 MAX_KEYWORDS = 8
 
 
-def posting_keywords(row, limit=MAX_KEYWORDS):
+def posting_keywords(row, limit=MAX_KEYWORDS, description=None, vocabulary=None):
     raw = str(row.get("Required Skills (summary)") or "")
     if "not extracted" in raw.lower():
         raw = ""
+    if not raw.strip() and description:
+        from .collect.match import skills_summary, default_vocabulary
+        raw = skills_summary(description, list(vocabulary or []) + default_vocabulary(), limit=limit)
     parts = re.split(r"[,;/\n]|\band\b|\boch\b", raw)
     seen, out = set(), []
     for p in parts:
@@ -89,7 +92,21 @@ def _dates(it):
     return f"{start} – {end}".strip(" –") if (start or end) else ""
 
 
-def template_specs(row, profile=None, style=None):
+def saved_description(home, url):
+    """The posting description captured by 'collect', if any."""
+    import glob
+    for p in sorted(glob.glob(os.path.join(home.path("new_postings"), "collect_*.json")), reverse=True):
+        try:
+            with open(p, "r", encoding="utf-8") as f:
+                for c in json.load(f).get("kept_candidates", []):
+                    if c.get("url") == url and c.get("description"):
+                        return c["description"]
+        except (OSError, ValueError):
+            continue
+    return ""
+
+
+def template_specs(row, profile=None, style=None, description=None, vocabulary=None):
     """CV and CL specs for a hypothetical candidate, built from the posting.
     Uses only profile fields that exist; everything else is a placeholder."""
     profile = profile or {}
@@ -97,7 +114,7 @@ def template_specs(row, profile=None, style=None):
     ident = profile.get("identity") or {}
     title = row.get("Title") or "[Position title]"
     employer = row.get("Employer") or "[Employer]"
-    kws = posting_keywords(row)
+    kws = posting_keywords(row, description=description, vocabulary=vocabulary)
     kw_text = ", ".join(kws) if kws else "[the main requirements listed in the posting]"
     name = ident.get("name") or "[Your name]"
     banner = {"name": name, "title": title,

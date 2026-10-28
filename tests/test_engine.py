@@ -127,6 +127,29 @@ class TestMatching(unittest.TestCase):
         self.assertEqual(sources.detect_ats("https://www.example.com/careers")[0], "html")
 
 
+class TestNamingAndSkills(unittest.TestCase):
+    def test_basename(self):
+        from engine import doc_naming as d
+        self.assertEqual(d.build_basename("Example AB", "ASIC Engineer, Uppsala", "Uppsala, Uppsala, Uppsala län, Sverige",
+                                          "https://arbetsformedlingen.se/platsbanken/annonser/12345678"),
+                         "Example_AB_ASIC_Engineer_Uppsala_12345678")
+        self.assertEqual(d.build_basename("Example AB", "FPGA Engineer", "Västerås, Sverige"), "Example_AB_FPGA_Engineer_Västerås")
+
+    def test_skills_from_description(self):
+        s = match.skills_summary("SystemVerilog and UVM, C and C++ on Linux. Go-to person. C-level contact.", match.default_vocabulary())
+        for t in ("SystemVerilog", "UVM", "C", "C++", "Linux"):
+            self.assertIn(t, s)
+        self.assertNotIn("Go", s.split(", "))
+
+    def test_template_uses_description(self):
+        from engine import documents
+        row = {"Title": "Verification Engineer", "Employer": "Example AB", "Required Skills (summary)": "not extracted, see posting"}
+        cv, cl = documents.template_specs(row, description="You will build UVM testbenches in SystemVerilog and run regressions in Python.")
+        table = [r[0] for s in cv["sections"] if s["heading"] == "Technical Skills" for r in s["table"]]
+        self.assertIn("UVM", table)
+        self.assertIn("SystemVerilog", table)
+
+
 class TestCollect(unittest.TestCase):
     def setUp(self):
         http.DELAY = 0

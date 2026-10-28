@@ -211,7 +211,10 @@ def cmd_tailor(h, args):
         rows = decisions.approved_pending(h) if "--all-pending" in a else [_row_by_key(h, a[1])]
         for r in rows:
             names = documents.filenames_for(r)
-            cv, cl = documents.template_specs(r, h.profile(), style)
+            cfg = h.search_config()
+            cv, cl = documents.template_specs(r, h.profile(), style,
+                                              description=documents.saved_description(h, r.get("URL")),
+                                              vocabulary=list(cfg.get("skill_terms") or []) + list(cfg.get("keywords") or []))
             p1 = documents.render(cv, os.path.join(h.path("cv_out"), "TEMPLATE_" + names["cv"]), style=style)
             p2 = documents.render(cl, os.path.join(h.path("cl_out"), "TEMPLATE_" + names["cl"]), style=style)
             print(f"template documents for {r.get('Employer')} / {r.get('Title')}:\n  {p1}\n  {p2}")

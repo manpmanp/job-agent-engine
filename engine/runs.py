@@ -43,7 +43,10 @@ def _templates_if_needed(home):
         target = os.path.join(home.path("cv_out"), "TEMPLATE_" + names["cv"])
         if os.path.exists(target) or os.path.exists(os.path.splitext(target)[0] + ".md"):
             continue
-        cv, cl = documents.template_specs(r, home.profile(), style)
+        cfg = home.search_config()
+        cv, cl = documents.template_specs(r, home.profile(), style,
+                                          description=documents.saved_description(home, r.get("URL")),
+                                          vocabulary=list(cfg.get("skill_terms") or []) + list(cfg.get("keywords") or []))
         documents.render(cv, target, style=style)
         documents.render(cl, os.path.join(home.path("cl_out"), "TEMPLATE_" + names["cl"]), style=style)
         n += 1
