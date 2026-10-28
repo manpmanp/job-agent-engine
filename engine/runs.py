@@ -118,8 +118,8 @@ def schedule_text(home):
         "~/Library/LaunchAgents/local.job-agent-engine.plist, then run\n"
         "launchctl load ~/Library/LaunchAgents/local.job-agent-engine.plist\n\n"
         f"{plist}\n\n"
-        "If python3 with openpyxl, or node, live elsewhere on your machine, add their folders to PATH above\n"
-        "(see 'which python3' and 'which node').\n"
+        "run.sh uses the engine's own .venv for Python. If node lives elsewhere on your machine,\n"
+        "add its folder to PATH above (see 'which node').\n"
     )
 
 

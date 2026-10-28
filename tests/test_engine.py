@@ -7,7 +7,7 @@
 # Version: 0.2.0
 # Date:    2026-10-28
 
-"""Run with:  python3 -m unittest discover -s tests   (from the engine folder)
+"""Run with:  ./run.sh test
 
 No network is used: engine.collect.http.transport is replaced by a router
 that serves the files in tests/fixtures/.

@@ -12,6 +12,7 @@
 /my_agent/
 /demo/home*/
 node_modules/
+/.venv/
 __pycache__/
 *.pyc
 .DS_Store

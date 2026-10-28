@@ -125,9 +125,11 @@ switch it on. A missing optional input is never an error.
 
 ### 1. Install
 
-Requirements: Python 3.9 or newer (standard library plus `openpyxl`), an
-internet connection for collection, and Node.js for .docx output (without
-Node, documents are written as Markdown).
+Requirements: Python 3.9 or newer, an internet connection for collection,
+and Node.js for .docx output (without Node, documents are written as
+Markdown). `./run.sh setup` installs the Python packages into a private
+virtual environment in the engine folder (`.venv/`), so nothing is
+installed system-wide and it works with Homebrew Python.
 
 ```
 git clone <repository URL> job-agent-engine
