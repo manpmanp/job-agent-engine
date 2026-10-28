@@ -1,0 +1,6 @@
+{"status":"OK","data":{"cursor":null,"jobs":[
+ {"job_id":"js1","job_title":"FPGA Engineer","employer_name":"Radio AB","job_publisher":"LinkedIn",
+  "job_apply_link":"https://www.linkedin.com/jobs/view/123","apply_options":[{"publisher":"Radio AB","apply_link":"https://radio.example/jobs/9","is_direct":true}],
+  "job_description":"FPGA design in VHDL for radio products.","job_is_remote":false,"job_posted_at_datetime_utc":"2026-10-25T08:00:00.000Z",
+  "job_location":"Uppsala  •  via LinkedIn","job_city":"Uppsala","job_country":"SE","job_employment_type":"FULLTIME"},
+ {"job_id":"js1","job_title":"duplicate"}]}}

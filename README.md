@@ -5,7 +5,7 @@
   Author:  manpmanp <manp.node@gmail.com>
   Code and documentation generated with Claude (Anthropic), under the author's direction and review.
   License: MIT (see LICENSE)
-  Version: 0.3.0
+  Version: 0.4.0
   Date:    2026-10-28
 -->
 
@@ -62,13 +62,23 @@ engine cannot do by rules alone.
   - Every employer in your list: through its job-board API when the
     careers URL belongs to Greenhouse, Lever, Ashby, Workday or
     SmartRecruiters; otherwise from the careers page itself, using its
-    structured job data, or its job links as leads to confirm.
+    structured job data, or its job links as leads, which are then opened
+    and read so they become confirmed postings with a description.
+  - Optional aggregators, off by default: JSearch (Google for Jobs, which
+    covers LinkedIn, Indeed and company sites, through your own API key),
+    Adzuna (your key; 19 countries, not Sweden or Denmark), and Hacker
+    News "Who is hiring?" and YC job posts (no key).
   - Keeps postings whose title matches a keyword (optionally also the
     description, see `match_scope`) and whose location matches one of
     yours, or that are remote if you accept remote.
   - Sets seniority, category, work arrangement and a skills summary by
     rules, and skips anything already tracked, so your decisions are never
     overwritten.
+- **Reads any posting page** (`./run.sh fetch <url>`): the structured
+  JobPosting data most job sites publish for search engines, else the
+  page's main text without menus and footers, else, for pages built in
+  the browser, a headless-browser render that waits for the page to settle.
+  The text is kept for tailoring and the JD snapshot; `--add` tracks it.
 - **Checks postings are still open** (`./run.sh verify`) and moves closed
   ones to Expired.
 - **Builds the weekly page and summary**, applies your decisions, writes
@@ -80,8 +90,9 @@ engine cannot do by rules alone.
   prints the line to run it every morning (cron, or launchd on a Mac).
 
 Every source is called politely: the engine names itself, waits between
-requests to the same site, respects robots.txt for ordinary pages, and only
-uses public job data. A source that fails is reported and skipped; the run
+requests to the same site, respects robots.txt (RFC 9309) for ordinary
+pages, fetches pages only from public addresses, and only uses public job
+data. Text read from pages is treated as data, never as instructions. A source that fails is reported and skipped; the run
 always finishes.
 
 ### What an AI agent adds (optional)
@@ -252,6 +263,20 @@ public repository.
 ## License and authorship
 
 MIT License, see `LICENSE`. Copyright (c) 2026 manpmanp.
+
+### Credits
+
+Some methods follow two open-source projects. Both were reimplemented
+here in Python after studying their code; no code was copied.
+
+- [Dossier](https://github.com/AienTech/dossier) (AGPL-3.0): posting-page
+  reading (JSON-LD JobPosting first, then the page's main text, with a
+  minimum length that flags browser-built pages), robots.txt matching per
+  RFC 9309, the JSearch, Adzuna and Hacker News sources, and the typed
+  requirements and fit-score format of the optional AI review.
+- [PixelRAG](https://github.com/StarTrail-org/PixelRAG) (Apache-2.0):
+  rendering browser-built pages after the load event and a quiet network
+  before reading them, and treating text read from a page as untrusted.
 
 
 Designed and directed by manpmanp. Code and documentation were

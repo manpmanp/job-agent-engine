@@ -5,12 +5,12 @@
 # Author:  manpmanp <manp.node@gmail.com>
 # Generated with Claude (Anthropic), under the author's direction and review.
 # License: MIT (see LICENSE)
-# Version: 0.3.0
+# Version: 0.4.0
 # Date:    2026-10-28
 #
 # Single entry point for the job-search agent engine.
 #   ./run.sh [--home DIR] <command> [args]
-# Commands: --setup (install + open the input forms), form, test, init, status, plan, collect, verify, enrich, run,
+# Commands: --setup [--browser] (install + open the input forms), form, fetch, test, init, status, plan, collect, verify, enrich, run,
 #           schedule, open, add-postings, weekly, sync, intake, tailor, checkpoint,
 #           note, demo. See docs/commands.md.
 set -euo pipefail
@@ -30,10 +30,11 @@ fi
 # "setup" or "--setup" anywhere in the arguments: install the dependencies
 # into .venv (first time, or when requirements changed), create the agent
 # home, then open the input forms in the browser.
-SETUP=0; ARGS=()
+SETUP=0; BROWSER=0; ARGS=()
 for a in "$@"; do
   case "$a" in
     setup|--setup) SETUP=1 ;;
+    --browser) BROWSER=1 ;;
     *) ARGS+=("$a") ;;
   esac
 done
@@ -55,6 +56,13 @@ if [ "$SETUP" = 1 ]; then
     else
       echo "npm not found: documents will be written as Markdown until Node.js is installed."
     fi
+  fi
+  if [ "$BROWSER" = 1 ]; then
+    # Optional: Playwright + Chromium, to read posting pages built in the browser.
+    if ! "$VENV/bin/python" -c "import playwright" >/dev/null 2>&1; then
+      "$VENV/bin/python" -m pip install --quiet playwright
+    fi
+    "$VENV/bin/python" -m playwright install chromium && echo "headless browser installed (Playwright + Chromium in $VENV)"
   fi
   PY="$VENV/bin/python"
   PYTHONPATH="$ENGINE_DIR${PYTHONPATH:+:$PYTHONPATH}" exec "$PY" -m engine.cli ${ARGS[@]+"${ARGS[@]}"} form

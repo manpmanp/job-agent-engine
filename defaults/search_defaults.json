@@ -78,6 +78,13 @@
     "linkedin_read_only": true,
     "web_search": true,
     "named_employers": true,
-    "extra_sites": []
+    "extra_sites": [],
+    "confirm_leads": true,
+    "confirm_leads_max": 25,
+    "jsearch": false,
+    "jsearch_pages": 1,
+    "adzuna": false,
+    "hn_who_is_hiring": false,
+    "yc_jobs": false
   }
 }

@@ -5,7 +5,7 @@
   Author:  manpmanp <manp.node@gmail.com>
   Generated with Claude (Anthropic), under the author's direction and review.
   License: MIT (see LICENSE)
-  Version: 0.3.0
+  Version: 0.4.0
   Date:    2026-10-28
 -->
 
@@ -22,13 +22,14 @@ before the command, or with the `JOB_AGENT_HOME` environment variable
 | Command | What it does |
 |---|---|
 | *(none)* | `./run.sh` on its own creates the agent home if needed and does today's run (`run auto`). |
-| `--setup` (or `setup`) | Installs the dependencies the first time (Python into `.venv/` in the engine folder, nothing system-wide; Node into `node_modules/`), creates the agent home, then opens the input forms in your browser. |
+| `--setup` (or `setup`) | Installs the dependencies the first time (Python into `.venv/` in the engine folder, nothing system-wide; Node into `node_modules/`), creates the agent home, then opens the input forms in your browser. Add `--browser` to also install Playwright with Chromium into `.venv/`, used to read posting pages that are built in the browser (optional; an installed Chrome is used otherwise). |
 | `form [--port N] [--no-browser]` | Opens the input forms without the install step. Served locally (127.0.0.1 only), so Save writes straight into the agent home and Update imports documents from the intake folders. Stop with Ctrl+C. |
 | `test` | Runs the offline test suite. |
 | `init` | Creates a new agent home with blank inputs and empty state files, and lists what it created. Every other command does the same silently when something is missing (including `output/` and the weekly page). Never overwrites existing files. |
 | `status` | Lists every feature as on or off, why, and what would switch it on. |
 | `plan` | Prints the search plan from the search config, employer list and rejection history. |
-| `collect [--only jobtech\|employers]` | Fetches postings online (Arbetsformedlingen API, employer job boards and careers pages), filters, classifies and adds new ones to the tracker. |
+| `collect [--only jobtech\|employers\|aggregators\|jsearch\|adzuna\|hn]` | Fetches postings online (Arbetsformedlingen API, employer job boards and careers pages, and any optional aggregators you switched on), opens link leads to read the posting, filters, classifies and adds new ones to the tracker. |
+| `fetch <url> [--add] [--employer E] [--title T] [--no-render]` | Reads one posting page: structured JobPosting data, else the page's main text, else a headless-browser render for pages built in the browser. Prints what it found, saves the text for tailoring and the JD snapshot, and with `--add` puts it in the tracker even if it is outside your filters. |
 | `verify` | Checks that tracked postings are still open; closed ones become Expired (accepted ones only get a note). |
 | `enrich` | Optional AI review of collected postings through your Anthropic API key. |
 | `run weekly\|daily\|auto` | A complete run without an agent. `weekly`: collect, verify, sync, enrich, templates, page and summary. `daily`: sync, templates, page. `auto`: weekly on your search day, daily otherwise. |

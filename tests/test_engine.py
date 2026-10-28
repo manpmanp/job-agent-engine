@@ -4,7 +4,7 @@
 # Author:  manpmanp <manp.node@gmail.com>
 # Generated with Claude (Anthropic), under the author's direction and review.
 # License: MIT (see LICENSE)
-# Version: 0.3.0
+# Version: 0.4.0
 # Date:    2026-10-28
 
 """Run with:  ./run.sh test
@@ -37,10 +37,11 @@ def fx(name):
 class Router:
     """Fake transport. routes: list of (substring, status, body or callable)."""
     def __init__(self, routes, default=(404, b"")):
-        self.routes, self.default, self.calls = routes, default, []
+        self.routes, self.default, self.calls, self.headers = routes, default, [], []
 
     def __call__(self, method, url, headers, data):
         self.calls.append((method, url))
+        self.headers.append(dict(headers or {}))
         for sub, status, body in self.routes:
             if sub in url:
                 return http.Response(status, body() if callable(body) else body, None, url)
@@ -338,3 +339,92 @@ class TestEnrich(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestExtractAndSources(unittest.TestCase):
+    def setUp(self):
+        http.DELAY = 0
+        http.RETRY_WAIT = 0
+        http._robots.clear()
+        self.h = make_home()
+
+    def tearDown(self):
+        http.transport = http._urllib_transport
+        shutil.rmtree(self.h.root, ignore_errors=True)
+
+    def test_structured_posting(self):
+        from engine.collect import extract
+        d = extract.read_html(fx("posting_structured.html").decode(), "https://links.example/careers/fpga-developer")
+        self.assertEqual(d["how"], "structured")
+        self.assertEqual((d["title"], d["employer"], d["location_text"]), ("FPGA Developer", "Links Corp", "Uppsala, SE"))
+        self.assertEqual((d["published"], d["deadline"]), ("2026-10-20", "2026-12-01"))
+        self.assertEqual(d["salary"], "SEK 45000-60000 per month")
+        self.assertEqual(d["employment_type"], "full time")
+        self.assertIn("- VHDL or SystemVerilog", d["description"])      # escaped HTML read, list items kept
+        self.assertTrue(d["complete"])
+
+    def test_page_text_and_shell(self):
+        from engine.collect import extract
+        d = extract.read_html(fx("posting_plain.html").decode())
+        self.assertEqual(d["how"], "page")
+        self.assertTrue(d["complete"])
+        self.assertIn("- Write C firmware", d["description"])
+        for noise in ("Cookie settings", "Copyright", "ignore me", "Home"):
+            self.assertNotIn(noise, d["description"])
+        self.assertEqual(sources.stated_deadline(d["description"]), "2026-11-30")
+        self.assertFalse(extract.read_html(fx("posting_shell.html").decode())["complete"])
+
+    def test_robots_rules(self):
+        r = http.parse_robots("User-agent: *\nDisallow: /jobs\nAllow: /jobs/view\nDisallow: /*.pdf$\n\n"
+                              "User-agent: job-agent-engine\nDisallow: /private")
+        self.assertEqual(r, [(False, "/private")])                    # own group replaces '*'
+        r = http.parse_robots("User-agent: *\nDisallow: /jobs\nAllow: /jobs/view\nDisallow: /*.pdf$")
+        self.assertFalse(http.robots_allow(r, "/jobs/1"))
+        self.assertTrue(http.robots_allow(r, "/jobs/view/1"))         # longest match wins
+        self.assertFalse(http.robots_allow(r, "/a.pdf"))
+        self.assertTrue(http.robots_allow(r, "/a.pdf?x=1"))
+        self.assertFalse(http.robots_allow("none", "/"))
+        http.transport = Router([("/robots.txt", 403, b"")])
+        self.assertFalse(http.robots_allowed("https://refuses.example/jobs"))  # 403 on robots.txt: not now
+        self.assertFalse(http.is_public_host("127.0.0.1"))
+        self.assertFalse(http.is_public_host("192.168.1.10"))
+
+    def test_lead_is_confirmed_from_posting_page(self):
+        http.transport = Router([("links.example/careers/fpga-developer", 200, lambda: fx("posting_structured.html"))] + ROUTES)
+        collect.collect(self.h, run_date="2026-11-02", only="employers")
+        rows = {r["Title"]: r for r in tr.read_all_rows(self.h.path("tracker"))}
+        r = rows["FPGA Developer"]
+        self.assertEqual(r["Status"], "New")                           # no longer an unconfirmed lead
+        self.assertEqual(r["Location"], "Uppsala, SE")
+        self.assertEqual(tr.to_date(r["Deadline"]).isoformat(), "2026-12-01")
+        self.assertIn("structured data", r["Notes"])
+
+    def test_aggregators(self):
+        cfg = dict(CONFIG, sources={"jobtech": False, "employer_sites": False, "jsearch": True, "hn_who_is_hiring": True})
+        with open(self.h.path("search_config"), "w") as f:
+            json.dump(cfg, f)
+        with open(os.path.join(self.h.path("inputs"), "secrets.json"), "w") as f:
+            json.dump({"jsearch_api_key": "test"}, f)
+        router = Router([("api.openwebninja.com/jsearch/search-v2", 200, lambda: fx("jsearch.json")),
+                         ("hn.algolia.com/api/v1/search_by_date", 200, lambda: fx("hn_search.json")),
+                         ("hn.algolia.com/api/v1/items/777", 200, lambda: fx("hn_thread.json"))])
+        http.transport = router
+        s = collect.collect(self.h, run_date="2026-11-02")
+        rows = {(r["Employer"], r["Title"]): r for r in tr.read_all_rows(self.h.path("tracker"))}
+        self.assertEqual(rows[("Radio AB", "FPGA Engineer")]["URL"], "https://radio.example/jobs/9")  # employer's own link
+        self.assertEqual(rows[("Radio AB", "FPGA Engineer")]["Location"], "Uppsala")
+        self.assertIn(("Edgechip", "FPGA Engineer"), rows)
+        self.assertNotIn("Webshop", [k[0] for k in rows])               # San Francisco: location filter
+        self.assertEqual(s["errors"], [])
+        self.assertTrue(all("test" not in u for _m, u in router.calls))   # the key goes in a header, not the URL
+        self.assertTrue(any(h.get("x-api-key") == "test" for h in router.headers))
+
+    def test_fetch_command_adds_posting(self):
+        http.transport = Router([("plain.example/jobs/1", 200, lambda: fx("posting_plain.html")), ("/robots.txt", 404, b"")])
+        cli.main(["--home", self.h.root, "fetch", "https://plain.example/jobs/1", "--add", "--employer", "Plain AB",
+                  "--title", "Embedded Engineer"])
+        rows = [r for r in tr.read_all_rows(self.h.path("tracker")) if r["Employer"] == "Plain AB"]
+        self.assertEqual(len(rows), 1)
+        self.assertEqual(tr.to_date(rows[0]["Deadline"]).isoformat(), "2026-11-30")  # stated in the text
+        from engine import documents
+        self.assertIn("ARM Cortex-M", documents.saved_description(self.h, "https://plain.example/jobs/1"))

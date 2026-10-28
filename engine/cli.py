@@ -4,7 +4,7 @@
 # Author:  manpmanp <manp.node@gmail.com>
 # Generated with Claude (Anthropic), under the author's direction and review.
 # License: MIT (see LICENSE)
-# Version: 0.3.0
+# Version: 0.4.0
 # Date:    2026-10-28
 
 """Command-line entry point. Use ./run.sh <command>; see docs/commands.md."""
@@ -289,6 +289,12 @@ def cmd_collect(h, args):
     collect(h, only=args.only)
 
 
+def cmd_fetch(h, args):
+    ensure_state(h)
+    from .collect import fetch_url
+    fetch_url(h, args.url, add=args.add, render=not args.no_render, employer=args.employer, title=args.title)
+
+
 def cmd_verify(h, args):
     ensure_state(h)
     from .collect.verify import verify
@@ -347,7 +353,9 @@ def main(argv=None):
     x = sp.add_parser("tailor"); x.add_argument("tailor_args", nargs=argparse.REMAINDER)
     x = sp.add_parser("checkpoint"); x.add_argument("cp_args", nargs=argparse.REMAINDER)
     x = sp.add_parser("note"); x.add_argument("text")
-    x = sp.add_parser("collect"); x.add_argument("--only", choices=["jobtech", "employers"])
+    x = sp.add_parser("collect"); x.add_argument("--only", choices=["jobtech", "employers", "aggregators", "jsearch", "adzuna", "hn"])
+    x = sp.add_parser("fetch"); x.add_argument("url"); x.add_argument("--add", action="store_true")
+    x.add_argument("--no-render", action="store_true"); x.add_argument("--employer"); x.add_argument("--title")
     sp.add_parser("verify")
     sp.add_parser("enrich")
     x = sp.add_parser("run"); x.add_argument("mode", nargs="?", default="auto", choices=["weekly", "daily", "auto"])
@@ -372,7 +380,7 @@ def main(argv=None):
               + ("; add your keywords and locations to inputs/search_config.json" if not h.capabilities()["search"][0] else ""))
     {"init": cmd_init, "status": cmd_status, "plan": cmd_plan, "add-postings": cmd_add_postings,
      "weekly": cmd_weekly, "sync": cmd_sync, "intake": cmd_intake, "tailor": cmd_tailor,
-     "checkpoint": cmd_checkpoint, "note": cmd_note, "collect": cmd_collect, "verify": cmd_verify,
+     "checkpoint": cmd_checkpoint, "note": cmd_note, "collect": cmd_collect, "fetch": cmd_fetch, "verify": cmd_verify,
      "enrich": cmd_enrich, "run": cmd_run, "schedule": cmd_schedule, "open": cmd_open, "form": cmd_form}[args.cmd](h, args)
 
 

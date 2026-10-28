@@ -5,7 +5,7 @@
   Author:  manpmanp <manp.node@gmail.com>
   Generated with Claude (Anthropic), under the author's direction and review.
   License: MIT (see LICENSE)
-  Version: 0.3.0
+  Version: 0.4.0
   Date:    2026-10-28
 -->
 
@@ -26,7 +26,7 @@ creates blank versions. Keys beginning with `_` are help text and ignored.
 | `seniority` | no | `preferred`, `flag_as_too_senior`, `flag_as_too_junior`. Flagged postings are kept and colour-coded, never discarded. |
 | `work_arrangement` | no | `remote_ok`, `hybrid_ok`, `onsite_ok`. |
 | `max_commute` | no | Free text, for example `1.5h one-way`. |
-| `sources` | no | Built into the engine: `jobtech` (Arbetsformedlingen API), `employer_sites` (job boards and careers pages of named employers). Used by the AI agent: `indeed`, `linkedin_read_only`, `web_search`, `named_employers`, `extra_sites`. |
+| `sources` | no | Built into the engine: `jobtech` (Arbetsformedlingen API), `employer_sites` (job boards and careers pages of named employers), `confirm_leads` (default true: links found on careers pages are opened and the posting is read, at most `confirm_leads_max`, default 25, per run). Optional aggregators, off by default: `jsearch` (Google for Jobs: LinkedIn, Indeed and company sites, most countries; key `jsearch_api_key`, optional `jsearch_host` `openwebninja` or `rapidapi`; `jsearch_pages` pages per query, each one request of your plan), `adzuna` (19 countries, not Sweden or Denmark; `adzuna_app_id`, `adzuna_app_key`; descriptions are shortened by the source), `hn_who_is_hiring` and `yc_jobs` (Hacker News, no key). Aggregators use each location's `country`. Used by the AI agent: `indeed`, `linkedin_read_only`, `web_search`, `named_employers`, `extra_sites`. |
 | `match_scope` | no | `title` (default: a keyword must be in the posting title) or `title_or_description` (also accept postings whose description contains the keyword as a phrase; finds more, but also software or other roles that only mention the term). |
 | `exclude_terms` | no | Titles containing any of these are skipped (for example `sales`, `säljare`). |
 | `skill_terms` | no | Extra terms to pick out for the skills summary (search keywords and profile skills are always used). |
@@ -48,7 +48,7 @@ A blank value keeps the default.
 | File | Used for |
 |---|---|
 | `inputs/employers.json` | Your named employers: `{"name", "urls": [...]}`. Careers URLs on Greenhouse, Lever, Ashby, Workday or SmartRecruiters are read through their job-board APIs automatically; other URLs as pages; `indeed:` / LinkedIn entries are left to the agent. An entry can force a source with `"ats": {"type": "greenhouse", "board": "..."}` (or `lever`/`company`, `ashby`/`org`, `workday`/`host`,`tenant`,`site`, `smartrecruiters`/`company`). `mode: "extend"` adds to the presets (same name replaces the preset entry); `"override"` uses only yours; `exclude` removes names. |
-| `inputs/secrets.json` | Optional API key for `enrich`. Keep it private; never commit it. |
+| `inputs/secrets.json` | Optional keys: `anthropic_api_key` (`enrich`), `jsearch_api_key`, `jsearch_host`, `adzuna_app_id`, `adzuna_app_key`. Environment variables `ANTHROPIC_API_KEY`, `JSEARCH_API_KEY`, `ADZUNA_APP_ID`, `ADZUNA_APP_KEY` work too. Keep it private; never commit it. |
 | `inputs/candidate/` | Your profile and uploaded documents. Managed with `./run.sh intake`; see `intake.md`. |
 | `inputs/intake/cv/`, `inputs/intake/cl/` | Drop folders for existing CVs and cover letters, imported by the form's Update button, `./run.sh intake scan` and every run. |
 | `inputs/characteristics.md` | How you work, with real examples. Only shapes cover-letter motivation; never quoted. |

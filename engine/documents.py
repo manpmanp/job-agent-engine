@@ -4,7 +4,7 @@
 # Author:  manpmanp <manp.node@gmail.com>
 # Generated with Claude (Anthropic), under the author's direction and review.
 # License: MIT (see LICENSE)
-# Version: 0.3.0
+# Version: 0.4.0
 # Date:    2026-10-28
 
 """
@@ -93,9 +93,11 @@ def _dates(it):
 
 
 def saved_description(home, url):
-    """The posting description captured by 'collect', if any."""
+    """The posting description captured by 'collect' or 'fetch', if any."""
     import glob
-    for p in sorted(glob.glob(os.path.join(home.path("new_postings"), "collect_*.json")), reverse=True):
+    files = glob.glob(os.path.join(home.path("new_postings"), "collect_*.json")) + \
+        glob.glob(os.path.join(home.path("new_postings"), "fetched_*.json"))
+    for p in sorted(files, key=os.path.getmtime, reverse=True):
         try:
             with open(p, "r", encoding="utf-8") as f:
                 for c in json.load(f).get("kept_candidates", []):

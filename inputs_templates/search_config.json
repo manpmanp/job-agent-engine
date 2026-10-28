@@ -26,9 +26,16 @@
   "max_commute": "",
 
   "sources": {
-    "_help": "jobtech and employer_sites are collected by the engine itself ('./run.sh collect'). indeed, linkedin_read_only and web_search are used by the AI agent, if you run one.",
+    "_help": "jobtech and employer_sites are collected by the engine itself ('./run.sh collect'). confirm_leads opens links found on careers pages and reads the posting (up to confirm_leads_max per run). OPTIONAL aggregators, off by default: jsearch (Google for Jobs: LinkedIn, Indeed and company sites; needs jsearch_api_key in inputs/secrets.json; each page is one request of your plan), adzuna (19 countries, not Sweden/Denmark; needs adzuna_app_id and adzuna_app_key), hn_who_is_hiring and yc_jobs (Hacker News, no key). Aggregators need a 'country' on each location. indeed, linkedin_read_only and web_search are used by the AI agent, if you run one.",
     "jobtech": true,
     "employer_sites": true,
+    "confirm_leads": true,
+    "confirm_leads_max": 25,
+    "jsearch": false,
+    "jsearch_pages": 1,
+    "adzuna": false,
+    "hn_who_is_hiring": false,
+    "yc_jobs": false,
     "indeed": true,
     "linkedin_read_only": true,
     "web_search": true,
