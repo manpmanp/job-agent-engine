@@ -51,7 +51,7 @@ def collect(home, run_date=None, only=None):
     cfg, src = _cfg(home)
     keywords = cfg.get("keywords") or []
     locations = cfg.get("locations") or []
-    summary = {"run_date": run_date, "candidates": 0, "kept": 0, "new": 0, "duplicates": 0,
+    summary = {"run_date": run_date, "candidates": 0, "kept": 0, "new": 0, "duplicates": 0, "already_tracked": 0, "repeated_in_run": 0,
                "errors": [], "by_source": {}, "skipped_agent_only": []}
     if not keywords or not locations:
         print("search is idle: add keywords and locations to inputs/search_config.json")
@@ -116,10 +116,15 @@ def collect(home, run_date=None, only=None):
     for row, cand in rows:
         k = match.norm_key(row["Employer"], row["Title"])
         if ((row["URL"], row["Title"]) in keys or row["URL"] in urls or (cand.get("apply_url") and cand["apply_url"] in urls)
-                or k in names or k in seen_batch):
+                or k in names):
             summary["duplicates"] += 1
+            summary["already_tracked"] += 1
             continue
-        seen_batch.add(k)
+        if k in seen_batch or row["URL"] in seen_batch:
+            summary["duplicates"] += 1
+            summary["repeated_in_run"] += 1
+            continue
+        seen_batch.update([k, row["URL"]])
         new_rows.append(row)
     summary["new"] = len(new_rows)
 
@@ -130,7 +135,7 @@ def collect(home, run_date=None, only=None):
         tr.update(home.path("tracker"), new_rows, seniority_cfg=cfg.get("seniority"),
                   act_asap_after_days=int(cfg.get("act_asap_after_days", 7)))
     print(f"collected {summary['candidates']} listing(s), {summary['kept']} matched, {summary['new']} new, "
-          f"{summary['duplicates']} already tracked")
+          f"{summary['already_tracked']} already tracked, {summary['repeated_in_run']} found twice in this run")
     for e in summary["errors"]:
         print(f"  [source error] {e}")
     if summary["skipped_agent_only"]:

@@ -52,7 +52,7 @@ def offline(method, url, headers, data):
 
 
 CONFIG = {
-    "keywords": ["FPGA engineer", "ASIC design engineer", "embedded hardware engineer"],
+    "keywords": ["FPGA engineer", "ASIC design engineer", "embedded hardware engineer", "ASIC verification engineer"],
     "locations": [{"name": "Västerås", "country": "SE"}, {"name": "Uppsala", "country": "SE"},
                   {"name": "Oslo", "country": "NO", "aliases": ["Bærum"]}],
     "employer_presets": [],
@@ -97,8 +97,13 @@ class TestMatching(unittest.TestCase):
     def test_keyword_core_tokens(self):
         self.assertEqual(match.keyword_tokens("FPGA engineer"), ["fpga"])
         self.assertEqual(match.match_keywords("Hardware Developer FPGA", "", ["FPGA engineer"])[1], "title")
-        self.assertEqual(match.match_keywords("Digital Designer", "ASIC flow", ["ASIC design engineer"])[1], "description")
+        self.assertEqual(match.match_keywords("Digital Designer", "work in the ASIC design flow", ["ASIC design engineer"])[1], "description")
+        self.assertIsNone(match.match_keywords("Digital Designer", "ASIC flow and design reviews", ["ASIC design engineer"])[1])
         self.assertEqual(match.match_keywords("Säljare", "FPGA", ["FPGA engineer"], exclude_terms=["säljare"])[0], [])
+        # description match needs the core words as one phrase
+        self.assertEqual(match.keyword_tokens("digital design engineer"), ["digital", "design"])
+        self.assertEqual(match.match_keywords("Frontend Engineer", "digital products with a great design", ["digital design engineer"])[1], None)
+        self.assertEqual(match.match_keywords("Hardware Engineer", "experience in digital design and RTL", ["digital design engineer"])[1], "description")
 
     def test_location_and_accents(self):
         locs = CONFIG["locations"]

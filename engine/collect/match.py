@@ -17,7 +17,7 @@ import re
 import unicodedata
 
 GENERIC_TOKENS = {
-    "engineer", "engineers", "developer", "developers", "designer", "design", "specialist", "expert",
+    "engineer", "engineers", "developer", "developers", "designer", "specialist", "expert",
     "utvecklare", "ingenjor", "ingenjör", "konstruktor", "konstruktör", "senior", "junior", "lead",
     "of", "and", "the", "for", "och", "i", "in",
 }
@@ -68,6 +68,12 @@ def _has(token, text):
     return re.search(r"(?<![\w])" + re.escape(token) + r"(?![\w])", text) is not None
 
 
+def _has_phrase(tokens, text):
+    """All tokens next to each other, in order (space or hyphen between)."""
+    pat = r"(?<![\w])" + r"[\s\-]+".join(re.escape(t) for t in tokens) + r"(?![\w])"
+    return re.search(pat, text) is not None
+
+
 def match_keywords(title, description, keywords, scope="title_or_description", exclude_terms=()):
     """Returns (matched_keywords, where) with where in {'title', 'description', None}."""
     t, d = fold(title), fold(description)
@@ -75,9 +81,10 @@ def match_keywords(title, description, keywords, scope="title_or_description", e
         if ex and _has(fold(ex), t):
             return [], None
     in_title, in_desc = [], []
-    # A description-only match also needs a role word from the keyword in the
-    # title (e.g. "engineer", "design"), so a sales role that mentions FPGA
-    # once is not picked up.
+    # A description-only match needs the keyword's core words as one phrase
+    # in the description ("digital design", not "digital" somewhere and
+    # "design" somewhere else) and a role word in the title, so a sales or
+    # software role that mentions the term in passing is not picked up.
     title_role = re.search(r"(design|develop|engineer|ingenj|utveckl|konstrukt|architect|research)", t)
     for kw in keywords:
         toks = keyword_tokens(kw)
@@ -85,7 +92,7 @@ def match_keywords(title, description, keywords, scope="title_or_description", e
             continue
         if all(_has(x, t) for x in toks):
             in_title.append(kw)
-        elif scope == "title_or_description" and title_role and all(_has(x, d) for x in toks):
+        elif scope == "title_or_description" and title_role and _has_phrase(toks, d):
             in_desc.append(kw)
     if in_title:
         return in_title, "title"

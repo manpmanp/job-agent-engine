@@ -58,7 +58,7 @@ def jobtech(keywords, max_per_keyword=200):
                 if h.get("removed"):
                     continue
                 wa = h.get("workplace_address") or {}
-                loc = ", ".join(x for x in (wa.get("city"), wa.get("municipality"), wa.get("region"), wa.get("country")) if x)
+                loc = ", ".join(dict.fromkeys(x for x in (wa.get("city"), wa.get("municipality"), wa.get("region"), wa.get("country")) if x))
                 desc = (h.get("description") or {}).get("text") or ""
                 model = ((h.get("workplace_model") or {}).get("label") or "")
                 skills = [s.get("label") for s in ((h.get("must_have") or {}).get("skills") or []) if s.get("label")]
