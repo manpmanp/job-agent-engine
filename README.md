@@ -283,7 +283,7 @@ tests/                  offline tests with recorded responses; tests/shared/ is 
 More detail: `docs/commands.md` (every command), `docs/inputs.md` (every
 setting), `docs/intake.md` (candidate data), `docs/state_files.md` (the
 tracker and the Accept/Reject loop), `docs/document_spec.md` (document
-format).
+format), `docs/job_sites.md` (job sites by country, with sources).
 
 ## Privacy
 

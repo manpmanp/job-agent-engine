@@ -337,6 +337,21 @@ class TestEnrich(unittest.TestCase):
         self.assertEqual(len(reviewed), 3)
 
 
+
+class JobSitesCatalogue(unittest.TestCase):
+    def test_catalogue_is_complete(self):
+        with open(os.path.join(home_mod.DEFAULTS_DIR, "job_sites.json"), encoding="utf-8") as f:
+            d = json.load(f)
+        eu27 = "AT BE BG HR CY CZ DK EE FI FR DE GR HU IE IT LV LT LU MT NL PL PT RO SK SI ES SE".split()
+        for code in eu27 + ["NO", "IS", "LI", "CH", "GB", "US", "CA", "AU"]:
+            self.assertIn(code, d["countries"], code)
+        for code, c in d["countries"].items():
+            self.assertIn(c["region"], d["regions"], code)
+            self.assertTrue(c["sources"], code)
+            for s in c["sites"] + d["international"] + d["academic"]["sites"]:
+                self.assertIn(s["access"], d["access_types"])
+                self.assertTrue(s["url"].startswith("https://"), s["url"])
+
 if __name__ == "__main__":
     unittest.main()
 
