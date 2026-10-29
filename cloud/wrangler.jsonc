@@ -1,0 +1,22 @@
+// Job-search agent engine: online search on your own Cloudflare account.
+// File:    cloud/wrangler.jsonc
+// Author:  manpmanp <manp.node@gmail.com>
+// Generated with Claude (Anthropic), under the author's direction and review.
+// License: MIT (see LICENSE). Version 0.4.0, 2026-10-28.
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "job-agent",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-08-01",
+  "workers_dev": true,
+  "d1_databases": [
+    { "binding": "DB", "database_name": "job-agent", "migrations_dir": "migrations" }
+  ],
+  // Works through queued search tasks every 2 minutes and starts the day's
+  // search at RUN_HOUR_UTC. Free plan: 10 ms CPU and 50 requests per run, so
+  // a search is split into small tasks.
+  "triggers": { "crons": ["*/2 * * * *"] },
+  "vars": { "RUN_HOUR_UTC": "6" },
+  "rules": [{ "type": "Text", "globs": ["**/*.html"], "fallthrough": true }],
+  "observability": { "enabled": true }
+}

@@ -71,7 +71,15 @@ def run(home, mode="auto"):
         lines.append(f"intake: {len(scan['imported'])} new document(s) imported from inputs/intake/ "
                      "(the agent turns them into profile entries)")
     note = None
-    if mode == "weekly":
+    from . import cloud_sync
+    online = cloud_sync.connected(home)
+    if online:
+        cs = cloud_sync.pull(home, log=lambda m: lines.append(m))
+        if not cs.get("ok"):
+            lines.append("online search not reachable; nothing fetched this time")
+    if mode == "weekly" and online and not (cfg.get("cloud") or {}).get("local_collect"):
+        note = f"Weekly run {today.isoformat()}: postings come from your online search."
+    elif mode == "weekly":
         s = collect(home)
         v = verify_mod.verify(home)
         lines.append(f"collect: {s['candidates']} listings, {s['kept']} matched, {s['new']} new, "
@@ -84,6 +92,8 @@ def run(home, mode="auto"):
         note = (f"Automatic weekly run {today.isoformat()}: {s['new']} new posting(s)"
                 + (", some sources failed (see notes)" if s["errors"] else "") + ".")
     res = decisions.apply(home, seniority_cfg=cfg.get("seniority"))
+    if online and res.get("applied"):
+        cloud_sync.pull(home, log=lambda m: None)   # sends the new decisions online
     lines.append(f"sync: {res.get('applied', 0)} decision(s) applied")
     if mode == "weekly":
         e = enrich_mod.enrich(home)

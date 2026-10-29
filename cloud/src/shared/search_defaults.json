@@ -1,0 +1,90 @@
+{
+  "_help": "Engine defaults. Any key set in the user's inputs/search_config.json replaces the default for that key. Do not edit for personal use; override in your own config instead.",
+  "categories": [
+    "Industry - Engineering/Design",
+    "Industry - Research & Development",
+    "Industry - Verification/Test",
+    "Academia - Postdoc/Researcher",
+    "Academia - Lecturer/Assistant Professor",
+    "Academia - Research Engineer/Assistant",
+    "Other"
+  ],
+  "seniority": {
+    "levels": [
+      "Manager",
+      "Senior",
+      "Staff",
+      "Lead",
+      "Principal",
+      "Architect",
+      "Experienced",
+      "Mid",
+      "Graduate",
+      "Entry",
+      "Not stated"
+    ],
+    "preferred": [
+      "Experienced",
+      "Mid",
+      "mid"
+    ],
+    "flag_as_too_senior": [
+      "Senior",
+      "Staff",
+      "Lead",
+      "Principal",
+      "Architect",
+      "architect",
+      "Manager"
+    ],
+    "flag_as_too_junior": [
+      "Graduate",
+      "Entry"
+    ]
+  },
+  "credible_sources": [
+    "The employer's own career page",
+    "Indeed (structured results or the posting page itself)",
+    "LinkedIn Jobs, read directly",
+    "Arbetsformedlingen Platsbanken",
+    "AcademicPositions"
+  ],
+  "non_credible_examples": [
+    "webbjobb.io",
+    "jobbland.se",
+    "Glassdoor",
+    "other aggregator or mirror sites"
+  ],
+  "rejection_reasons": [
+    "Location too far / not commutable",
+    "Company not a target employer",
+    "Seniority level mismatch",
+    "Field / specialty mismatch",
+    "Technical skills mismatch",
+    "Role doesn't interest me",
+    "Work arrangement mismatch (on-site / hybrid / remote)",
+    "Employment type mismatch (contract / temporary / part-time)",
+    "Work authorization / visa requirement",
+    "Deadline passed"
+  ],
+  "stale_after_days": 42,
+  "act_asap_after_days": 7,
+  "document_market": "nordic",
+  "match_scope": "title",
+  "sources": {
+    "jobtech": true,
+    "employer_sites": true,
+    "indeed": true,
+    "linkedin_read_only": true,
+    "web_search": true,
+    "named_employers": true,
+    "extra_sites": [],
+    "confirm_leads": true,
+    "confirm_leads_max": 25,
+    "jsearch": false,
+    "jsearch_pages": 1,
+    "adzuna": false,
+    "hn_who_is_hiring": false,
+    "yc_jobs": false
+  }
+}

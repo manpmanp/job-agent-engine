@@ -190,6 +190,16 @@ Windows, click **More info > Run anyway**.
 
 Close the app with **Settings > Quit the app** (or close its window).
 
+### Online search (optional)
+
+The search can also run every day on your own free Cloudflare account,
+so new postings are waiting even when your computer is off and you can
+decide from your phone. Your CV and documents stay on your computer; the
+app fetches the postings and decisions from there. See
+[`cloud/README.md`](cloud/README.md):
+
+[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/manpmanp/job-agent-engine/tree/main/cloud)
+
 ### Try it first with fictional data
 
 ```
@@ -251,7 +261,8 @@ defaults/               engine defaults and employer presets
 demo/                   fictional data and example output
 docs/                   inputs, intake, commands, state files, document spec
 tests/                  offline tests with recorded API responses
-packaging/, .github/    builds of the ready-made apps
+cloud/                  the optional online search (Cloudflare Worker + D1)
+packaging/, .github/    builds of the ready-made apps, CI
 ```
 
 More detail: `docs/commands.md` (every command), `docs/inputs.md` (every

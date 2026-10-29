@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<!--
+  Job-search agent engine
+  File:    app/index.html
+  Purpose: The local app: one page for every operation, served by engine/app.py.
+  Author:  manpmanp <manp.node@gmail.com>
+  Generated with Claude (Anthropic), under the author's direction and review.
+  License: MIT (see LICENSE)
+  Version: 0.4.0
+  Date:    2026-10-28
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Job Agent</title>
+<style>
+:root {
+  --bg:#f4f6f8; --panel:#fff; --border:#d9dee5; --text:#1c232b; --muted:#5f6b78; --accent:#1B3A5C; --accent-2:#2E74B5;
+  --soft:#e8eef5; --good:#2f7d4f; --good-soft:#e3f2e8; --bad:#a23a3a; --bad-soft:#f7e4e4; --warn:#8a6200; --warn-soft:#fbf1d9;
+  --shadow:0 1px 2px rgba(16,24,40,.06);
+}
+@media (prefers-color-scheme: dark) {
+  :root { --bg:#101419; --panel:#181e25; --border:#2b333d; --text:#e4e8ee; --muted:#98a3b1; --accent:#9dbde3; --accent-2:#7fb0e6;
+          --soft:#1f2934; --good:#7fcf9c; --good-soft:#1c2e24; --bad:#f09a9a; --bad-soft:#341f22; --warn:#e8c25d; --warn-soft:#30291a; --shadow:none; }
+}
+* { box-sizing:border-box; }
+html, body { margin:0; background:var(--bg); color:var(--text); font:14px/1.45 Arial, Helvetica, sans-serif; }
+a { color:var(--accent-2); }
+header.top { position:sticky; top:0; z-index:5; background:var(--panel); border-bottom:1px solid var(--border); }
+.bar { max-width:1060px; margin:0 auto; padding:10px 16px; display:flex; align-items:center; gap:14px; flex-wrap:wrap; }
+.brand { font-weight:bold; color:var(--accent); font-size:16px; margin-right:6px; }
+nav { display:flex; gap:2px; flex-wrap:wrap; }
+nav button { background:none; border:0; padding:8px 11px; border-radius:6px; color:var(--muted); font:inherit; cursor:pointer; }
+nav button.on { background:var(--soft); color:var(--text); font-weight:bold; }
+nav .count[hidden] { display:none; }
+nav .count { display:inline-block; min-width:18px; padding:0 5px; margin-left:4px; border-radius:9px; background:var(--accent); color:var(--panel); font-size:11px; line-height:18px; text-align:center; }
+main { max-width:1060px; margin:0 auto; padding:18px 16px 80px; }
+section.view { display:none; } section.view.on { display:block; }
+h1 { font-size:20px; margin:4px 0 14px; color:var(--accent); }
+h2 { font-size:15px; margin:22px 0 10px; color:var(--accent); }
+.card { background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:16px; box-shadow:var(--shadow); margin-bottom:12px; }
+.grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:12px; }
+.stat { cursor:pointer; } .stat .n { font-size:28px; font-weight:bold; color:var(--accent); } .stat .l { color:var(--muted); }
+.muted { color:var(--muted); } .small { font-size:12px; }
+button.b { font:inherit; border:1px solid var(--border); background:var(--panel); color:var(--text); padding:8px 14px; border-radius:7px; cursor:pointer; }
+button.b:hover { border-color:var(--accent-2); }
+button.b.primary { background:var(--accent); border-color:var(--accent); color:var(--panel); font-weight:bold; }
+button.b.good { color:var(--good); border-color:var(--good); } button.b.good.on { background:var(--good); color:var(--panel); }
+button.b.bad { color:var(--bad); border-color:var(--bad); } button.b.bad.on { background:var(--bad); color:var(--panel); }
+button.b:disabled { opacity:.5; cursor:not-allowed; }
+.row { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+.spacer { flex:1; }
+input[type=text], input[type=url], input[type=password], input[type=search], textarea, select {
+  font:inherit; color:var(--text); background:var(--bg); border:1px solid var(--border); border-radius:7px; padding:8px 10px; width:100%; }
+textarea { min-height:120px; font-family:Menlo, Consolas, monospace; font-size:12px; }
+label.f { display:block; margin:10px 0 4px; font-weight:bold; font-size:13px; }
+.chips { display:flex; gap:6px; flex-wrap:wrap; margin:0 0 12px; }
+.chip { border:1px solid var(--border); background:var(--panel); border-radius:16px; padding:5px 12px; cursor:pointer; font-size:13px; color:var(--muted); }
+.chip.on { background:var(--accent); border-color:var(--accent); color:var(--panel); }
+.post { padding:14px 16px; }
+.post h3 { margin:0 0 2px; font-size:15px; } .post .emp { color:var(--muted); margin-bottom:6px; }
+.tags { display:flex; gap:6px; flex-wrap:wrap; margin:6px 0; }
+.tag { font-size:11px; padding:2px 8px; border-radius:10px; background:var(--soft); color:var(--muted); }
+.tag.new { background:var(--accent-2); color:#fff; } .tag.warn { background:var(--warn-soft); color:var(--warn); }
+.tag.good { background:var(--good-soft); color:var(--good); } .tag.bad { background:var(--bad-soft); color:var(--bad); }
+.skills { font-size:12px; color:var(--muted); margin:4px 0 8px; }
+details.notes summary { cursor:pointer; color:var(--muted); font-size:12px; }
+details.notes div { font-size:12px; color:var(--muted); white-space:pre-wrap; margin-top:6px; }
+.reasons { margin-top:10px; padding:10px; border:1px dashed var(--border); border-radius:8px; display:none; }
+.reasons.on { display:block; }
+.reasons label { display:block; font-size:13px; margin:3px 0; }
+.job { position:fixed; right:16px; bottom:16px; width:min(560px, calc(100vw - 32px)); max-height:46vh; display:none; flex-direction:column;
+       background:var(--panel); border:1px solid var(--border); border-radius:10px; box-shadow:0 8px 30px rgba(0,0,0,.18); z-index:9; }
+.job.on { display:flex; }
+.job .hd { padding:10px 12px; border-bottom:1px solid var(--border); display:flex; gap:8px; align-items:center; font-weight:bold; }
+.job pre { margin:0; padding:10px 12px; overflow:auto; font:12px/1.4 Menlo, Consolas, monospace; white-space:pre-wrap; flex:1; }
+.dot { width:9px; height:9px; border-radius:50%; background:var(--accent-2); animation:pulse 1s infinite; }
+.dot.ok { background:var(--good); animation:none; } .dot.fail { background:var(--bad); animation:none; }
+@keyframes pulse { 50% { opacity:.3; } }
+.attn { border-left:4px solid var(--warn); }
+.ok-line { color:var(--good); } .err-line { color:var(--bad); }
+.drop { border:2px dashed var(--border); border-radius:10px; padding:22px; text-align:center; color:var(--muted); cursor:pointer; }
+.drop.over { border-color:var(--accent-2); background:var(--soft); }
+iframe.form { width:100%; height:78vh; border:1px solid var(--border); border-radius:10px; background:var(--panel); }
+.switch { display:flex; align-items:center; gap:10px; margin:8px 0; }
+.switch input { width:18px; height:18px; }
+.empty { text-align:center; padding:34px 10px; color:var(--muted); }
+.toast { position:fixed; left:50%; top:62px; transform:translateX(-50%); background:var(--accent); color:var(--panel); padding:8px 14px; border-radius:8px; display:none; z-index:20; }
+.toast.on { display:block; }
+body.cloud .local-only { display:none !important; }
+body:not(.cloud) .cloud-only { display:none !important; }
+ul.plain { margin:4px 0 0 18px; padding:0; }
+</style>
+</head>
+<body>
+<header class="top"><div class="bar">
+  <span class="brand">Job Agent</span>
+  <nav id="nav">
+    <button data-v="home" class="on">Home</button>
+    <button data-v="postings">Postings<span class="count" id="c-undecided" hidden></span></button>
+    <button data-v="add">Add a posting</button>
+    <button data-v="docs">Documents<span class="count" id="c-docs" hidden></span></button>
+    <button data-v="setup">Setup</button>
+    <button data-v="settings">Settings</button>
+  </nav>
+</div></header>
+<div class="toast" id="toast"></div>
+
+<main>
+<!-- HOME -->
+<section class="view on" id="v-home">
+  <h1>Home</h1>
+  <div id="home-setup"></div>
+  <div class="card">
+    <div class="row">
+      <div><b>Find new postings</b><div class="muted small" id="search-desc"></div></div>
+      <span class="spacer"></span>
+      <button class="b primary" id="btn-search">Search now</button>
+      <button class="b" id="btn-verify" title="Check that tracked postings are still open">Check postings</button>
+    </div>
+  </div>
+  <div class="grid" id="stats"></div>
+  <div id="attention"></div>
+  <h2>Recent activity</h2>
+  <div class="card"><div id="recent" class="small muted">Nothing yet.</div></div>
+</section>
+
+<!-- POSTINGS -->
+<section class="view" id="v-postings">
+  <h1>Postings</h1>
+  <div class="row" style="margin-bottom:10px">
+    <div class="chips" id="filters" style="margin:0">
+      <span class="chip on" data-f="undecided">To decide</span>
+      <span class="chip" data-f="accepted">Accepted</span>
+      <span class="chip" data-f="rejected">Rejected</span>
+      <span class="chip" data-f="expired">Expired</span>
+      <span class="chip" data-f="all">All</span>
+    </div>
+    <span class="spacer"></span>
+    <input type="search" id="q" placeholder="Filter by title, employer, place..." style="max-width:280px">
+  </div>
+  <div id="plist"></div>
+</section>
+
+<!-- ADD -->
+<section class="view" id="v-add">
+  <h1>Add a posting</h1>
+  <div class="card">
+    <p class="muted" style="margin-top:0">Paste the link of a job posting you found anywhere. The app reads the page, keeps the full text for your documents, and adds it to your postings.</p>
+    <label class="f" for="add-url">Link to the posting</label>
+    <input type="url" id="add-url" placeholder="https://...">
+    <div class="grid" style="margin-top:4px">
+      <div><label class="f" for="add-emp">Employer <span class="muted small">(if the page does not say)</span></label><input type="text" id="add-emp"></div>
+      <div><label class="f" for="add-title">Job title <span class="muted small">(if the page does not say)</span></label><input type="text" id="add-title"></div>
+    </div>
+    <div class="row" style="margin-top:12px"><button class="b primary" id="btn-add">Read and add</button></div>
+  </div>
+</section>
+
+<!-- DOCUMENTS -->
+<section class="view" id="v-docs">
+  <h1>Documents</h1>
+  <p class="muted" style="margin-top:-6px">CVs and cover letters for the postings you accepted. They are drafts on your computer; nothing is ever sent.</p>
+  <div class="row local-only" style="margin-bottom:12px"><button class="b" id="btn-open-out">Open the documents folder</button></div>
+  <div class="card cloud-only"><b>Documents are made on your computer.</b>
+    <div class="muted small">Your CV never comes online. Open the Job Agent app on your computer and connect it to this page (Settings &gt; Online search); your accepted postings appear there under Documents.</div></div>
+  <div id="dlist"></div>
+</section>
+
+<!-- SETUP -->
+<section class="view" id="v-setup">
+  <h1>Setup</h1>
+  <h2 style="margin-top:0" class="local-only">Your CV or cover letter (optional)</h2>
+  <div class="card local-only">
+    <div class="drop" id="drop">Drop a CV or cover letter here (PDF, Word, text), or click to choose a file.
+      <div class="small" style="margin-top:6px">It stays on your computer.</div></div>
+    <div class="row" style="margin-top:10px">
+      <label class="small"><input type="radio" name="upkind" value="cv" checked> CV</label>
+      <label class="small"><input type="radio" name="upkind" value="cl"> Cover letter</label>
+    </div>
+    <input type="file" id="file" accept=".pdf,.docx,.txt,.md" hidden>
+    <div id="up-result" class="small" style="margin-top:8px"></div>
+  </div>
+  <h2><span class="local-only">What to search for, and your profile</span><span class="cloud-only">What to search for</span></h2>
+  <iframe class="form" id="form" title="Search setup and profile"></iframe>
+  <h2>Employers to watch (optional)</h2>
+  <div class="card">
+    <p class="muted small" style="margin-top:0">One per line: the employer's name, a vertical bar, and its careers page. Pages on Greenhouse, Lever, Ashby, Workday or SmartRecruiters are read through their job boards; other pages for job links.</p>
+    <textarea id="emps" placeholder="Example AB | https://example.com/careers" style="min-height:140px"></textarea>
+    <div class="row" style="margin-top:8px"><button class="b primary" id="btn-emps">Save employers</button><span id="emps-r" class="small muted"></span></div>
+  </div>
+</section>
+
+<!-- SETTINGS -->
+<section class="view" id="v-settings">
+  <h1>Settings</h1>
+  <div class="card cloud-only">
+    <b>Daily search</b>
+    <div class="muted small" id="cloud-sch"></div>
+  </div>
+  <div class="card cloud-only">
+    <b>Connect your computer</b>
+    <p class="muted small">CVs, cover letters and documents never come here. To make documents for the postings you accept, open the Job Agent app on your computer, go to <b>Settings &gt; Online search</b>, and enter this page's address and the sync token you chose when you deployed it. The app then fetches your postings and decisions and makes the documents on your computer.</p>
+    <div class="small">Address: <b id="cloud-url"></b></div>
+  </div>
+  <div class="card local-only">
+    <b>Online search (optional)</b>
+    <p class="muted small">If you deployed Job Agent on your own Cloudflare account, the search runs there every day and this app fetches the postings and your decisions from it. Your CV and documents stay here.</p>
+    <label class="f" for="c-url">Address of your online Job Agent</label>
+    <input type="url" id="c-url" placeholder="https://job-agent.your-name.workers.dev">
+    <label class="f" for="c-token">Sync token <span class="muted small" id="c-token-s"></span></label>
+    <input type="password" id="c-token" autocomplete="off">
+    <div class="row" style="margin-top:10px"><button class="b primary" id="btn-cloud">Save and fetch now</button>
+      <button class="b" id="btn-cloud-off">Disconnect</button><span class="small muted" id="c-state"></span></div>
+  </div>
+  <div class="card local-only">
+    <b>Run every morning</b>
+    <div class="switch"><input type="checkbox" id="sch"><label for="sch" id="sch-text">off</label></div>
+    <div class="muted small">Searches on your search day and refreshes on the other days, even when this window is closed. Your computer must be on (a Mac catches up after waking).</div>
+  </div>
+  <div class="card">
+    <b>Where to search</b>
+    <div id="src"></div>
+  </div>
+  <div class="card">
+    <div class="local-only">
+    <b>AI help (optional)</b>
+    <p class="muted small">With your own Anthropic API key, the app can read your CV into your profile, draft tailored CVs and cover letters, and review new postings. This sends that material to Anthropic's API when you use it. Without a key, use "Copy for Claude" and any Claude chat instead.</p>
+    <label class="f" for="k-anthropic">Anthropic API key <span class="muted small" id="k-anthropic-s"></span></label>
+    <input type="password" id="k-anthropic" placeholder="sk-ant-..." autocomplete="off">
+    <div class="switch"><input type="checkbox" id="enr"><label for="enr">Review new postings with AI after each search</label></div>
+    <div class="switch"><input type="checkbox" id="enr-prof"><label for="enr-prof">Include my profile in the review (gives a fit score)</label></div>
+    </div>
+    <h2>Optional search services</h2>
+    <label class="f" for="k-jsearch">JSearch API key (Google for Jobs: LinkedIn, Indeed, company sites) <span class="muted small" id="k-jsearch-s"></span></label>
+    <input type="password" id="k-jsearch" autocomplete="off">
+    <div class="grid">
+      <div><label class="f" for="k-adzuna-id">Adzuna app id <span class="muted small" id="k-adzuna-id-s"></span></label><input type="text" id="k-adzuna-id" autocomplete="off"></div>
+      <div><label class="f" for="k-adzuna">Adzuna app key <span class="muted small" id="k-adzuna-s"></span></label><input type="password" id="k-adzuna" autocomplete="off"></div>
+    </div>
+    <div class="row" style="margin-top:12px"><button class="b primary" id="btn-save-set">Save settings</button></div>
+  </div>
+  <div class="card">
+    <b>About</b>
+    <div class="small muted" id="about"></div>
+    <div class="row" style="margin-top:10px">
+      <button class="b local-only" id="btn-open-home">Open my agent folder</button>
+      <a class="b cloud-only" href="/logout" style="text-decoration:none">Log out</a>
+      <span class="spacer"></span>
+      <button class="b bad local-only" id="btn-quit">Quit the app</button>
+    </div>
+  </div>
+</section>
+</main>
+
+<div class="job" id="job"><div class="hd"><span class="dot" id="job-dot"></span><span id="job-label"></span><span class="spacer"></span>
+  <button class="b" id="job-close" style="padding:4px 10px">Close</button></div><pre id="job-log"></pre></div>
+
+<script>
+const API = window.JOB_AGENT_API || {};
+const CLOUD = !!window.JOB_AGENT_CLOUD;
+if (CLOUD) document.body.classList.add('cloud');
+const $ = (s, el=document) => el.querySelector(s);
+const $$ = (s, el=document) => [...el.querySelectorAll(s)];
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let S = null, P = { postings:[], rejection_reasons:[] }, filter = 'undecided', jobTimer = null, lastJob = 0;
+
+async function api(path, body) {
+  const r = await fetch(path, { method: body === undefined ? 'GET' : 'POST',
+    headers: { 'Content-Type':'application/json', 'X-Agent-Token': API.token }, body: body === undefined ? undefined : JSON.stringify(body) });
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(j.error || ('HTTP ' + r.status));
+  return j;
+}
+function toast(msg) { const t = $('#toast'); t.textContent = msg; t.classList.add('on'); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('on'), 2600); }
+function fileUrl(rel) { return '/file?p=' + encodeURIComponent(rel) + '&t=' + encodeURIComponent(API.token); }
+
+// ----------------------------------------------------------- navigation
+function show(v) {
+  $$('#nav button').forEach(b => b.classList.toggle('on', b.dataset.v === v));
+  $$('section.view').forEach(s => s.classList.toggle('on', s.id === 'v-' + v));
+  if (v === 'setup') { if (!$('#form').src) $('#form').src = '/form'; loadEmployers(); }
+  if (v === 'settings') loadSettings();
+  if (v === 'postings' || v === 'docs') loadPostings();
+  history.replaceState(null, '', '#' + v);
+}
+$$('#nav button').forEach(b => b.onclick = () => show(b.dataset.v));
+
+// ----------------------------------------------------------- jobs
+function startJob(j) { if (!j) return; lastJob = j.id; renderJob(j); clearInterval(jobTimer); jobTimer = setInterval(pollJob, 900); }
+async function pollJob() {
+  const { job } = await api('/api/job').catch(() => ({}));
+  if (!job) return;
+  renderJob(job);
+  if (job.done) { clearInterval(jobTimer); jobTimer = null; refresh(); loadPostings();
+    if (job.ok) setTimeout(() => { if (!jobTimer) $('#job').classList.remove('on'); }, 8000); }
+}
+function renderJob(j) {
+  $('#job').classList.add('on');
+  $('#job-label').textContent = j.label + (j.done ? (j.ok ? ': done' : ': finished with problems') : '...');
+  $('#job-dot').className = 'dot' + (j.done ? (j.ok ? ' ok' : ' fail') : '');
+  const pre = $('#job-log');
+  pre.innerHTML = j.lines.map(l => /error|failed|problem|could not/i.test(l) ? `<span class="err-line">${esc(l)}</span>` : esc(l)).join('\n') || 'starting...';
+  pre.scrollTop = pre.scrollHeight;
+  $$('button[data-job]').forEach(b => b.disabled = !j.done);
+}
+$('#job-close').onclick = () => $('#job').classList.remove('on');
+async function runJob(path, body) {
+  try { const r = await api(path, body || {}); startJob(r.job); } catch (e) { toast(e.message); }
+}
+
+// ----------------------------------------------------------- home
+function capOn(k) { return S && S.capabilities[k] && S.capabilities[k].on; }
+async function refresh() {
+  try { S = await api('/api/status'); } catch (e) { toast('The app lost contact with the engine. Start it again.'); return; }
+  const c = S.counts;
+  const cu = $('#c-undecided'); cu.hidden = !c.undecided; cu.textContent = c.undecided;
+  const cd = $('#c-docs'); cd.hidden = !c.accepted_waiting; cd.textContent = c.accepted_waiting;
+  $('#search-desc').textContent = capOn('search')
+    ? `${S.capabilities.search.why}. Full search on ${S.search_day}s${S.schedule.on ? ', automatically every morning' : ''}.`
+    : 'Not set up yet.';
+  $('#btn-search').disabled = !capOn('search');
+  $('#home-setup').innerHTML = capOn('search') ? '' :
+    `<div class="card attn"><b>Start here:</b> tell the agent what to search for.
+     <div class="row" style="margin-top:10px"><button class="b primary" onclick="show('setup')">Set up my search</button></div></div>`;
+  $('#stats').innerHTML = [
+    ['undecided', 'postings to decide on', 'postings'], ['accepted_waiting', 'accepted, waiting for documents', 'docs'],
+    ['active', 'open postings tracked', 'postings'], ['rejected', 'rejected', 'postings'],
+  ].map(([k, l, v]) => `<div class="card stat" onclick="${k==='rejected' ? "filter='rejected';" : ''}show('${v}')"><div class="n">${c[k]}</div><div class="l">${l}</div></div>`).join('');
+  const att = [];
+  if (S.awaiting_extraction.length) {
+    att.push(`<div class="card attn"><b>Your uploaded documents are not in your profile yet.</b>
+      <div class="muted small">They are used as they are; reading them into your profile lets the app fill templates and score postings.</div>
+      ${S.awaiting_extraction.map(e => `<div class="row" style="margin-top:8px"><span>${esc(e.file)}</span><span class="spacer"></span>
+        ${S.api_key ? `<button class="b" data-job onclick="runJob('/api/profile/ai',{id:'${esc(e.id)}'})">Read with AI</button>` : ''}
+        <button class="b" onclick="copyProfilePrompt('${esc(e.id)}')">Copy for Claude</button>
+        <button class="b" onclick="pasteProfile('${esc(e.id)}')">Paste Claude's answer</button></div>`).join('')}
+      <div id="pp-box"></div></div>`);
+  }
+  if (S.open_conflicts.length) {
+    att.push(`<div class="card attn"><b>Your profile has values that differ between sources.</b> Pick which to keep.
+      ${S.open_conflicts.map(cf => `<div style="margin-top:10px"><div class="small"><b>${esc(cf.field)}</b></div>
+        <div class="row small"><span class="muted">earlier:</span> ${esc(short(cf.previous.value))}
+          <span class="spacer"></span><button class="b" onclick="resolve(${cf.n},'keep-previous')">Keep this</button></div>
+        <div class="row small"><span class="muted">newer:</span> ${esc(short(cf.new.value))}
+          <span class="spacer"></span><button class="b" onclick="resolve(${cf.n},'keep-new')">Keep this</button></div></div>`).join('')}</div>`);
+  }
+  if (!CLOUD && S.cloud && S.cloud.connected && S.cloud.error) {
+    att.push(`<div class="card attn"><b>Could not fetch from your online Job Agent.</b><div class="muted small">${esc(S.cloud.error)}</div></div>`);
+  }
+  if (capOn('search') && !S.schedule.on) {
+    att.push(`<div class="card"><div class="row"><div><b>Search automatically every morning?</b>
+      <div class="muted small">So new postings are waiting for you without opening the app.</div></div><span class="spacer"></span>
+      <button class="b" onclick="setSchedule(true)">Turn on</button></div></div>`);
+  }
+  $('#attention').innerHTML = att.join('');
+  $('#recent').innerHTML = S.recent.length ? S.recent.map(l => /^=== /.test(l) ? '<b>' + esc(l.replace(/=/g, '').trim()) + '</b>' : esc(l)).join('<br>') : 'Nothing yet. Your searches and syncs will be listed here.';
+  $('#about').innerHTML = CLOUD ? `Version ${esc(S.version)}, online at ${esc(S.home)}` : `Version ${esc(S.version)}<br>Your agent folder: ${esc(S.home)}`;
+  if (CLOUD) { $('#cloud-sch').textContent = 'Runs by itself: ' + S.schedule.text + (S.search_day ? `; on ${S.search_day}s it also checks that postings are still open.` : '.'); $('#cloud-url').textContent = S.home; }
+  if (S.job && !S.job.done && !jobTimer) startJob(S.job);
+}
+function short(v) { const s = typeof v === 'string' ? v : JSON.stringify(v); return s.length > 140 ? s.slice(0, 140) + '...' : s; }
+async function resolve(n, choice) { try { await api('/api/conflicts/resolve', { n, choice }); refresh(); } catch (e) { toast(e.message); } }
+$('#btn-search').onclick = () => runJob('/api/run', { mode: 'weekly' });
+$('#btn-verify').onclick = () => runJob('/api/verify');
+
+// ----------------------------------------------------------- postings
+async function loadPostings() {
+  try { P = await api('/api/postings'); } catch (e) { return toast(e.message); }
+  renderPostings(); renderDocs();
+}
+function decisionOf(p) { return p.status.startsWith('Approved') ? 'accepted' : p.status.startsWith('Rejected') ? 'rejected' : ''; }
+function inFilter(p) {
+  const d = decisionOf(p);
+  if (filter === 'all') return true;
+  if (filter === 'expired') return p.bucket === 'expired';
+  if (p.bucket === 'expired') return false;
+  if (filter === 'undecided') return !d;
+  return d === filter;
+}
+$$('#filters .chip').forEach(c => c.onclick = () => { filter = c.dataset.f; renderPostings(); });
+$('#q').oninput = renderPostings;
+function renderPostings() {
+  $$('#filters .chip').forEach(c => c.classList.toggle('on', c.dataset.f === filter));
+  const q = $('#q').value.toLowerCase().trim();
+  const newest = P.postings.reduce((m, p) => p.found > m ? p.found : m, '');
+  const list = P.postings.filter(inFilter)
+    .filter(p => !q || [p.title, p.employer, p.location, p.category].join(' ').toLowerCase().includes(q))
+    .sort((a, b) => (b.found || '').localeCompare(a.found || '') || (a.deadline || 'z').localeCompare(b.deadline || 'z'));
+  if (!list.length) {
+    $('#plist').innerHTML = `<div class="card empty">${filter === 'undecided' ? 'Nothing to decide on right now.' : 'No postings here.'}
+      ${capOn('search') ? '<div style="margin-top:10px"><button class="b primary" onclick="runJob(\'/api/run\',{mode:\'weekly\'})" data-job>Search now</button></div>' : ''}</div>`;
+    return;
+  }
+  $('#plist').innerHTML = list.map((p, i) => {
+    const d = decisionOf(p);
+    const tags = [];
+    if (p.found && p.found === newest && !d) tags.push('<span class="tag new">New</span>');
+    if (p.urgent) tags.push(`<span class="tag warn">${esc(p.urgent.replace(/^\W+/, ''))}</span>`);
+    if (p.senior_bucket === 'senior') tags.push(`<span class="tag warn">${esc(p.seniority)}: may be above your level</span>`);
+    else if (p.seniority && p.seniority !== 'Not stated') tags.push(`<span class="tag">${esc(p.seniority)}</span>`);
+    if (p.arrangement && p.arrangement !== 'Not stated') tags.push(`<span class="tag">${esc(p.arrangement)}</span>`);
+    if (p.category) tags.push(`<span class="tag">${esc(p.category)}</span>`);
+    if (p.status === 'Unverified') tags.push('<span class="tag warn">link found on a careers page, check it</span>');
+    if (d === 'accepted') tags.push('<span class="tag good">Accepted</span>');
+    if (d === 'rejected') tags.push(`<span class="tag bad">${esc(p.status)}</span>`);
+    if (p.bucket === 'expired') tags.push('<span class="tag bad">Expired</span>');
+    const k = esc(p.key);
+    return `<div class="card post" data-key="${k}">
+      <div class="row"><div style="flex:1;min-width:220px"><h3>${esc(p.title)}</h3>
+        <div class="emp">${esc(p.employer)}${p.location ? ' &middot; ' + esc(p.location) : ''}</div></div>
+        <div class="small muted" style="text-align:right">${p.deadline ? (/^\d{4}-/.test(p.deadline) ? 'Apply by <b>' + esc(p.deadline) + '</b>' : 'Deadline: ' + esc(p.deadline)) + '<br>' : ''}${p.announced ? 'Posted ' + esc(p.announced) : ''}</div></div>
+      <div class="tags">${tags.join('')}</div>
+      ${p.skills && !/not extracted/.test(p.skills) ? `<div class="skills">${esc(p.skills)}</div>` : ''}
+      <div class="row">
+        ${p.url ? `<a href="${esc(p.url)}" target="_blank" rel="noopener noreferrer">Open the posting</a>` : ''}
+        <span class="spacer"></span>
+        ${p.bucket === 'expired' ? '' : d ? `<button class="b" onclick="decide(${i},'undo')">Undo</button>` :
+          `<button class="b good" onclick="decide(${i},'accepted')">Accept</button>
+           <button class="b bad" onclick="toggleReasons(${i})">Reject</button>`}
+      </div>
+      <div class="reasons" id="rs-${i}">
+        <div class="small muted" style="margin-bottom:6px">Why? This teaches future searches what to avoid.</div>
+        ${P.rejection_reasons.map(r => `<label><input type="checkbox" value="${esc(r)}"> ${esc(r)}</label>`).join('')}
+        <input type="text" placeholder="Note (optional)" style="margin-top:6px">
+        <div class="row" style="margin-top:8px"><button class="b bad on" onclick="decide(${i},'rejected')">Reject</button>
+          <button class="b" onclick="toggleReasons(${i})">Cancel</button></div>
+      </div>
+      ${p.notes ? `<details class="notes"><summary>Notes</summary><div>${esc(p.notes.split(' | ').join('\n'))}</div></details>` : ''}
+    </div>`;
+  }).join('');
+  window._list = list;
+}
+function toggleReasons(i) { $('#rs-' + i).classList.toggle('on'); }
+async function decide(i, decision) {
+  const p = window._list[i];
+  const body = { key: p.key, decision };
+  if (decision === 'rejected') {
+    const box = $('#rs-' + i);
+    body.reasons = $$('input[type=checkbox]:checked', box).map(x => x.value);
+    body.note = $('input[type=text]', box).value;
+  }
+  try { await api('/api/decision', body); toast(decision === 'accepted' ? 'Accepted' : decision === 'rejected' ? 'Rejected' : 'Undone');
+        await loadPostings(); refresh(); } catch (e) { toast(e.message); }
+}
+
+// ----------------------------------------------------------- add
+$('#btn-add').onclick = () => {
+  const url = $('#add-url').value.trim();
+  if (!/^https?:\/\//.test(url)) return toast('Paste a link that starts with https://');
+  runJob('/api/fetch', { url, add: true, employer: $('#add-emp').value.trim(), title: $('#add-title').value.trim() });
+};
+
+// ----------------------------------------------------------- documents
+function renderDocs() {
+  const acc = P.postings.filter(p => decisionOf(p) === 'accepted');
+  if (!acc.length) { $('#dlist').innerHTML = '<div class="card empty">Accept a posting first; its documents are made here.</div>'; return; }
+  if (CLOUD) {
+    $('#dlist').innerHTML = acc.map(p => `<div class="card"><b>${esc(p.title)}</b><div class="muted">${esc(p.employer)}${p.location ? ' &middot; ' + esc(p.location) : ''}</div>
+      <div class="small" style="margin-top:6px">${p.drafted ? '<span class="tag good">Documents made on your computer</span>' : '<span class="tag">Waiting for your computer</span>'}</div></div>`).join('');
+    return;
+  }
+  const full = capOn('tailoring_full');
+  $('#dlist').innerHTML = acc.map((p, i) => {
+    const docs = p.docs.map(d => `<a href="${fileUrl(d.rel)}" target="_blank">${esc(d.name)}</a>`).join('<br>');
+    return `<div class="card">
+      <div class="row"><div style="flex:1"><b>${esc(p.title)}</b><div class="muted">${esc(p.employer)}${p.location ? ' &middot; ' + esc(p.location) : ''}${/^\d{4}-/.test(p.deadline || '') ? ' &middot; apply by ' + esc(p.deadline) : ''}</div></div>
+        ${p.drafted ? '<span class="tag good">Drafted</span>' : p.docs.length ? '<span class="tag">Templates only</span>' : '<span class="tag warn">No documents yet</span>'}</div>
+      <div class="small" style="margin:8px 0">${docs || '<span class="muted">No files yet.</span>'}</div>
+      <div class="row">
+        ${full ? `${S.api_key ? `<button class="b primary" data-job onclick="aiDoc(${i})">Write with AI</button>` : ''}
+          <button class="b ${S.api_key ? '' : 'primary'}" onclick="copyTailorPrompt(${i})">Copy for Claude</button>
+          <button class="b" onclick="pasteTailor(${i})">Paste Claude's answer</button>` : ''}
+        <button class="b" data-job onclick="tmplDoc(${i})">Make a template</button>
+      </div>
+      ${full ? '' : '<div class="muted small" style="margin-top:6px">Templates use the posting\'s keywords and leave your experience as placeholders. Add your CV in Setup for tailored drafts.</div>'}
+      <div id="paste-${i}"></div>
+    </div>`;
+  }).join('');
+  window._acc = acc;
+}
+function aiDoc(i) { runJob('/api/documents/ai', { key: window._acc[i].key }); }
+function tmplDoc(i) { runJob('/api/documents/template', { key: window._acc[i].key }); }
+async function copyText(t) {
+  try { await navigator.clipboard.writeText(t); }
+  catch { const a = document.createElement('textarea'); a.value = t; document.body.appendChild(a); a.select(); document.execCommand('copy'); a.remove(); }
+}
+async function copyTailorPrompt(i) {
+  try { const r = await api('/api/documents/prompt?key=' + encodeURIComponent(window._acc[i].key));
+        await copyText(r.prompt); toast('Copied. Paste it into a Claude chat, then paste the answer back here.'); pasteTailor(i); }
+  catch (e) { toast(e.message); }
+}
+function pasteTailor(i) {
+  $('#paste-' + i).innerHTML = `<label class="f">Claude's answer</label><textarea id="ans-${i}" placeholder="Paste the whole answer here"></textarea>
+    <div class="row" style="margin-top:8px"><button class="b primary" onclick="useTailor(${i})">Make the documents</button></div><div id="ansr-${i}" class="small"></div>`;
+}
+async function useTailor(i) {
+  try {
+    const r = await api('/api/documents/answer', { key: window._acc[i].key, answer: $('#ans-' + i).value });
+    $('#ansr-' + i).innerHTML = (r.problems.length ? '<div class="err-line">' + r.problems.map(esc).join('<br>') + '</div>' : '<div class="ok-line">Documents written.</div>')
+      + (r.report ? '<div class="muted" style="margin-top:6px;white-space:pre-wrap">' + esc(r.report) + '</div>' : '');
+    if (r.files.length) loadPostings();
+  } catch (e) { $('#ansr-' + i).innerHTML = '<span class="err-line">' + esc(e.message) + '</span>'; }
+}
+async function copyProfilePrompt(id) {
+  try { const r = await api('/api/profile/prompt?id=' + encodeURIComponent(id)); await copyText(r.prompt);
+        toast('Copied. Paste it into a Claude chat, then paste the answer back here.'); pasteProfile(id); } catch (e) { toast(e.message); }
+}
+function pasteProfile(id) {
+  $('#pp-box').innerHTML = `<label class="f">Claude's answer</label><textarea id="pp-ans"></textarea>
+    <div class="row" style="margin-top:8px"><button class="b primary" onclick="useProfile('${esc(id)}')">Add to my profile</button></div>`;
+}
+async function useProfile(id) {
+  try { await api('/api/profile/answer', { id, answer: $('#pp-ans').value }); toast('Profile updated'); refresh(); } catch (e) { toast(e.message); }
+}
+$('#btn-open-out').onclick = () => api('/api/open', { rel: 'output' }).catch(e => toast(e.message));
+$('#btn-open-home').onclick = () => api('/api/open', { rel: '.' }).catch(e => toast(e.message));
+
+// ----------------------------------------------------------- setup: upload
+const drop = $('#drop');
+drop.onclick = () => $('#file').click();
+drop.ondragover = e => { e.preventDefault(); drop.classList.add('over'); };
+drop.ondragleave = () => drop.classList.remove('over');
+drop.ondrop = e => { e.preventDefault(); drop.classList.remove('over'); if (e.dataTransfer.files[0]) upload(e.dataTransfer.files[0]); };
+$('#file').onchange = e => e.target.files[0] && upload(e.target.files[0]);
+function upload(f) {
+  if (f.size > 15e6) return toast('That file is too large.');
+  const rd = new FileReader();
+  rd.onload = async () => {
+    const data = rd.result.split(',')[1];
+    const kind = $('input[name=upkind]:checked').value;
+    try { const r = await api('/api/intake/upload', { name: f.name, kind, data });
+          const n = (r.result.imported || []).length;
+          $('#up-result').innerHTML = n ? `<span class="ok-line">Added ${esc(f.name)}.</span> Next: on Home, read it into your profile.` : `<span class="muted">${esc(f.name)} was already added.</span>`;
+          refresh(); } catch (e) { $('#up-result').innerHTML = '<span class="err-line">' + esc(e.message) + '</span>'; }
+  };
+  rd.readAsDataURL(f);
+}
+
+// ----------------------------------------------------------- settings
+const SOURCES = [
+  ['jobtech', 'Arbetsformedlingen (Platsbanken, Sweden)', true],
+  ['employer_sites', 'Careers pages of your employer list', true],
+  ['confirm_leads', 'Open job links found on careers pages and read them', true],
+  ['jsearch', 'JSearch: Google for Jobs (needs a key below)', false],
+  ['adzuna', 'Adzuna (needs a key below; not Sweden or Denmark)', false],
+  ['hn_who_is_hiring', 'Hacker News "Who is hiring?" (startups)', false],
+  ['yc_jobs', 'Y Combinator startups\' job posts', false],
+];
+let SET = null;
+async function loadEmployers() {
+  try { const e = await api('/api/employers');
+        $('#emps').value = (e.employers || []).map(x => [x.name, ...(x.urls || [])].join(' | ')).join('\n'); } catch (e) { }
+}
+$('#btn-emps').onclick = async () => {
+  const employers = $('#emps').value.split('\n').map(l => l.split('|').map(s => s.trim())).filter(p => p[0])
+    .map(([name, ...urls]) => ({ name, urls: urls.filter(Boolean) }));
+  try { await api('/api/employers', { employers }); $('#emps-r').textContent = `Saved ${employers.length} employer(s).`; refresh(); } catch (e) { toast(e.message); }
+};
+async function loadCloud() {
+  if (CLOUD) return;
+  try { const c = await api('/api/cloud'); $('#c-url').value = c.url || ''; $('#c-token').value = '';
+        $('#c-token-s').textContent = c.token ? '(saved; leave empty to keep)' : '';
+        $('#c-state').textContent = c.url ? (c.last_pull ? 'Last fetched ' + c.last_pull : 'Connected, not fetched yet') : ''; } catch (e) { }
+}
+$('#btn-cloud').onclick = async () => {
+  try { await api('/api/cloud', { url: $('#c-url').value.trim(), token: $('#c-token').value.trim() }); runJob('/api/cloud/pull'); loadCloud(); } catch (e) { toast(e.message); }
+};
+$('#btn-cloud-off').onclick = async () => { try { await api('/api/cloud', { url: '', token: '__clear__' }); toast('Disconnected'); loadCloud(); refresh(); } catch (e) { toast(e.message); } };
+async function loadSettings() {
+  loadCloud();
+  try { SET = await api('/api/settings'); } catch (e) { return toast(e.message); }
+  $('#src').innerHTML = SOURCES.map(([k, l, def]) => `<div class="switch"><input type="checkbox" id="s-${k}" ${(SET.sources[k] ?? def) ? 'checked' : ''}><label for="s-${k}">${esc(l)}</label></div>`).join('');
+  $('#enr').checked = !!SET.enrichment.enabled; $('#enr-prof').checked = !!SET.enrichment.send_profile;
+  for (const [id, k] of [['k-anthropic', 'anthropic_api_key'], ['k-jsearch', 'jsearch_api_key'], ['k-adzuna-id', 'adzuna_app_id'], ['k-adzuna', 'adzuna_app_key']]) {
+    $('#' + id + '-s').textContent = SET.secrets[k] ? '(saved; leave empty to keep)' : ''; $('#' + id).value = '';
+  }
+  const st = S ? S.schedule : { on: false, text: 'off' };
+  $('#sch').checked = st.on; $('#sch-text').textContent = st.on ? st.text : 'off';
+}
+$('#btn-save-set').onclick = async () => {
+  const sources = {}; SOURCES.forEach(([k]) => sources[k] = $('#s-' + k).checked);
+  const secretsIn = { anthropic_api_key: $('#k-anthropic').value, jsearch_api_key: $('#k-jsearch').value,
+                      adzuna_app_id: $('#k-adzuna-id').value, adzuna_app_key: $('#k-adzuna').value };
+  try { await api('/api/settings', { sources, secrets: secretsIn, enrichment: { enabled: $('#enr').checked, send_profile: $('#enr-prof').checked } });
+        toast('Saved'); loadSettings(); refresh(); } catch (e) { toast(e.message); }
+};
+async function setSchedule(on) {
+  try { const r = await api('/api/schedule', { on }); toast(r.message); await refresh(); loadSettings(); }
+  catch (e) { toast(e.message); }
+}
+$('#sch').onchange = e => setSchedule(e.target.checked);
+$('#btn-quit').onclick = async () => { await api('/api/quit', {}).catch(() => {}); document.body.innerHTML = '<main><h1>Job Agent has stopped.</h1><p class="muted">Start it again with the Job Agent launcher. You can close this tab.</p></main>'; };
+
+// ----------------------------------------------------------- start
+refresh().then(() => { loadPostings(); const v = location.hash.slice(1); if (v && $('#v-' + v)) show(v); });
+setInterval(() => { if (!jobTimer && document.visibilityState === 'visible') refresh(); }, 30000);
+</script>
+</body>
+</html>

@@ -239,8 +239,9 @@ def _make_handler(home, token, jobs, httpd_ref):
             pending = decisions.approved_pending(home)
             new = [r for r in active if not str(r.get("Status") or "").startswith(("Approved", "Rejected"))]
             on, sdesc = sched.status(home)
-            from . import ai_docs
+            from . import ai_docs, cloud_sync
             return {
+                "cloud": cloud_sync.settings(home),
                 "version": __version__, "home": home.root, "today": date.today().isoformat(),
                 "capabilities": {k: {"on": v[0], "why": v[1]} for k, v in caps.items()},
                 "counts": {"active": len(active), "undecided": len(new), "accepted_waiting": len(pending),
@@ -405,6 +406,11 @@ def _make_handler(home, token, jobs, httpd_ref):
                 return self._send(200, {"job": jobs.current})
             if u.path == "/api/settings":
                 return self._send(200, self._settings_get())
+            if u.path == "/api/employers":
+                return self._send(200, _read_json(home.path("employers"), {"mode": "extend", "employers": []}) or {})
+            if u.path == "/api/cloud":
+                from . import cloud_sync
+                return self._send(200, cloud_sync.settings(home))
             if u.path == "/api/documents/prompt":
                 from . import ai_docs
                 row = self._row((q.get("key") or [""])[0])
@@ -445,7 +451,39 @@ def _make_handler(home, token, jobs, httpd_ref):
             if p == "/api/decision":
                 code, res = self._decide(body)
                 return self._send(code, res)
+            if p == "/api/employers":
+                emps = []
+                for e in body.get("employers") or []:
+                    name = str((e or {}).get("name") or "").strip()[:120]
+                    urls = [str(x).strip() for x in (e.get("urls") or []) if re.match(r"^(https?://|indeed:|linkedin:)", str(x).strip())][:5]
+                    if name:
+                        emps.append({"name": name, "urls": urls})
+                cur = _read_json(home.path("employers"), {}) or {}
+                cur.update({"mode": cur.get("mode") or "extend", "employers": emps})
+                _write_json(home.path("employers"), {k: v for k, v in cur.items() if not k.startswith("_")})
+                from . import cloud_sync
+                if cloud_sync.connected(home):   # the online search uses the same list
+                    url, hdr = cloud_sync._auth(home)
+                    from .collect import http as _h
+                    _h.post_json(f"{url}/api/sync/config", {"employers": {"mode": "override", "employers": emps}}, headers=hdr)
+                return self._send(200, {"saved": len(emps)})
+            if p == "/api/cloud":
+                from . import cloud_sync
+                try:
+                    return self._send(200, cloud_sync.configure(home, body.get("url"), body.get("token")))
+                except ValueError as e:
+                    return self._send(400, {"error": str(e)})
+            if p == "/api/cloud/pull":
+                job = jobs.run_cli(home, "Fetch from your online search", ["cloud", "pull"])
+                return self._send(200, {"job": job}) if job else busy()
             if p == "/api/run":
+                from . import cloud_sync
+                if cloud_sync.connected(home):
+                    ok, msg = cloud_sync.start_search(home)
+                    job = jobs.run_cli(home, "Search online and fetch", ["cloud", "pull"])
+                    if job:
+                        job["lines"].append(msg)
+                    return self._send(200, {"job": job}) if job else busy()
                 mode = body.get("mode") if body.get("mode") in ("weekly", "daily", "auto") else "weekly"
                 job = jobs.run_cli(home, {"weekly": "Search now", "daily": "Refresh", "auto": "Today's run"}[mode], ["run", mode])
                 return self._send(200, {"job": job}) if job else busy()

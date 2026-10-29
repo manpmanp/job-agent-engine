@@ -1,0 +1,45 @@
+{
+  "name": "job-agent-cloud",
+  "version": "0.4.0",
+  "private": true,
+  "description": "Online search for the job-search agent engine, on your own Cloudflare account (Worker + D1 + daily cron). Documents stay on your computer. Generated with Claude (Anthropic) under the author's direction.",
+  "author": "manpmanp <manp.node@gmail.com>",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler d1 migrations apply DB --local && wrangler dev",
+    "deploy": "wrangler d1 migrations apply DB --remote && wrangler deploy",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "sync": "node scripts/sync-shared.mjs"
+  },
+  "cloudflare": {
+    "bindings": {
+      "APP_PASSWORD": {
+        "description": "The password for your online Job Agent page. Choose a long one: anyone with it can see your postings."
+      },
+      "SYNC_TOKEN": {
+        "description": "A long random text your computer's Job Agent app uses to fetch your postings (Settings > Online search). Generate one at random, for example with a password manager."
+      },
+      "JSEARCH_API_KEY": {
+        "description": "Optional. A JSearch API key (Google for Jobs). Leave as is to skip."
+      },
+      "ADZUNA_APP_ID": {
+        "description": "Optional. Adzuna app id (19 countries, not Sweden or Denmark). Leave as is to skip."
+      },
+      "ADZUNA_APP_KEY": {
+        "description": "Optional. Adzuna app key."
+      },
+      "DB": {
+        "description": "Your postings, decisions and search settings."
+      }
+    }
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^5.20261001.0",
+    "miniflare": "^4.20260730.0",
+    "typescript": "^5.9.2",
+    "vitest": "^3.2.4",
+    "wrangler": "^4.40.0"
+  }
+}

@@ -88,6 +88,8 @@ iframe.form { width:100%; height:78vh; border:1px solid var(--border); border-ra
 .empty { text-align:center; padding:34px 10px; color:var(--muted); }
 .toast { position:fixed; left:50%; top:62px; transform:translateX(-50%); background:var(--accent); color:var(--panel); padding:8px 14px; border-radius:8px; display:none; z-index:20; }
 .toast.on { display:block; }
+body.cloud .local-only { display:none !important; }
+body:not(.cloud) .cloud-only { display:none !important; }
 ul.plain { margin:4px 0 0 18px; padding:0; }
 </style>
 </head>
@@ -160,15 +162,17 @@ ul.plain { margin:4px 0 0 18px; padding:0; }
 <section class="view" id="v-docs">
   <h1>Documents</h1>
   <p class="muted" style="margin-top:-6px">CVs and cover letters for the postings you accepted. They are drafts on your computer; nothing is ever sent.</p>
-  <div class="row" style="margin-bottom:12px"><button class="b" id="btn-open-out">Open the documents folder</button></div>
+  <div class="row local-only" style="margin-bottom:12px"><button class="b" id="btn-open-out">Open the documents folder</button></div>
+  <div class="card cloud-only"><b>Documents are made on your computer.</b>
+    <div class="muted small">Your CV never comes online. Open the Job Agent app on your computer and connect it to this page (Settings &gt; Online search); your accepted postings appear there under Documents.</div></div>
   <div id="dlist"></div>
 </section>
 
 <!-- SETUP -->
 <section class="view" id="v-setup">
   <h1>Setup</h1>
-  <h2 style="margin-top:0">Your CV or cover letter (optional)</h2>
-  <div class="card">
+  <h2 style="margin-top:0" class="local-only">Your CV or cover letter (optional)</h2>
+  <div class="card local-only">
     <div class="drop" id="drop">Drop a CV or cover letter here (PDF, Word, text), or click to choose a file.
       <div class="small" style="margin-top:6px">It stays on your computer.</div></div>
     <div class="row" style="margin-top:10px">
@@ -178,14 +182,39 @@ ul.plain { margin:4px 0 0 18px; padding:0; }
     <input type="file" id="file" accept=".pdf,.docx,.txt,.md" hidden>
     <div id="up-result" class="small" style="margin-top:8px"></div>
   </div>
-  <h2>What to search for, and your profile</h2>
+  <h2><span class="local-only">What to search for, and your profile</span><span class="cloud-only">What to search for</span></h2>
   <iframe class="form" id="form" title="Search setup and profile"></iframe>
+  <h2>Employers to watch (optional)</h2>
+  <div class="card">
+    <p class="muted small" style="margin-top:0">One per line: the employer's name, a vertical bar, and its careers page. Pages on Greenhouse, Lever, Ashby, Workday or SmartRecruiters are read through their job boards; other pages for job links.</p>
+    <textarea id="emps" placeholder="Example AB | https://example.com/careers" style="min-height:140px"></textarea>
+    <div class="row" style="margin-top:8px"><button class="b primary" id="btn-emps">Save employers</button><span id="emps-r" class="small muted"></span></div>
+  </div>
 </section>
 
 <!-- SETTINGS -->
 <section class="view" id="v-settings">
   <h1>Settings</h1>
-  <div class="card">
+  <div class="card cloud-only">
+    <b>Daily search</b>
+    <div class="muted small" id="cloud-sch"></div>
+  </div>
+  <div class="card cloud-only">
+    <b>Connect your computer</b>
+    <p class="muted small">CVs, cover letters and documents never come here. To make documents for the postings you accept, open the Job Agent app on your computer, go to <b>Settings &gt; Online search</b>, and enter this page's address and the sync token you chose when you deployed it. The app then fetches your postings and decisions and makes the documents on your computer.</p>
+    <div class="small">Address: <b id="cloud-url"></b></div>
+  </div>
+  <div class="card local-only">
+    <b>Online search (optional)</b>
+    <p class="muted small">If you deployed Job Agent on your own Cloudflare account, the search runs there every day and this app fetches the postings and your decisions from it. Your CV and documents stay here.</p>
+    <label class="f" for="c-url">Address of your online Job Agent</label>
+    <input type="url" id="c-url" placeholder="https://job-agent.your-name.workers.dev">
+    <label class="f" for="c-token">Sync token <span class="muted small" id="c-token-s"></span></label>
+    <input type="password" id="c-token" autocomplete="off">
+    <div class="row" style="margin-top:10px"><button class="b primary" id="btn-cloud">Save and fetch now</button>
+      <button class="b" id="btn-cloud-off">Disconnect</button><span class="small muted" id="c-state"></span></div>
+  </div>
+  <div class="card local-only">
     <b>Run every morning</b>
     <div class="switch"><input type="checkbox" id="sch"><label for="sch" id="sch-text">off</label></div>
     <div class="muted small">Searches on your search day and refreshes on the other days, even when this window is closed. Your computer must be on (a Mac catches up after waking).</div>
@@ -195,12 +224,14 @@ ul.plain { margin:4px 0 0 18px; padding:0; }
     <div id="src"></div>
   </div>
   <div class="card">
+    <div class="local-only">
     <b>AI help (optional)</b>
     <p class="muted small">With your own Anthropic API key, the app can read your CV into your profile, draft tailored CVs and cover letters, and review new postings. This sends that material to Anthropic's API when you use it. Without a key, use "Copy for Claude" and any Claude chat instead.</p>
     <label class="f" for="k-anthropic">Anthropic API key <span class="muted small" id="k-anthropic-s"></span></label>
     <input type="password" id="k-anthropic" placeholder="sk-ant-..." autocomplete="off">
     <div class="switch"><input type="checkbox" id="enr"><label for="enr">Review new postings with AI after each search</label></div>
     <div class="switch"><input type="checkbox" id="enr-prof"><label for="enr-prof">Include my profile in the review (gives a fit score)</label></div>
+    </div>
     <h2>Optional search services</h2>
     <label class="f" for="k-jsearch">JSearch API key (Google for Jobs: LinkedIn, Indeed, company sites) <span class="muted small" id="k-jsearch-s"></span></label>
     <input type="password" id="k-jsearch" autocomplete="off">
@@ -214,9 +245,10 @@ ul.plain { margin:4px 0 0 18px; padding:0; }
     <b>About</b>
     <div class="small muted" id="about"></div>
     <div class="row" style="margin-top:10px">
-      <button class="b" id="btn-open-home">Open my agent folder</button>
+      <button class="b local-only" id="btn-open-home">Open my agent folder</button>
+      <a class="b cloud-only" href="/logout" style="text-decoration:none">Log out</a>
       <span class="spacer"></span>
-      <button class="b bad" id="btn-quit">Quit the app</button>
+      <button class="b bad local-only" id="btn-quit">Quit the app</button>
     </div>
   </div>
 </section>
@@ -227,6 +259,8 @@ ul.plain { margin:4px 0 0 18px; padding:0; }
 
 <script>
 const API = window.JOB_AGENT_API || {};
+const CLOUD = !!window.JOB_AGENT_CLOUD;
+if (CLOUD) document.body.classList.add('cloud');
 const $ = (s, el=document) => el.querySelector(s);
 const $$ = (s, el=document) => [...el.querySelectorAll(s)];
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -246,7 +280,7 @@ function fileUrl(rel) { return '/file?p=' + encodeURIComponent(rel) + '&t=' + en
 function show(v) {
   $$('#nav button').forEach(b => b.classList.toggle('on', b.dataset.v === v));
   $$('section.view').forEach(s => s.classList.toggle('on', s.id === 'v-' + v));
-  if (v === 'setup' && !$('#form').src) $('#form').src = '/form';
+  if (v === 'setup') { if (!$('#form').src) $('#form').src = '/form'; loadEmployers(); }
   if (v === 'settings') loadSettings();
   if (v === 'postings' || v === 'docs') loadPostings();
   history.replaceState(null, '', '#' + v);
@@ -312,6 +346,9 @@ async function refresh() {
         <div class="row small"><span class="muted">newer:</span> ${esc(short(cf.new.value))}
           <span class="spacer"></span><button class="b" onclick="resolve(${cf.n},'keep-new')">Keep this</button></div></div>`).join('')}</div>`);
   }
+  if (!CLOUD && S.cloud && S.cloud.connected && S.cloud.error) {
+    att.push(`<div class="card attn"><b>Could not fetch from your online Job Agent.</b><div class="muted small">${esc(S.cloud.error)}</div></div>`);
+  }
   if (capOn('search') && !S.schedule.on) {
     att.push(`<div class="card"><div class="row"><div><b>Search automatically every morning?</b>
       <div class="muted small">So new postings are waiting for you without opening the app.</div></div><span class="spacer"></span>
@@ -319,7 +356,8 @@ async function refresh() {
   }
   $('#attention').innerHTML = att.join('');
   $('#recent').innerHTML = S.recent.length ? S.recent.map(l => /^=== /.test(l) ? '<b>' + esc(l.replace(/=/g, '').trim()) + '</b>' : esc(l)).join('<br>') : 'Nothing yet. Your searches and syncs will be listed here.';
-  $('#about').innerHTML = `Version ${esc(S.version)}<br>Your agent folder: ${esc(S.home)}`;
+  $('#about').innerHTML = CLOUD ? `Version ${esc(S.version)}, online at ${esc(S.home)}` : `Version ${esc(S.version)}<br>Your agent folder: ${esc(S.home)}`;
+  if (CLOUD) { $('#cloud-sch').textContent = 'Runs by itself: ' + S.schedule.text + (S.search_day ? `; on ${S.search_day}s it also checks that postings are still open.` : '.'); $('#cloud-url').textContent = S.home; }
   if (S.job && !S.job.done && !jobTimer) startJob(S.job);
 }
 function short(v) { const s = typeof v === 'string' ? v : JSON.stringify(v); return s.length > 140 ? s.slice(0, 140) + '...' : s; }
@@ -418,6 +456,11 @@ $('#btn-add').onclick = () => {
 function renderDocs() {
   const acc = P.postings.filter(p => decisionOf(p) === 'accepted');
   if (!acc.length) { $('#dlist').innerHTML = '<div class="card empty">Accept a posting first; its documents are made here.</div>'; return; }
+  if (CLOUD) {
+    $('#dlist').innerHTML = acc.map(p => `<div class="card"><b>${esc(p.title)}</b><div class="muted">${esc(p.employer)}${p.location ? ' &middot; ' + esc(p.location) : ''}</div>
+      <div class="small" style="margin-top:6px">${p.drafted ? '<span class="tag good">Documents made on your computer</span>' : '<span class="tag">Waiting for your computer</span>'}</div></div>`).join('');
+    return;
+  }
   const full = capOn('tailoring_full');
   $('#dlist').innerHTML = acc.map((p, i) => {
     const docs = p.docs.map(d => `<a href="${fileUrl(d.rel)}" target="_blank">${esc(d.name)}</a>`).join('<br>');
@@ -506,7 +549,27 @@ const SOURCES = [
   ['yc_jobs', 'Y Combinator startups\' job posts', false],
 ];
 let SET = null;
+async function loadEmployers() {
+  try { const e = await api('/api/employers');
+        $('#emps').value = (e.employers || []).map(x => [x.name, ...(x.urls || [])].join(' | ')).join('\n'); } catch (e) { }
+}
+$('#btn-emps').onclick = async () => {
+  const employers = $('#emps').value.split('\n').map(l => l.split('|').map(s => s.trim())).filter(p => p[0])
+    .map(([name, ...urls]) => ({ name, urls: urls.filter(Boolean) }));
+  try { await api('/api/employers', { employers }); $('#emps-r').textContent = `Saved ${employers.length} employer(s).`; refresh(); } catch (e) { toast(e.message); }
+};
+async function loadCloud() {
+  if (CLOUD) return;
+  try { const c = await api('/api/cloud'); $('#c-url').value = c.url || ''; $('#c-token').value = '';
+        $('#c-token-s').textContent = c.token ? '(saved; leave empty to keep)' : '';
+        $('#c-state').textContent = c.url ? (c.last_pull ? 'Last fetched ' + c.last_pull : 'Connected, not fetched yet') : ''; } catch (e) { }
+}
+$('#btn-cloud').onclick = async () => {
+  try { await api('/api/cloud', { url: $('#c-url').value.trim(), token: $('#c-token').value.trim() }); runJob('/api/cloud/pull'); loadCloud(); } catch (e) { toast(e.message); }
+};
+$('#btn-cloud-off').onclick = async () => { try { await api('/api/cloud', { url: '', token: '__clear__' }); toast('Disconnected'); loadCloud(); refresh(); } catch (e) { toast(e.message); } };
 async function loadSettings() {
+  loadCloud();
   try { SET = await api('/api/settings'); } catch (e) { return toast(e.message); }
   $('#src').innerHTML = SOURCES.map(([k, l, def]) => `<div class="switch"><input type="checkbox" id="s-${k}" ${(SET.sources[k] ?? def) ? 'checked' : ''}><label for="s-${k}">${esc(l)}</label></div>`).join('');
   $('#enr').checked = !!SET.enrichment.enabled; $('#enr-prof').checked = !!SET.enrichment.send_profile;

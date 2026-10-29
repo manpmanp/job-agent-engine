@@ -34,6 +34,7 @@ before the command, or with the `JOB_AGENT_HOME` environment variable
 | `enrich` | Optional AI review of collected postings through your Anthropic API key. |
 | `run weekly\|daily\|auto` | A complete run without an agent. `weekly`: collect, verify, sync, enrich, templates, page and summary. `daily`: sync, templates, page. `auto`: weekly on your search day, daily otherwise. |
 | `schedule [install\|remove\|status]` | Installs or removes the daily run at 08:02 (launchd on macOS, cron on Linux, Task Scheduler on Windows), or shows it. Without an argument it prints what would be installed. The app's Settings has the same switch. |
+| `cloud [pull\|connect <address> <token>\|disconnect\|search\|status]` | Your online search (`cloud/`): `pull` fetches new postings, descriptions and decisions and sends back decisions made here (also done by every run); `connect` saves the address and sync token and fetches; `search` starts a search online. |
 | `app [--port N] [--no-browser]` | Opens the local app in your browser (127.0.0.1 only). Plain `./run.sh` in a terminal does the same. If it is already running, the browser is pointed at it. |
 | `add-postings <file.json>` | Merges found or updated posting rows into the tracker. |
 | `weekly ["note"]` | Writes the weekly page (`output/jobs-on-market.html`) and the weekly summary. |

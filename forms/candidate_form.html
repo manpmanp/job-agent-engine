@@ -219,6 +219,7 @@ const $ = id => document.getElementById(id);
 const API = window.JOB_AGENT_API || null;   // set when served by the app or ./run.sh --setup
 if (window.JOB_AGENT_EMBEDDED) {              // inside the app: the app has its own upload and header
   document.querySelector('.tab[data-pane="upload"]').style.display = 'none';
+  if (window.JOB_AGENT_CLOUD) document.querySelector('.tab[data-pane="candidate"]').style.display = 'none';  // the profile stays on your computer
   const hd = document.querySelector('header'); if (hd) hd.style.display = 'none';
 }
 let loadedLocations = [];

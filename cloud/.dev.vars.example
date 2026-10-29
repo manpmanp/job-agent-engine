@@ -1,0 +1,7 @@
+# Secrets for your online Job Agent. The Deploy to Cloudflare button asks for
+# these; for 'npm run dev' copy this file to .dev.vars (never commit it).
+APP_PASSWORD=choose-a-long-password # password for the online page
+SYNC_TOKEN=generate-a-long-random-text # used by the app on your computer (Settings > Online search)
+JSEARCH_API_KEY= # optional, Google for Jobs via JSearch
+ADZUNA_APP_ID= # optional
+ADZUNA_APP_KEY= # optional

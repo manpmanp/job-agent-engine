@@ -97,7 +97,8 @@ def saved_description(home, url):
     """The posting description captured by 'collect' or 'fetch', if any."""
     import glob
     files = glob.glob(os.path.join(home.path("new_postings"), "collect_*.json")) + \
-        glob.glob(os.path.join(home.path("new_postings"), "fetched_*.json"))
+        glob.glob(os.path.join(home.path("new_postings"), "fetched_*.json")) + \
+        glob.glob(os.path.join(home.path("new_postings"), "cloud_*.json"))
     for p in sorted(files, key=os.path.getmtime, reverse=True):
         try:
             with open(p, "r", encoding="utf-8") as f:

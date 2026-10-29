@@ -543,3 +543,110 @@ class TestApp(unittest.TestCase):
         self.assertEqual(good["problems"], [])
         self.assertTrue(any(f.endswith((".docx", ".md")) for f in good["files"]))
         self.assertIn("Never invent", ai_docs.tailor_prompt(self.h, row))
+
+
+class TestSharedCases(unittest.TestCase):
+    """The same cases run in cloud/test/shared.test.ts against the online Worker."""
+
+    def test_shared(self):
+        with open(os.path.join(HERE, "shared", "match_cases.json"), encoding="utf-8") as f:
+            c = json.load(f)
+        for kw, toks in c["keyword_tokens"]:
+            self.assertEqual(match.keyword_tokens(kw), toks, kw)
+        for m in c["match_keywords"]:
+            got = match.match_keywords(m["title"], m["description"], m["keywords"], scope=m["scope"], exclude_terms=m.get("exclude", []))[1]
+            self.assertEqual(got, m["where"], m)
+        for m in c["match_location"]:
+            self.assertEqual(match.match_location(m["text"], m["locations"]), m["expect"], m)
+        for t, want in c["seniority"]:
+            self.assertEqual(match.seniority(t), want, t)
+        for t, want in c["arrangement"]:
+            self.assertEqual(match.arrangement(t), want, t)
+        for t, want in c["stated_deadline"]:
+            self.assertEqual(sources.stated_deadline(t), want, t)
+        for t, want in c["welcomes_junior"]:
+            self.assertEqual(match.welcomes_junior(t), want, t)
+        for m in c["skills_summary"]:
+            self.assertEqual(match.skills_summary(m["text"], m["vocab"]), m["expect"], m)
+        for e, want in c["norm_employer"]:
+            self.assertEqual(match.norm_employer(e), want, e)
+
+
+class TestCloudSync(unittest.TestCase):
+    """engine/cloud_sync.py against a stand-in for the online Job Agent's sync API."""
+
+    def setUp(self):
+        import threading
+        from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler
+        self.h = make_home()
+        self.received = {}
+        test = self
+        export = {"now": "2026-11-02T10:00:00Z", "config": {"search_config": {"keywords": ["FPGA"]}},
+                  "postings": [{"key": "https://ex.com/j/1||FPGA Engineer", "url": "https://ex.com/j/1", "title": "FPGA Engineer",
+                                "employer": "Online AB", "location": "Lund", "status": "New", "deadline": "2026-12-01",
+                                "description": "VHDL radios.", "found": "2026-11-02", "notes": "Source: test"},
+                               {"key": "https://ex.com/j/2||RTL Designer", "url": "https://ex.com/j/2", "title": "RTL Designer",
+                                "employer": "Online AB", "location": "Lund", "status": "New", "found": "2026-11-02", "notes": ""}],
+                  "decisions": {"https://ex.com/j/2||RTL Designer": {"decision": "rejected", "reasons": ["Seniority level mismatch"], "ts": "2026-11-02T09:00:00"}}}
+
+        class H(BaseHTTPRequestHandler):
+            def log_message(self, *a):
+                pass
+
+            def _ok(self):
+                return self.headers.get("Authorization") == "Bearer tok-123"
+
+            def do_GET(self):
+                code, body = (200, export) if self._ok() else (401, {"error": "no"})
+                data = json.dumps(body).encode()
+                self.send_response(code); self.send_header("Content-Length", str(len(data))); self.end_headers(); self.wfile.write(data)
+
+            def do_POST(self):
+                n = int(self.headers.get("Content-Length") or 0)
+                test.received[self.path] = json.loads(self.rfile.read(n) or b"{}")
+                data = b'{"applied": 1, "ok": true}'
+                self.send_response(200 if self._ok() else 401); self.send_header("Content-Length", str(len(data))); self.end_headers(); self.wfile.write(data)
+
+        self.srv = ThreadingHTTPServer(("127.0.0.1", 0), H)
+        threading.Thread(target=self.srv.serve_forever, daemon=True).start()
+        self.url = f"http://127.0.0.1:{self.srv.server_address[1]}"
+        http.DELAY = 0
+
+    def tearDown(self):
+        self.srv.shutdown()
+        shutil.rmtree(self.h.root, ignore_errors=True)
+
+    def test_pull_and_push(self):
+        from engine import cloud_sync, documents
+        with self.assertRaises(ValueError):
+            cloud_sync.configure(self.h, "http://plain.example", "x")            # https only
+        cloud_sync.configure(self.h, self.url, "wrong")
+        self.assertFalse(cloud_sync.pull(self.h, log=lambda m: None)["ok"])     # token refused, nothing changes
+        self.assertIn("token", cloud_sync.settings(self.h)["error"])
+        cloud_sync.configure(self.h, self.url, "tok-123")
+        s = cloud_sync.pull(self.h, log=lambda m: None)
+        self.assertEqual((s["new"], s["decisions_applied"]), (2, 1))
+        rows = {r["Title"]: r for r in tr.read_all_rows(self.h.path("tracker"))}
+        self.assertTrue(rows["RTL Designer"]["Status"].startswith("Rejected: Seniority"))
+        self.assertEqual(documents.saved_description(self.h, "https://ex.com/j/1"), "VHDL radios.")
+        with open(self.h.path("decisions"), encoding="utf-8") as f:
+            d = json.load(f)
+        d["https://ex.com/j/1||FPGA Engineer"] = {"decision": "accepted", "ts": "2026-11-02T11:00:00"}
+        with open(self.h.path("decisions"), "w", encoding="utf-8") as f:
+            json.dump(d, f)
+        s = cloud_sync.pull(self.h, log=lambda m: None)
+        self.assertEqual(s["new"], 0)                                           # nothing duplicated
+        sent = self.received["/api/sync/decisions"]["decisions"]
+        self.assertIn("https://ex.com/j/1||FPGA Engineer", sent)               # decided here: sent online
+        self.assertNotIn("https://ex.com/j/2||RTL Designer", sent)             # decided online: not echoed back
+        self.assertNotIn("candidate", json.dumps(self.received))               # nothing about the candidate travels
+
+
+class TestCloudCopies(unittest.TestCase):
+    def test_worker_copies_are_current(self):
+        """cloud/src/shared/ must match the originals (run: cd cloud && npm run sync)."""
+        root = os.path.dirname(HERE)
+        for src, dst in (("app/index.html", "index.html"), ("forms/candidate_form.html", "candidate_form.html"),
+                         ("defaults/search_defaults.json", "search_defaults.json"), ("defaults/skill_vocabulary.json", "skill_vocabulary.json")):
+            with open(os.path.join(root, src), "rb") as a, open(os.path.join(root, "cloud", "src", "shared", dst), "rb") as b:
+                self.assertEqual(a.read(), b.read(), f"{dst} is out of date: cd cloud && npm run sync")

@@ -331,6 +331,28 @@ def cmd_schedule(h, args):
         sys.exit(1)
 
 
+def cmd_cloud(h, args):
+    from . import cloud_sync
+    if args.action == "connect":
+        if not args.url or not args.token:
+            raise SystemExit("usage: ./run.sh cloud connect <https://your-job-agent...> <sync token>")
+        st = cloud_sync.configure(h, args.url, args.token)
+        print(f"connected to {st['url']}")
+        cloud_sync.pull(h)
+    elif args.action == "disconnect":
+        cloud_sync.configure(h, "", "__clear__")
+        print("online search disconnected")
+    elif args.action == "search":
+        ok, msg = cloud_sync.start_search(h)
+        print(msg)
+    elif args.action == "status":
+        st = cloud_sync.settings(h)
+        print(f"online search: {st['url'] or 'not connected'}; last fetched: {st['last_pull'] or 'never'}"
+              + (f"; last error: {st['error']}" if st.get("error") else ""))
+    else:
+        cloud_sync.pull(h)
+
+
 def cmd_app(h, args):
     from .app import serve, find_running
     import webbrowser
@@ -387,6 +409,8 @@ def main(argv=None):
     sp.add_parser("enrich")
     x = sp.add_parser("run"); x.add_argument("mode", nargs="?", default="auto", choices=["weekly", "daily", "auto"])
     x = sp.add_parser("schedule"); x.add_argument("action", nargs="?", choices=["show", "install", "remove", "status"])
+    x = sp.add_parser("cloud"); x.add_argument("action", nargs="?", default="pull", choices=["pull", "connect", "disconnect", "search", "status"])
+    x.add_argument("url", nargs="?"); x.add_argument("token", nargs="?")
     x = sp.add_parser("app"); x.add_argument("--port", type=int, default=8765); x.add_argument("--no-browser", action="store_true")
     sp.add_parser("open")
     x = sp.add_parser("form"); x.add_argument("--port", type=int, default=8765); x.add_argument("--no-browser", action="store_true")
@@ -411,7 +435,7 @@ def main(argv=None):
     {"init": cmd_init, "status": cmd_status, "plan": cmd_plan, "add-postings": cmd_add_postings,
      "weekly": cmd_weekly, "sync": cmd_sync, "intake": cmd_intake, "tailor": cmd_tailor,
      "checkpoint": cmd_checkpoint, "note": cmd_note, "collect": cmd_collect, "fetch": cmd_fetch, "verify": cmd_verify,
-     "enrich": cmd_enrich, "run": cmd_run, "schedule": cmd_schedule, "open": cmd_open, "form": cmd_form, "app": cmd_app}[args.cmd](h, args)
+     "enrich": cmd_enrich, "run": cmd_run, "schedule": cmd_schedule, "open": cmd_open, "form": cmd_form, "app": cmd_app, "cloud": cmd_cloud}[args.cmd](h, args)
 
 
 if __name__ == "__main__":
