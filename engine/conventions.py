@@ -23,7 +23,7 @@ Both are suggestions: state/document_choices.json holds what you chose for
 a posting in the Documents tab. The market gives page size, personal
 details, tone of the country, salutation and closing; the type gives the
 sections (order, headings, length, focus), confidence, wording, emphasis
-and letter focus. Your tuned types (Writing style tab) live in
+and letter focus. Your tuned types (Settings > Writing style) live in
 inputs/document_conventions.json and replace the suggested ones.
 
     for_row(home, row) -> dict      as_text(conv) -> the block for the AI and the agent
@@ -249,7 +249,7 @@ def as_text(conv):
 
 
 def editor_data(home):
-    """What the Writing style tab shows: the suggested type settings, your
+    """What Settings > Writing style shows: the suggested type settings, your
     tuned ones, and the lists to choose from."""
     base = catalogue(None)
     mine = _strip_help(_read_json(home.path("document_conventions"), {}) or {}).get("types") or {}

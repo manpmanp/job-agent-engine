@@ -62,11 +62,17 @@ other software to install. Downloads are on the
 Job Agent opens in your web browser. It runs only on your computer and
 keeps your job search in a **JobAgent** folder in your home folder.
 
-1. **Setup:** type what to search for (job titles or skills) and where
-   (towns, regions or countries). Optionally drop in your CV, and list
-   employers you want watched.
-2. **Home > Search now.** New postings appear under **Postings**.
-3. **Postings:** **Accept** the ones you want; **Reject** the others with a
+The app has five tabs. **Home** shows what to do next, how the app works,
+and what it does with your data. **Jobs**, **Documents** and **Setup** are
+the everyday work. **Settings** holds everything you may want to tune
+later (writing style, AI, online search, network activity, update and
+uninstall); you never need it to get started.
+
+1. **Setup:** (1) what to search for (job titles or skills) and where
+   (towns, regions or countries), and (2) the countries and job sites to
+   use. Optionally list employers to watch and drop in your CV.
+2. **Home > Search now.** New jobs appear under **Jobs**.
+3. **Jobs:** **Accept** the ones you want; **Reject** the others with a
    reason (future searches learn from it).
 4. **Documents:** for each accepted posting, make a **template** (your
    details plus the posting's keywords, experience left as placeholders),
@@ -79,10 +85,10 @@ keeps your job search in a **JobAgent** folder in your home folder.
 
    Drafts are Word files in your folder. Nothing is ever sent or applied
    for you.
-5. **Settings > Run every morning:** the search then runs by itself
-   every day, even when the app is closed.
+5. **Settings > Daily search > Run every morning:** the search then runs
+   by itself every day, even when the app is closed.
 
-**Add a posting** reads any job link you found yourself and adds it.
+**Jobs > Add a job you found** reads any job link you found yourself and adds it.
 Close the app with **Quit the app** in the top bar (closing the app's tab also stops it after a few seconds).
 
 **Update and uninstall:** Settings > Update and uninstall, or the

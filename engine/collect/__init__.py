@@ -177,7 +177,7 @@ def collect(home, run_date=None, only=None):
                   act_asap_after_days=int(cfg.get("act_asap_after_days", 7)))
     print(f"collected {summary['candidates']} listing(s), {summary['kept']} matched, {summary['new']} new, "
           f"{summary['already_tracked']} already tracked, {summary['repeated_in_run']} found twice in this run; "
-          f"{len(skipped)} not matched (listed in the app under Postings > Not matched)")
+          f"{len(skipped)} not matched (listed in the app under Jobs > Not matched)")
     for e in summary["errors"]:
         print(f"  [source error] {e}")
     if summary["skipped_agent_only"]:

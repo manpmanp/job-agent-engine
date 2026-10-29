@@ -191,11 +191,11 @@ class Presence:
     itself when its last tab is closed instead of staying behind in the
     background. Each tab sends a beat with every request and every 20
     seconds, and a goodbye when it closes. The app stops when no tab is
-    left: GRACE seconds after a goodbye (a reload says hello again at once),
+    left: GRACE seconds after a goodbye (a reload says hello again within a second),
     IDLE seconds after the last beat (browsers slow timers in hidden tabs to
     about one a minute), or FIRST seconds after start if no page ever
     connected. It never stops while a job runs."""
-    GRACE, IDLE, FIRST = 8, 180, 600
+    GRACE, IDLE, FIRST = 2, 180, 600
 
     def __init__(self):
         self.tabs, self.started, self.bye_at, self.seen = {}, time.time(), None, False
@@ -767,7 +767,7 @@ def find_running(port_from=8765, span=20, home_root=None):
 
 def _watch(presence, jobs, httpd):
     while True:
-        time.sleep(2)
+        time.sleep(0.5)
         if presence.should_stop(jobs.busy()):
             print("the app's page was closed; Job Agent stops (start it again with the launcher)", flush=True)
             httpd.shutdown()

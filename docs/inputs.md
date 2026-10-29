@@ -32,7 +32,7 @@ creates blank versions. Keys beginning with `_` are help text and ignored.
 | `skill_terms` | no | Extra terms to pick out for the skills summary (search keywords and profile skills are always used). |
 | `category_rules` | no | `{"<category>": ["term", ...]}`: first rule whose term appears in title or description sets the category. |
 | `enrichment` | no | Optional AI review: `enabled`, `model` (default `claude-haiku-5-5`), `send_profile` (default false: the profile is not sent), `max_per_run`. Needs `ANTHROPIC_API_KEY` or `inputs/secrets.json` `{"anthropic_api_key": "..."}`. |
-| `job_sites` | no | Set in the app's Job sites tab: `countries` (ISO codes, for example `["SE", "DK"]`; default: the countries of your locations), `skip` (addresses of listed sites you do not want), `custom` (your own sites, `{"name", "url"}`). The catalogue is `engine/defaults/job_sites.json` (readable: `docs/job_sites.md`); sites without a built-in search are for you or your agent to read. |
+| `job_sites` | no | Set in the app under Setup > Countries and job sites: `countries` (ISO codes, for example `["SE", "DK"]`; default: the countries of your locations), `skip` (addresses of listed sites you do not want), `custom` (your own sites, `{"name", "url"}`). The catalogue is `engine/defaults/job_sites.json` (readable: `docs/job_sites.md`); sites without a built-in search are for you or your agent to read. |
 | `credible_sources` | no | Sources that count as confirmation that a posting is live. |
 | `employer_presets` | no | Names of files in `engine/defaults/employer_presets/`. |
 | `rejection_reasons` | no | The checkbox list on the weekly page. |
@@ -57,7 +57,7 @@ A blank value keeps the default.
 | `inputs/tailoring_checks.json` | Mechanical checks: `cv_must_contain`, `cl_must_contain`, `must_not_contain`. `tailor render` refuses a spec that fails them. |
 | `inputs/references/` | Any authoritative files the agent should consult (a publication list, a detailed technical profile). |
 | `inputs/document_style.json` | `font`, `banner_color`, `accent_color`, `secondary_text_color`, `body_text_color`, `page_size` (A4/Letter), `avoid_em_dash`, `cl_closing`. Leave `page_size` and `cl_closing` out to follow each posting's market (Letter and "Sincerely," for the US, A4 and "Kind regards," for Sweden). |
-| `inputs/document_conventions.json` | Your changes to the writing conventions, in the same shape as `engine/defaults/document_conventions.json`: `markets` (countries) and `types` (the ten position types). The app's Writing style tab writes `types` for you (sections in order with heading, length and focus; confidence 1 to 5; emphasis; wording; CV and letter length; letter focus). Only what you write replaces the default, for example `{"markets": {"us": {"letter": {"closing": "Best regards,"}}}}`. |
+| `inputs/document_conventions.json` | Your changes to the writing conventions, in the same shape as `engine/defaults/document_conventions.json`: `markets` (countries) and `types` (the ten position types). The app's Settings > Writing style writes `types` for you (sections in order with heading, length and focus; confidence 1 to 5; emphasis; wording; CV and letter length; letter focus). Only what you write replaces the default, for example `{"markets": {"us": {"letter": {"closing": "Best regards,"}}}}`. |
 | `state/document_choices.json` | The position type or market you chose for single postings in the Documents tab (or with `tailor choose`). |
 
 ## Using an existing folder layout: `agent_home.json`

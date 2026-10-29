@@ -113,26 +113,117 @@ textarea.plain { font-family:inherit; font-size:13px; min-height:58px; }
 @media (max-width:640px) { .secrow { grid-template-columns:auto 1fr 96px auto; } .secrow .fc { grid-column:1 / -1; } }
 input[type=range] { width:220px; vertical-align:middle; }
 details.grp > summary { cursor:pointer; font-weight:bold; color:var(--accent); }
+
+/* ---------- look: icons, hero, flow, promises, sub-navigation ---------- */
+.ic { width:18px; height:18px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; flex:none; }
+.brand { display:inline-flex; align-items:center; gap:8px; }
+.ic.logo { width:26px; height:26px; color:var(--accent-2); stroke-width:1.7; }
+nav button { display:inline-flex; align-items:center; gap:6px; }
+nav button .ic { width:17px; height:17px; }
+.b .ic { width:16px; height:16px; }
+button.b, a.b { display:inline-flex; align-items:center; gap:6px; }
+.hero { background:linear-gradient(135deg, #1B3A5C 0%, #2E74B5 100%); color:#fff; border-radius:16px; padding:26px 26px 22px; margin:4px 0 16px;
+        box-shadow:0 10px 30px rgba(27,58,92,.18); position:relative; overflow:hidden; }
+.hero::after { content:""; position:absolute; right:-60px; top:-60px; width:240px; height:240px; border-radius:50%; background:rgba(255,255,255,.07); }
+.hero h1 { color:#fff; font-size:24px; margin:0 0 6px; }
+.hero p { margin:0 0 16px; max-width:640px; opacity:.92; font-size:15px; }
+.hero .b.big { padding:10px 18px; font-size:15px; }
+.hero .b.primary { background:#fff; color:#1B3A5C; border-color:#fff; }
+.hero .b.ghost { background:transparent; color:#fff; border-color:rgba(255,255,255,.6); }
+.hero .b.ghost:hover { border-color:#fff; }
+.hero-note { margin-top:12px; color:rgba(255,255,255,.85); }
+.grid.stats { grid-template-columns:repeat(auto-fit, minmax(170px, 1fr)); }
+.stats .stat { display:flex; gap:12px; align-items:center; }
+.stat .si { width:42px; height:42px; border-radius:12px; display:grid; place-items:center; background:var(--soft); color:var(--accent-2); flex:none; }
+.stat .si .ic { width:22px; height:22px; }
+.stat:hover { border-color:var(--accent-2); }
+.flow { list-style:none; margin:0; padding:0; display:grid; grid-template-columns:repeat(6, 1fr); gap:14px; }
+.step { position:relative; display:flex; flex-direction:column; align-items:center; text-align:center; gap:4px; padding:14px 8px 12px;
+        border-radius:12px; background:var(--soft); cursor:pointer; transition:transform .12s; }
+.step:hover { transform:translateY(-2px); }
+.step:not(:last-child)::after { content:""; position:absolute; right:-12px; top:34px; width:10px; height:10px; border-top:2px solid var(--muted);
+        border-right:2px solid var(--muted); transform:rotate(45deg); opacity:.6; }
+.bub { width:46px; height:46px; border-radius:50%; display:grid; place-items:center; background:var(--panel); color:var(--accent-2); border:2px solid var(--accent-2); }
+.bub .ic { width:22px; height:22px; }
+.step b { margin-top:6px; font-size:14px; } .step span { font-size:12px; color:var(--muted); }
+.step i { font-style:normal; font-weight:bold; color:var(--accent-2); }
+.step.you .bub { background:var(--accent-2); color:#fff; }
+.step:last-child { cursor:default; }
+.flow-opt { display:flex; gap:22px; flex-wrap:wrap; margin-top:14px; padding-top:12px; border-top:1px dashed var(--border); }
+.flow-opt span { display:inline-flex; align-items:center; gap:6px; } .flow-opt .ic { width:16px; height:16px; }
+.promise .bub { width:40px; height:40px; } .promise .bub .ic { width:20px; height:20px; }
+.promise b { display:block; margin:10px 0 4px; font-size:14px; }
+.promise p { margin:0; color:var(--muted); font-size:13px; }
+.head { display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; margin-bottom:6px; }
+.head h1 { margin:4px 0; }
+.lead { margin-top:-4px; }
+.subnav { display:flex; gap:6px; flex-wrap:wrap; margin:0 0 16px; }
+.subnav button { font:inherit; font-size:13px; border:1px solid var(--border); background:var(--panel); color:var(--muted); border-radius:18px; padding:7px 14px; cursor:pointer; }
+.subnav button b { display:inline-grid; place-items:center; width:18px; height:18px; border-radius:50%; background:var(--soft); color:var(--accent); font-size:11px; margin-right:4px; }
+.subnav button i { font-size:11px; opacity:.7; margin-left:4px; }
+.subnav button.on { background:var(--accent); border-color:var(--accent); color:var(--panel); }
+.subnav button.on b { background:var(--panel); }
+.settings-wrap { display:grid; grid-template-columns:220px 1fr; gap:20px; align-items:start; }
+.subnav.side { flex-direction:column; flex-wrap:nowrap; position:sticky; top:76px; gap:2px; }
+.subnav.side button { border:0; border-radius:8px; text-align:left; background:none; padding:8px 12px; }
+.subnav.side button.on { background:var(--soft); color:var(--text); font-weight:bold; }
+.subnav.side .grp { font-size:11px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); margin:12px 12px 2px; }
+.subnav.side .grp:first-child { margin-top:0; }
+.sub { display:none; } .sub.on { display:block; }
+details.more > summary { cursor:pointer; }
+@media (max-width:860px) {
+  .flow { grid-template-columns:repeat(3, 1fr); } .step:nth-child(3n)::after { display:none; }
+  .settings-wrap { grid-template-columns:1fr; }
+  .subnav.side { flex-direction:row; flex-wrap:wrap; position:static; } .subnav.side .grp { display:none; }
+  .subnav.side button { border:1px solid var(--border); border-radius:18px; }
+  .subnav.side button.on { background:var(--accent); color:var(--panel); }
+}
+@media (max-width:560px) {
+  .flow { grid-template-columns:1fr 1fr; } .step::after { display:none; }
+  nav button span:not(.count) { display:none; } nav button.on span { display:inline; }
+  .acts .lbl { display:none; }
+  .hero { padding:20px 18px; } .hero h1 { font-size:20px; }
+}
 </style>
 </head>
 <body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-logo" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2.5"/><path d="M9 7V5.5A1.5 1.5 0 0 1 10.5 4h3A1.5 1.5 0 0 1 15 5.5V7"/><path d="M3 12.5h18"/><circle cx="12" cy="12.5" r="1.6"/></symbol>
+    <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v9.5h13V10"/><path d="M10 19.5v-5h4v5"/></symbol>
+    <symbol id="i-jobs" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5h6v2"/><path d="M3 13h18"/></symbol>
+    <symbol id="i-doc" viewBox="0 0 24 24"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/><path d="M9 12h6M9 16h6"/></symbol>
+    <symbol id="i-setup" viewBox="0 0 24 24"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></symbol>
+    <symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1"/></symbol>
+    <symbol id="i-folder" viewBox="0 0 24 24"><path d="M3 6.5A1.5 1.5 0 0 1 4.5 5h4l2 2.5h9A1.5 1.5 0 0 1 21 9v9.5a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 18.5z"/></symbol>
+    <symbol id="i-power" viewBox="0 0 24 24"><path d="M12 3v8"/><path d="M6.4 6.6a8 8 0 1 0 11.2 0"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></symbol>
+    <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9S9.5 5.6 12 3z"/></symbol>
+    <symbol id="i-filter" viewBox="0 0 24 24"><path d="M4 5h16l-6.5 7.5V19l-3 1.5v-8z"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m8 12.5 2.7 2.7L16.5 9.5"/></symbol>
+    <symbol id="i-send" viewBox="0 0 24 24"><path d="M4 12 20 4l-4 16-4-6.5z"/><path d="m12 13.5 8-9.5"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3 4.5 6v5.5c0 4.6 3.2 8.2 7.5 9.5 4.3-1.3 7.5-4.9 7.5-9.5V6z"/><path d="m8.8 12 2.3 2.3 4.2-4.5"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="10.5" width="14" height="10" rx="2"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/><circle cx="12" cy="15.5" r="1.4"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-spark" viewBox="0 0 24 24"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6.3 6.3l2.4 2.4M15.3 15.3l2.4 2.4M6.3 17.7l2.4-2.4M15.3 8.7l2.4-2.4"/></symbol>
+    <symbol id="i-cloud" viewBox="0 0 24 24"><path d="M7 18.5h10a4 4 0 0 0 .6-8 5.5 5.5 0 0 0-10.6 1.5A3.3 3.3 0 0 0 7 18.5z"/></symbol>
+  </defs>
+</svg>
 <header class="top"><div class="bar">
-  <span class="brand">Job Agent</span>
+  <span class="brand"><svg class="ic logo"><use href="#i-logo"/></svg>Job Agent</span>
   <nav id="nav">
-    <button data-v="home" class="on">Home</button>
-    <button data-v="postings">Postings<span class="count" id="c-undecided" hidden></span></button>
-    <button data-v="add">Add a posting</button>
-    <button data-v="docs">Documents<span class="count" id="c-docs" hidden></span></button>
-    <button data-v="setup">Setup</button>
-    <button data-v="sites">Job sites</button>
-    <button data-v="style" class="local-only">Writing style</button>
-    <button data-v="settings">Settings</button>
+    <button data-v="home" class="on"><svg class="ic"><use href="#i-home"/></svg><span>Home</span></button>
+    <button data-v="postings"><svg class="ic"><use href="#i-jobs"/></svg><span>Jobs</span><span class="count" id="c-undecided" hidden></span></button>
+    <button data-v="docs"><svg class="ic"><use href="#i-doc"/></svg><span>Documents</span><span class="count" id="c-docs" hidden></span></button>
+    <button data-v="setup"><svg class="ic"><use href="#i-setup"/></svg><span>Setup</span></button>
+    <button data-v="settings"><svg class="ic"><use href="#i-gear"/></svg><span>Settings</span></button>
   </nav>
   <span class="spacer"></span>
   <div class="acts">
-    <button class="b sm local-only" id="btn-open-home" title="Open the folder with your inputs, tracker and documents">Open my agent folder</button>
+    <button class="b sm local-only" id="btn-open-home" title="Open the folder with your inputs, tracker and documents"><svg class="ic"><use href="#i-folder"/></svg><span class="lbl">Open my agent folder</span></button>
     <a class="b sm cloud-only" href="/logout">Log out</a>
-    <button class="b sm bad local-only" id="btn-quit" title="Stop the app (the daily run still happens)">Quit the app</button>
+    <button class="b sm bad local-only" id="btn-quit" title="Stop the app (the daily run still happens). Closing this tab also stops it."><svg class="ic"><use href="#i-power"/></svg><span class="lbl">Quit the app</span></button>
   </div>
 </div></header>
 <div class="toast" id="toast"></div>
@@ -140,25 +231,73 @@ details.grp > summary { cursor:pointer; font-weight:bold; color:var(--accent); }
 <main>
 <!-- HOME -->
 <section class="view on" id="v-home">
-  <h1>Home</h1>
-  <div id="home-setup"></div>
-  <div class="card">
-    <div class="row">
-      <div><b>Find new postings</b><div class="muted small" id="search-desc"></div></div>
-      <span class="spacer"></span>
-      <button class="b primary" id="btn-search">Search now</button>
-      <button class="b" id="btn-verify" title="Check that tracked postings are still open">Check postings</button>
+  <div class="hero">
+    <div>
+      <h1>Your job search, on your own computer</h1>
+      <p>Job Agent finds postings that fit you. You decide on each one, it drafts the documents, and you apply yourself.</p>
+      <div class="row">
+        <button class="b primary big" id="btn-search"><svg class="ic"><use href="#i-search"/></svg>Search now</button>
+        <button class="b big ghost" id="btn-verify" title="Check that tracked postings are still open">Check postings</button>
+      </div>
+      <div class="small hero-note" id="search-desc"></div>
     </div>
   </div>
-  <div class="grid" id="stats"></div>
+  <div id="home-setup"></div>
+  <div class="grid stats" id="stats"></div>
   <div id="attention"></div>
+
+  <h2>How it works</h2>
+  <div class="card flow-card">
+    <ol class="flow">
+      <li class="step" onclick="show('setup','sites')"><span class="bub"><svg class="ic"><use href="#i-globe"/></svg></span><b>Job sites</b><span>the countries, sites and employers you chose</span></li>
+      <li class="step" onclick="runSearchFromFlow()"><span class="bub"><svg class="ic"><use href="#i-search"/></svg></span><b>Search</b><span id="fl-search">now, or every morning by itself</span></li>
+      <li class="step" onclick="show('postings')"><span class="bub"><svg class="ic"><use href="#i-filter"/></svg></span><b>Matches</b><span>jobs that fit your words and places; <i id="fl-new">0</i> to decide</span></li>
+      <li class="step you" onclick="show('postings')"><span class="bub"><svg class="ic"><use href="#i-check"/></svg></span><b>You decide</b><span>Accept or Reject each one</span></li>
+      <li class="step" onclick="show('docs')"><span class="bub"><svg class="ic"><use href="#i-doc"/></svg></span><b>Drafts</b><span>CV and cover letter, on your computer</span></li>
+      <li class="step you"><span class="bub"><svg class="ic"><use href="#i-send"/></svg></span><b>You apply</b><span>yourself, when you are ready</span></li>
+    </ol>
+    <div class="flow-opt small muted">
+      <span><svg class="ic"><use href="#i-spark"/></svg>Optional: AI drafts with your own key, only when you click</span>
+      <span><svg class="ic"><use href="#i-cloud"/></svg>Optional: a daily online search on your own Cloudflare account</span>
+    </div>
+  </div>
+
+  <h2>Safe by design</h2>
+  <div class="grid promises">
+    <div class="card promise"><span class="bub"><svg class="ic"><use href="#i-shield"/></svg></span>
+      <b>Nothing is sent without you</b>
+      <p>Job Agent never applies, submits or e-mails anything. Every posting waits for your Accept or Reject, and documents are drafts you open, edit and send yourself.</p></div>
+    <div class="card promise"><span class="bub"><svg class="ic"><use href="#i-lock"/></svg></span>
+      <b>Your personal data stays with you</b>
+      <p class="local-only">Your CV, profile, decisions and documents are files in your own folder on this computer<span id="pr-where"></span>. They leave it only if you use AI with your own key, and then only for that request.</p>
+      <p class="cloud-only">This online page holds only postings, your decisions and search settings. Your CV, profile and documents stay on your computer.</p></div>
+    <div class="card promise"><span class="bub"><svg class="ic"><use href="#i-globe"/></svg></span>
+      <b>What goes over the internet</b>
+      <p>Your search words and places go to the job sites you chose; job pages are read by their address; AI only when you click it. No tracking or analytics.
+        <a href="#" class="local-only" onclick="show('settings','network');return false">See every request</a></p></div>
+    <div class="card promise"><span class="bub"><svg class="ic"><use href="#i-clock"/></svg></span>
+      <b>What runs in the background</b>
+      <p id="pr-bg">Only what you switched on.</p></div>
+  </div>
+
   <h2>Recent activity</h2>
   <div class="card"><div id="recent" class="small muted">Nothing yet.</div></div>
 </section>
 
-<!-- POSTINGS -->
+<!-- JOBS -->
 <section class="view" id="v-postings">
-  <h1>Postings</h1>
+  <div class="head"><h1>Jobs</h1>
+    <button class="b sm" id="add-toggle"><svg class="ic"><use href="#i-plus"/></svg>Add a job you found</button></div>
+  <div class="card" id="v-add" hidden>
+    <p class="muted" style="margin-top:0">Paste the link of a job posting you found anywhere. The app reads the page, keeps the full text for your documents, and adds it to your jobs.</p>
+    <label class="f" for="add-url">Link to the posting</label>
+    <input type="url" id="add-url" placeholder="https://...">
+    <div class="grid" style="margin-top:4px">
+      <div><label class="f" for="add-emp">Employer <span class="muted small">(if the page does not say)</span></label><input type="text" id="add-emp"></div>
+      <div><label class="f" for="add-title">Job title <span class="muted small">(if the page does not say)</span></label><input type="text" id="add-title"></div>
+    </div>
+    <div class="row" style="margin-top:12px"><button class="b primary" id="btn-add">Read and add</button></div>
+  </div>
   <div class="row" style="margin-bottom:10px">
     <div class="chips" id="filters" style="margin:0">
       <span class="chip on" data-f="undecided">To decide</span>
@@ -174,172 +313,200 @@ details.grp > summary { cursor:pointer; font-weight:bold; color:var(--accent); }
   <div id="plist"></div>
 </section>
 
-<!-- ADD -->
-<section class="view" id="v-add">
-  <h1>Add a posting</h1>
-  <div class="card">
-    <p class="muted" style="margin-top:0">Paste the link of a job posting you found anywhere. The app reads the page, keeps the full text for your documents, and adds it to your postings.</p>
-    <label class="f" for="add-url">Link to the posting</label>
-    <input type="url" id="add-url" placeholder="https://...">
-    <div class="grid" style="margin-top:4px">
-      <div><label class="f" for="add-emp">Employer <span class="muted small">(if the page does not say)</span></label><input type="text" id="add-emp"></div>
-      <div><label class="f" for="add-title">Job title <span class="muted small">(if the page does not say)</span></label><input type="text" id="add-title"></div>
-    </div>
-    <div class="row" style="margin-top:12px"><button class="b primary" id="btn-add">Read and add</button></div>
-  </div>
-</section>
-
 <!-- DOCUMENTS -->
 <section class="view" id="v-docs">
-  <h1>Documents</h1>
-  <p class="muted" style="margin-top:-6px">CVs and cover letters for the postings you accepted. They are drafts on your computer; nothing is ever sent.</p>
-  <div class="row local-only" style="margin-bottom:12px"><button class="b" id="btn-open-out">Open the documents folder</button></div>
+  <div class="head"><h1>Documents</h1>
+    <button class="b sm local-only" id="btn-open-out"><svg class="ic"><use href="#i-folder"/></svg>Open the documents folder</button></div>
+  <p class="muted lead">CVs and cover letters for the jobs you accepted. They are drafts on your computer; nothing is ever sent. How they are written is in Settings &gt; Writing style.</p>
   <div class="card cloud-only"><b>Documents are made on your computer.</b>
-    <div class="muted small">Your CV never comes online. Open the Job Agent app on your computer and connect it to this page (Settings &gt; Online search); your accepted postings appear there under Documents.</div></div>
+    <div class="muted small">Your CV never comes online. Open the Job Agent app on your computer and connect it to this page (Settings &gt; Online search); your accepted jobs appear there under Documents.</div></div>
   <div id="dlist"></div>
 </section>
 
 <!-- SETUP -->
 <section class="view" id="v-setup">
   <h1>Setup</h1>
-  <h2 style="margin-top:0" class="local-only">Your CV or cover letter (optional)</h2>
-  <div class="card local-only">
-    <div class="drop" id="drop">Drop a CV or cover letter here (PDF, Word, text), or click to choose a file.
-      <div class="small" style="margin-top:6px">It stays on your computer.</div></div>
-    <div class="row" style="margin-top:10px">
-      <label class="small"><input type="radio" name="upkind" value="cv" checked> CV</label>
-      <label class="small"><input type="radio" name="upkind" value="cl"> Cover letter</label>
+  <p class="muted lead">What you are looking for. The first two are all a search needs; the rest is optional.</p>
+  <div class="subnav" data-tab="setup">
+    <button data-s="search"><b>1</b> What to search</button>
+    <button data-s="sites"><b>2</b> Countries and job sites</button>
+    <button data-s="employers">Employers to watch <i>optional</i></button>
+    <button data-s="cv" class="local-only">Your CV <i>optional</i></button>
+  </div>
+
+  <div class="sub" id="s-setup-search">
+    <p class="muted small"><span class="local-only">Your search words, places and profile.</span><span class="cloud-only">Your search words and places.</span> Save at the bottom of the form.</p>
+    <iframe class="form" id="form" title="Search setup and profile"></iframe>
+  </div>
+
+  <div class="sub" id="s-setup-sites">
+    <p class="muted small" style="margin-top:0">Choose the countries you look for work in. Each country shows its credible job sites: the public employment service and the main private boards, checked against official sources.</p>
+    <h2 style="margin-top:4px">Countries</h2>
+    <div class="card"><div id="countries" class="muted small">Loading...</div></div>
+    <h2>Sites to check</h2>
+    <p class="muted small" style="margin-top:-4px">Untick a site you do not want to use. Sites marked "open yourself" have no automatic search: open them from here, or let your agent read them (read only, nothing is ever applied for or sent).</p>
+    <div id="site-list"></div>
+    <details class="card more">
+      <summary><b>More</b>: sources searched automatically, and your own sites</summary>
+      <div style="margin-top:10px"><b>Searched automatically</b>
+        <div class="muted small">These run on every search. Services that need a key get it in Settings &gt; AI and services.</div>
+        <div id="src"></div>
+        <div class="row" style="margin-top:8px"><button class="b primary" id="btn-save-src">Save</button><span id="src-r" class="small muted"></span></div></div>
+      <div style="margin-top:16px"><b>Other sites</b>
+        <div class="muted small">One per line: a name, a vertical bar, and the address.</div>
+        <textarea id="custom-sites" placeholder="Example board | https://jobs.example.com" style="min-height:80px;margin-top:8px"></textarea></div>
+    </details>
+    <div class="row"><button class="b primary" id="btn-save-sites">Save job sites</button><span id="sites-r" class="small muted"></span></div>
+    <p class="small muted" id="sites-checked"></p>
+  </div>
+
+  <div class="sub" id="s-setup-employers">
+    <div class="card">
+      <p class="muted small" style="margin-top:0">Companies whose careers pages are checked on every search. One per line: the employer's name, a vertical bar, and its careers page. Pages on Greenhouse, Lever, Ashby, Workday or SmartRecruiters are read through their job boards; other pages for job links.</p>
+      <textarea id="emps" placeholder="Example AB | https://example.com/careers" style="min-height:140px"></textarea>
+      <div class="row" style="margin-top:8px"><button class="b primary" id="btn-emps">Save employers</button><span id="emps-r" class="small muted"></span></div>
     </div>
-    <input type="file" id="file" accept=".pdf,.docx,.txt,.md" hidden>
-    <div id="up-result" class="small" style="margin-top:8px"></div>
   </div>
-  <h2><span class="local-only">What to search for, and your profile</span><span class="cloud-only">What to search for</span></h2>
-  <iframe class="form" id="form" title="Search setup and profile"></iframe>
-  <h2>Employers to watch (optional)</h2>
-  <div class="card">
-    <p class="muted small" style="margin-top:0">One per line: the employer's name, a vertical bar, and its careers page. Pages on Greenhouse, Lever, Ashby, Workday or SmartRecruiters are read through their job boards; other pages for job links.</p>
-    <textarea id="emps" placeholder="Example AB | https://example.com/careers" style="min-height:140px"></textarea>
-    <div class="row" style="margin-top:8px"><button class="b primary" id="btn-emps">Save employers</button><span id="emps-r" class="small muted"></span></div>
-  </div>
-</section>
 
-<!-- JOB SITES -->
-<section class="view" id="v-sites">
-  <h1>Job sites</h1>
-  <p class="muted" style="margin-top:-6px">Choose the countries you look for work in. Each country shows its credible job sites: the public employment service and the main private boards, checked against official sources.</p>
-  <div class="card">
-    <b>Searched automatically</b>
-    <div class="muted small">These run on every search. Services that need a key get it in Settings.</div>
-    <div id="src"></div>
-    <div class="row" style="margin-top:8px"><button class="b primary" id="btn-save-src">Save</button><span id="src-r" class="small muted"></span></div>
+  <div class="sub local-only" id="s-setup-cv">
+    <div class="card">
+      <div class="drop" id="drop">Drop a CV or cover letter here (PDF, Word, text), or click to choose a file.
+        <div class="small" style="margin-top:6px">It stays on your computer. With it, documents use your own wording instead of placeholders.</div></div>
+      <div class="row" style="margin-top:10px">
+        <label class="small"><input type="radio" name="upkind" value="cv" checked> CV</label>
+        <label class="small"><input type="radio" name="upkind" value="cl"> Cover letter</label>
+      </div>
+      <input type="file" id="file" accept=".pdf,.docx,.txt,.md" hidden>
+      <div id="up-result" class="small" style="margin-top:8px"></div>
+    </div>
   </div>
-  <h2>Countries</h2>
-  <div class="card"><div id="countries" class="muted small">Loading...</div></div>
-  <h2>Sites to check</h2>
-  <p class="muted small" style="margin-top:-4px">Untick a site you do not want to use. Sites marked "open yourself" have no automatic search: open them from here, or let your agent read them (read only, nothing is ever applied for or sent).</p>
-  <div id="site-list"></div>
-  <div class="card">
-    <b>Other sites</b>
-    <div class="muted small">One per line: a name, a vertical bar, and the address.</div>
-    <textarea id="custom-sites" placeholder="Example board | https://jobs.example.com" style="min-height:80px;margin-top:8px"></textarea>
-  </div>
-  <div class="row"><button class="b primary" id="btn-save-sites">Save job sites</button><span id="sites-r" class="small muted"></span></div>
-  <p class="small muted" id="sites-checked"></p>
-</section>
-
-<!-- WRITING STYLE -->
-<section class="view" id="v-style">
-  <h1>Writing style</h1>
-  <p class="muted" style="margin-top:-6px">Every posting gets a suggested position type and country automatically; the Documents tab shows it and lets you change it for one posting. Here you tune how each type is written. Country rules (page size, personal details, salutation, closing) are added per posting on top.</p>
-  <div class="card"><div id="ty-chips" class="muted small">Loading...</div></div>
-  <div id="ty-edit"></div>
 </section>
 
 <!-- SETTINGS -->
 <section class="view" id="v-settings">
   <h1>Settings</h1>
-  <div class="card cloud-only">
-    <b>Daily search</b>
-    <div class="muted small" id="cloud-sch"></div>
-  </div>
-  <div class="card cloud-only">
-    <b>Connect your computer</b>
-    <p class="muted small">CVs, cover letters and documents never come here. To make documents for the postings you accept, open the Job Agent app on your computer, go to <b>Settings &gt; Online search</b>, and enter this page's address and the sync token you chose when you deployed it. The app then fetches your postings and decisions and makes the documents on your computer.</p>
-    <div class="small">Address: <b id="cloud-url"></b></div>
-  </div>
-  <div class="card local-only">
-    <b>Online search (optional)</b>
-    <p class="muted small">If you deployed Job Agent on your own Cloudflare account, the search runs there every day and this app fetches the postings and your decisions from it. Your CV and documents stay here.</p>
-    <label class="f" for="c-url">Address of your online Job Agent</label>
-    <input type="url" id="c-url" placeholder="https://job-agent.your-name.workers.dev">
-    <label class="f" for="c-token">Sync token <span class="muted small" id="c-token-s"></span></label>
-    <input type="password" id="c-token" autocomplete="off">
-    <div class="row" style="margin-top:10px"><button class="b primary" id="btn-cloud">Save and fetch now</button>
-      <button class="b" id="btn-cloud-off">Disconnect</button><span class="small muted" id="c-state"></span></div>
-  </div>
-  <div class="card local-only">
-    <b>Run every morning</b>
-    <div class="switch"><input type="checkbox" id="sch"><label for="sch" id="sch-text">off</label></div>
-    <div class="muted small">Searches on your search day and refreshes on the other days, even when this window is closed. Your computer must be on (a Mac catches up after waking).</div>
-  </div>
-  <div class="card">
-    <div class="local-only">
-    <b>AI help (optional)</b>
-    <p class="muted small">With your own Anthropic API key, the app can read your CV into your profile, draft tailored CVs and cover letters, and review new postings. This sends that material to Anthropic's API when you use it. Without a key, use "Copy for Claude" and any Claude chat instead.</p>
-    <label class="f" for="k-anthropic">Anthropic API key <span class="muted small" id="k-anthropic-s"></span></label>
-    <input type="password" id="k-anthropic" placeholder="sk-ant-..." autocomplete="off">
-    <div class="switch"><input type="checkbox" id="enr"><label for="enr">Review new postings with AI after each search</label></div>
-    <div class="switch"><input type="checkbox" id="enr-prof"><label for="enr-prof">Include my profile in the review (gives a fit score)</label></div>
+  <div class="settings-wrap">
+    <div class="subnav side" data-tab="settings">
+      <span class="grp">Basics</span>
+      <button data-s="daily">Daily search</button>
+      <span class="grp">Fine-tuning</span>
+      <button data-s="style" class="local-only">Writing style</button>
+      <button data-s="ai">AI and services</button>
+      <button data-s="online" class="local-only">Online search</button>
+      <span class="grp local-only">Privacy</span>
+      <button data-s="network" class="local-only">Network activity</button>
+      <span class="grp">Maintenance</span>
+      <button data-s="maint">Update and uninstall</button>
     </div>
-    <h2>Optional search services</h2>
-    <label class="f" for="k-jsearch">JSearch API key (Google for Jobs: LinkedIn, Indeed, company sites) <span class="muted small" id="k-jsearch-s"></span></label>
-    <input type="password" id="k-jsearch" autocomplete="off">
-    <div class="grid">
-      <div><label class="f" for="k-adzuna-id">Adzuna app id <span class="muted small" id="k-adzuna-id-s"></span></label><input type="text" id="k-adzuna-id" autocomplete="off"></div>
-      <div><label class="f" for="k-adzuna">Adzuna app key <span class="muted small" id="k-adzuna-s"></span></label><input type="password" id="k-adzuna" autocomplete="off"></div>
+    <div class="settings-body">
+
+  <div class="sub" id="s-settings-daily">
+    <div class="card cloud-only">
+      <b>Daily search</b>
+      <div class="muted small" id="cloud-sch"></div>
     </div>
-    <div class="row" style="margin-top:12px"><button class="b primary" id="btn-save-set">Save settings</button></div>
-  </div>
-  <div class="card local-only">
-    <div class="row"><b>Network activity</b><span class="spacer"></span><button class="b sm" id="net-refresh">Refresh</button></div>
-    <p class="muted small" style="margin:4px 0 0">What this app received from the internet and what it sent, recorded on this computer for every request, including the ones made in the background (daily run, sync). API keys are never shown or recorded.</p>
-    <details class="info" style="margin-top:8px"><summary>What can leave this computer, and when</summary><div><ul class="plain">
-      <li><b>Your search terms and places</b> go to the job sources you switched on (Job sites tab), during a search.</li>
-      <li><b>Employer job boards, careers pages and posting pages</b> are only requested by address; nothing about you is sent.</li>
-      <li><b>To Anthropic</b>, with your own key only: when you press "Write with AI" or read a CV with AI, and after each search if "Review new postings with AI" is on. Each entry below names the material it carried.</li>
-      <li><b>To your online Job Agent</b>, if connected: your accept/reject decisions, which postings have documents, and your employer list. Never your CV, profile or documents.</li>
-      <li><b>Never</b>: no analytics, tracking or reports to anyone else.</li>
-      <li>Not in this list: installing the Python packages on first start (from pypi.org), and the extra files a page loads itself when it is read in the headless browser.</li>
-    </ul></div></details>
-    <div id="net-sum" class="small muted" style="margin-top:8px">Loading...</div>
-    <details class="info" style="margin-top:8px"><summary>Recent requests</summary><div class="netwrap" id="net-recent"></div></details>
-  </div>
-  <div class="card local-only" id="maint">
-    <b>Update and uninstall</b>
-    <div class="row" style="margin-top:8px"><span id="up-state" class="small muted">Version <span class="ver"></span>.</span><span class="spacer"></span>
-      <button class="b" id="up-check">Check for updates</button><button class="b primary" id="up-go" data-job hidden>Update now</button></div>
-    <div id="un-box" hidden style="margin-top:10px">
-      <div class="small">Uninstalling removes:</div><ul class="plain small" id="un-plan"></ul>
-      <div class="switch"><input type="checkbox" id="un-data"><label for="un-data">Also delete my job-search folder (postings, CVs, letters, documents)</label></div>
-      <div class="switch" id="un-engine-row" hidden><input type="checkbox" id="un-engine"><label for="un-engine">Also delete the engine folder</label></div>
-      <div class="row" style="margin-top:8px"><button class="b bad on" id="un-go">Uninstall Job Agent</button><button class="b" id="un-cancel">Cancel</button></div>
+    <div class="card cloud-only">
+      <b>Connect your computer</b>
+      <p class="muted small">CVs, cover letters and documents never come here. To make documents for the jobs you accept, open the Job Agent app on your computer, go to <b>Settings &gt; Online search</b>, and enter this page's address and the sync token you chose when you deployed it. The app then fetches your jobs and decisions and makes the documents on your computer.</p>
+      <div class="small">Address: <b id="cloud-url"></b></div>
     </div>
-    <div class="row" style="margin-top:10px" id="un-open-row"><button class="b bad" id="un-open">Uninstall...</button></div>
-  </div>
-  <div class="card local-only">
-    <b>Start over</b>
-    <p class="muted small" style="margin:4px 0 0">Resets the app to a fresh start. Nothing is deleted: what you reset is moved to a dated folder under <i>backups</i> in your agent folder, so you can get it back.</p>
-    <div id="rs-box" hidden>
-      <div id="rs-parts" style="margin-top:8px"></div>
-      <div class="row" style="margin-top:8px"><button class="b bad on" id="rs-go">Move to a backup and start over</button>
-        <button class="b" id="rs-cancel">Cancel</button></div>
+    <div class="card local-only">
+      <b>Run every morning</b>
+      <div class="switch"><input type="checkbox" id="sch"><label for="sch" id="sch-text">off</label></div>
+      <div class="muted small">Searches on your search day and refreshes on the other days, even when the app is closed. Your computer must be on (a Mac catches up after waking).</div>
     </div>
-    <div class="row" style="margin-top:10px" id="rs-open-row"><button class="b bad" id="rs-open">Start over...</button></div>
-    <div class="small" id="rs-r" style="margin-top:8px"></div>
+    <div class="card">
+      <b>About</b>
+      <div class="small muted" id="about"></div>
+    </div>
   </div>
-  <div class="card">
-    <b>About</b>
-    <div class="small muted" id="about"></div>
+
+  <div class="sub local-only" id="s-settings-style">
+    <p class="muted small" style="margin-top:0">Every job gets a suggested position type and country automatically; the Documents tab shows it and lets you change it for one job. Here you tune how each type is written. Country rules (page size, personal details, salutation, closing) are added per job on top.</p>
+    <div class="card"><div id="ty-chips" class="muted small">Loading...</div></div>
+    <div id="ty-edit"></div>
+  </div>
+
+  <div class="sub" id="s-settings-ai">
+    <div class="card">
+      <div class="local-only">
+      <b>AI help (optional)</b>
+      <p class="muted small">With your own Anthropic API key, the app can read your CV into your profile, draft tailored CVs and cover letters, and review new jobs. This sends that material to Anthropic's API when you use it. Without a key, use "Copy for Claude" and any Claude chat instead.</p>
+      <label class="f" for="k-anthropic">Anthropic API key <span class="muted small" id="k-anthropic-s"></span></label>
+      <input type="password" id="k-anthropic" placeholder="sk-ant-..." autocomplete="off">
+      <div class="switch"><input type="checkbox" id="enr"><label for="enr">Review new jobs with AI after each search</label></div>
+      <div class="switch"><input type="checkbox" id="enr-prof"><label for="enr-prof">Include my profile in the review (gives a fit score)</label></div>
+      </div>
+      <h2>Optional search services</h2>
+      <label class="f" for="k-jsearch">JSearch API key (Google for Jobs: LinkedIn, Indeed, company sites) <span class="muted small" id="k-jsearch-s"></span></label>
+      <input type="password" id="k-jsearch" autocomplete="off">
+      <div class="grid">
+        <div><label class="f" for="k-adzuna-id">Adzuna app id <span class="muted small" id="k-adzuna-id-s"></span></label><input type="text" id="k-adzuna-id" autocomplete="off"></div>
+        <div><label class="f" for="k-adzuna">Adzuna app key <span class="muted small" id="k-adzuna-s"></span></label><input type="password" id="k-adzuna" autocomplete="off"></div>
+      </div>
+      <div class="row" style="margin-top:12px"><button class="b primary" id="btn-save-set">Save settings</button></div>
+    </div>
+  </div>
+
+  <div class="sub local-only" id="s-settings-online">
+    <div class="card">
+      <b>Online search (optional)</b>
+      <p class="muted small">If you deployed Job Agent on your own Cloudflare account, the search runs there every day and this app fetches the jobs and your decisions from it. Your CV and documents stay here.</p>
+      <label class="f" for="c-url">Address of your online Job Agent</label>
+      <input type="url" id="c-url" placeholder="https://job-agent.your-name.workers.dev">
+      <label class="f" for="c-token">Sync token <span class="muted small" id="c-token-s"></span></label>
+      <input type="password" id="c-token" autocomplete="off">
+      <div class="row" style="margin-top:10px"><button class="b primary" id="btn-cloud">Save and fetch now</button>
+        <button class="b" id="btn-cloud-off">Disconnect</button><span class="small muted" id="c-state"></span></div>
+    </div>
+  </div>
+
+  <div class="sub local-only" id="s-settings-network">
+    <div class="card">
+      <div class="row"><b>Network activity</b><span class="spacer"></span><button class="b sm" id="net-refresh">Refresh</button></div>
+      <p class="muted small" style="margin:4px 0 0">What this app received from the internet and what it sent, recorded on this computer for every request, including the ones made in the background (daily run, sync). API keys are never shown or recorded.</p>
+      <details class="info" style="margin-top:8px"><summary>What can leave this computer, and when</summary><div><ul class="plain">
+        <li><b>Your search words and places</b> go to the job sources you switched on (Setup &gt; Countries and job sites), during a search.</li>
+        <li><b>Employer job boards, careers pages and posting pages</b> are only requested by address; nothing about you is sent.</li>
+        <li><b>To Anthropic</b>, with your own key only: when you press "Write with AI" or read a CV with AI, and after each search if "Review new jobs with AI" is on. Each entry below names the material it carried.</li>
+        <li><b>To your online Job Agent</b>, if connected: your accept/reject decisions, which jobs have documents, and your employer list. Never your CV, profile or documents.</li>
+        <li><b>To GitHub</b>, when you check for or install an update: nothing about you.</li>
+        <li><b>Never</b>: no analytics, tracking or reports to anyone else.</li>
+        <li>Not in this list: installing the Python packages on first start (from pypi.org), and the extra files a page loads itself when it is read in the headless browser.</li>
+      </ul></div></details>
+      <div id="net-sum" class="small muted" style="margin-top:8px">Loading...</div>
+      <details class="info" style="margin-top:8px"><summary>Recent requests</summary><div class="netwrap" id="net-recent"></div></details>
+    </div>
+  </div>
+
+  <div class="sub" id="s-settings-maint">
+    <div class="card local-only" id="maint">
+      <b>Update and uninstall</b>
+      <div class="row" style="margin-top:8px"><span id="up-state" class="small muted">Version <span class="ver"></span>.</span><span class="spacer"></span>
+        <button class="b" id="up-check">Check for updates</button><button class="b primary" id="up-go" data-job hidden>Update now</button></div>
+      <div id="un-box" hidden style="margin-top:10px">
+        <div class="small">Uninstalling removes:</div><ul class="plain small" id="un-plan"></ul>
+        <div class="switch"><input type="checkbox" id="un-data"><label for="un-data">Also delete my job-search folder (jobs, CVs, letters, documents)</label></div>
+        <div class="switch" id="un-engine-row" hidden><input type="checkbox" id="un-engine"><label for="un-engine">Also delete the engine folder</label></div>
+        <div class="row" style="margin-top:8px"><button class="b bad on" id="un-go">Uninstall Job Agent</button><button class="b" id="un-cancel">Cancel</button></div>
+      </div>
+      <div class="row" style="margin-top:10px" id="un-open-row"><button class="b bad" id="un-open">Uninstall...</button></div>
+    </div>
+    <div class="card local-only">
+      <b>Start over</b>
+      <p class="muted small" style="margin:4px 0 0">Resets the app to a fresh start. Nothing is deleted: what you reset is moved to a dated folder under <i>backups</i> in your agent folder, so you can get it back.</p>
+      <div id="rs-box" hidden>
+        <div id="rs-parts" style="margin-top:8px"></div>
+        <div class="row" style="margin-top:8px"><button class="b bad on" id="rs-go">Move to a backup and start over</button>
+          <button class="b" id="rs-cancel">Cancel</button></div>
+      </div>
+      <div class="row" style="margin-top:10px" id="rs-open-row"><button class="b bad" id="rs-open">Start over...</button></div>
+      <div class="small" id="rs-r" style="margin-top:8px"></div>
+    </div>
+    <div class="card cloud-only"><b>Maintenance</b><div class="muted small">Updates, uninstalling and starting over are in the Job Agent app on your computer. The online page is updated by deploying it again from your Cloudflare account.</div></div>
+  </div>
+
+    </div>
   </div>
 </section>
 </main>
@@ -368,17 +535,40 @@ function toast(msg) { const t = $('#toast'); t.textContent = msg; t.classList.ad
 function fileUrl(rel) { return '/file?p=' + encodeURIComponent(rel) + '&t=' + encodeURIComponent(API.token); }
 
 // ----------------------------------------------------------- navigation
-function show(v) {
+// Five tabs. Setup and Settings have sections (sub-navigation); older links
+// (#sites, #style, #add, #jobs) still lead to the same place.
+const ALIAS = { sites: ['setup', 'sites'], style: ['settings', 'style'], add: ['postings', null], jobs: ['postings', null] };
+const FIRST = { setup: 'search', settings: 'daily' };
+const LAST_SUB = {};
+function show(v, sub) {
+  if (v === 'add') $('#v-add').hidden = false;
+  if (ALIAS[v]) { sub = sub || ALIAS[v][1]; v = ALIAS[v][0]; }
+  if (!$('#v-' + v)) v = 'home';
   $$('#nav button').forEach(b => b.classList.toggle('on', b.dataset.v === v));
   $$('section.view').forEach(s => s.classList.toggle('on', s.id === 'v-' + v));
-  if (v === 'setup') { if (!$('#form').src) $('#form').src = '/form'; loadEmployers(); }
   if (v === 'settings') loadSettings();
-  if (v === 'sites') loadSites();
-  if (v === 'style') loadStyle();
   if (v === 'postings' || v === 'docs') loadPostings();
-  history.replaceState(null, '', '#' + v);
+  if (FIRST[v]) showSub(v, sub || LAST_SUB[v] || FIRST[v]);
+  else history.replaceState(null, '', '#' + v);
+  window.scrollTo(0, 0);
+}
+function showSub(tab, s) {
+  const btns = $$(`.subnav[data-tab="${tab}"] button`).filter(b => getComputedStyle(b).display !== 'none');
+  if (!btns.some(b => b.dataset.s === s)) s = btns[0].dataset.s;          // a section not offered online
+  btns.forEach(b => b.classList.toggle('on', b.dataset.s === s));
+  $$(`#v-${tab} .sub`).forEach(x => x.classList.toggle('on', x.id === `s-${tab}-${s}`));
+  LAST_SUB[tab] = s;
+  history.replaceState(null, '', `#${tab}/${s}`);
+  if (tab === 'setup' && s === 'search' && !$('#form').src) $('#form').src = '/form';
+  if (tab === 'setup' && s === 'sites') loadSites();
+  if (tab === 'setup' && s === 'employers') loadEmployers();
+  if (tab === 'settings' && s === 'style') loadStyle();
+  if (tab === 'settings' && s === 'network') loadNet();
 }
 $$('#nav button').forEach(b => b.onclick = () => show(b.dataset.v));
+$$('.subnav button').forEach(b => b.onclick = () => showSub(b.closest('.subnav').dataset.tab, b.dataset.s));
+$('#add-toggle').onclick = () => { const a = $('#v-add'); a.hidden = !a.hidden; if (!a.hidden) $('#add-url').focus(); };
+function runSearchFromFlow() { capOn('search') ? runJob('/api/run', { mode: 'weekly' }) : show('setup', 'search'); }
 
 // ----------------------------------------------------------- jobs
 function startJob(j) { if (!j) return; lastJob = j.id; renderJob(j); clearInterval(jobTimer); jobTimer = setInterval(pollJob, 900); }
@@ -416,11 +606,21 @@ async function refresh() {
   $('#btn-search').disabled = !capOn('search');
   $('#home-setup').innerHTML = capOn('search') ? '' :
     `<div class="card attn"><b>Start here:</b> tell the agent what to search for.
-     <div class="row" style="margin-top:10px"><button class="b primary" onclick="show('setup')">Set up my search</button></div></div>`;
+     <div class="row" style="margin-top:10px"><button class="b primary" onclick="show('setup','search')">Set up my search</button></div></div>`;
   $('#stats').innerHTML = [
-    ['undecided', 'postings to decide on', 'postings'], ['accepted_waiting', 'accepted, waiting for documents', 'docs'],
-    ['active', 'open postings tracked', 'postings'], ['rejected', 'rejected', 'postings'],
-  ].map(([k, l, v]) => `<div class="card stat" onclick="${k==='rejected' ? "filter='rejected';" : ''}show('${v}')"><div class="n">${c[k]}</div><div class="l">${l}</div></div>`).join('');
+    ['undecided', 'jobs to decide on', 'postings', 'i-filter'], ['accepted_waiting', 'accepted, waiting for documents', 'docs', 'i-doc'],
+    ['active', 'open jobs tracked', 'postings', 'i-jobs'], ['rejected', 'rejected', 'postings', 'i-check'],
+  ].map(([k, l, v, ic]) => `<div class="card stat" onclick="${k==='rejected' ? "filter='rejected';" : ''}show('${v}')">
+      <span class="si"><svg class="ic"><use href="#${ic}"/></svg></span><div><div class="n">${c[k]}</div><div class="l">${l}</div></div></div>`).join('');
+  $('#fl-new').textContent = c.undecided;
+  $('#fl-search').textContent = S.schedule.on ? 'every morning by itself, or now' : 'when you press Search now';
+  if (!CLOUD) $('#pr-where').textContent = ` (${S.home})`;
+  $('#pr-bg').textContent = CLOUD
+    ? `The search runs on your own Cloudflare account: ${S.schedule.text}. Nothing runs on anyone else's computer.`
+    : `This app runs only while its tab is open; closing the tab stops it. Daily search: ${S.schedule.on
+        ? S.schedule.text.replace(/^runs /, '') + ', even when the app is closed' : 'off (Settings > Daily search)'}.`
+      + (S.cloud && S.cloud.connected ? ' Your online Job Agent searches on Cloudflare; this app fetches from it while it is open.' : '')
+      + ' Nothing else.';
   const att = [];
   if (S.awaiting_extraction.length) {
     att.push(`<div class="card attn"><b>Your uploaded documents are not in your profile yet.</b>
@@ -969,11 +1169,11 @@ if (!CLOUD) {
 }
 
 // ----------------------------------------------------------- start
-refresh().then(() => { loadPostings(); const v = location.hash.slice(1);
+refresh().then(() => { loadPostings(); const [v, sub] = location.hash.slice(1).split('/');
   if (v === 'update' || v === 'uninstall') {          // the update and uninstall shortcuts open the app here
-    show('settings'); history.replaceState(null, '', '#settings');
+    show('settings', 'maint');
     setTimeout(() => { $('#maint').scrollIntoView({ block: 'center' }); v === 'update' ? checkUpdate() : $('#un-open').click(); }, 300);
-  } else if (v && $('#v-' + v)) show(v); });
+  } else if (v) show(v, sub); });
 setInterval(() => { if (!jobTimer && document.visibilityState === 'visible') refresh(); }, 30000);
 </script>
 </body>
