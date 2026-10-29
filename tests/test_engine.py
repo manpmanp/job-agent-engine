@@ -513,6 +513,21 @@ class TestNetworkLog(unittest.TestCase):
         self.assertGreater(ai["sent_bytes"], 0)
 
 
+class TestWindowsConsole(unittest.TestCase):
+    def test_child_programs_start_without_a_window_on_windows(self):
+        import subprocess
+        from unittest import mock
+        import engine
+
+        class FakePopen:
+            def __init__(self, *a, **kw):
+                self.kw = kw
+        with mock.patch("os.name", "nt"), mock.patch.object(subprocess, "Popen", FakePopen):
+            engine._hide_console_windows()
+            self.assertEqual(subprocess.Popen(["schtasks"]).kw["creationflags"], 0x08000000)
+            self.assertEqual(subprocess.Popen(["x"], creationflags=0x10).kw["creationflags"], 0x10)   # explicit flags kept
+
+
 class TestExtractAndSources(unittest.TestCase):
     def setUp(self):
         http.DELAY = 0

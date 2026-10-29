@@ -86,8 +86,22 @@ def _task_name(home):
     return f"JobAgentEngine-{_id(home)}"
 
 
-def status(home):
-    """(installed: bool, description)"""
+_status_cache = {}
+
+
+def status(home, fresh=False):
+    """(installed: bool, description). The app asks often (every refresh), so
+    the answer is kept for a minute; install and remove clear it."""
+    import time
+    hit = _status_cache.get(home.root)
+    if hit and not fresh and time.time() - hit[0] < 60:
+        return hit[1]
+    res = _status(home)
+    _status_cache[home.root] = (time.time(), res)
+    return res
+
+
+def _status(home):
     try:
         if sys.platform == "darwin":
             on = os.path.exists(_plist_path(home))
@@ -132,6 +146,7 @@ def refresh(home):
 
 
 def install(home):
+    _status_cache.pop(home.root, None)
     os.makedirs(os.path.dirname(_log(home)), exist_ok=True)
     if sys.platform == "darwin":
         p = _plist_path(home)
@@ -158,6 +173,7 @@ def install(home):
 
 
 def remove(home):
+    _status_cache.pop(home.root, None)
     if sys.platform == "darwin":
         p = _plist_path(home)
         if os.path.exists(p):
