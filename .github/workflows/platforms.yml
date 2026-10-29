@@ -22,7 +22,12 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with: { python-version: "3.12" }
-      - run: pip install -r requirements.txt && python -m unittest discover -s tests
+      - shell: bash
+        run: |
+          pip install -r requirements.txt
+          python -m unittest discover -s tests > unit.log 2>&1 && ok=1 || ok=0
+          tail -5 unit.log
+          if [ "$ok" = 0 ]; then python tests/gh_annotate.py error "unit tests on ${{ runner.os }}" unit.log 6000; exit 1; fi
 
   check:
     strategy:
@@ -47,7 +52,10 @@ jobs:
             app-Linux)   CMD='["dist/JobAgent"]' ;;
             source-*)    CMD='["python", "launchers/start.py"]' ;;
           esac
-          python tests/platform_check.py --mode "${{ matrix.mode }}" --cmd "$CMD" --out "platform-${{ runner.os }}-${{ matrix.mode }}.json"
+          OUT="platform-${{ runner.os }}-${{ matrix.mode }}.json"
+          python tests/platform_check.py --mode "${{ matrix.mode }}" --cmd "$CMD" --out "$OUT" > check.log 2>&1 && ok=1 || ok=0
+          if [ "$ok" = 1 ]; then python tests/gh_annotate.py notice "result ${{ runner.os }} ${{ matrix.mode }}" "$OUT" 6000
+          else python tests/gh_annotate.py error "check ${{ runner.os }} ${{ matrix.mode }}" check.log 6000; exit 1; fi
       - uses: actions/upload-artifact@v4
         if: always()
         with: { name: "platform-${{ runner.os }}-${{ matrix.mode }}", path: "platform-*.json", if-no-files-found: ignore }
@@ -64,6 +72,8 @@ jobs:
         run: |
           set -o pipefail
           echo '```' >> "$GITHUB_STEP_SUMMARY"
-          rc=0; python tests/platform_compare.py results/*.json | tee -a "$GITHUB_STEP_SUMMARY" || rc=$?
+          rc=0; python tests/platform_compare.py results/*.json > compare.log 2>&1 || rc=$?
+          cat compare.log | tee -a "$GITHUB_STEP_SUMMARY"
+          python tests/gh_annotate.py "$([ $rc = 0 ] && echo notice || echo error)" "side by side" compare.log 6000
           echo '```' >> "$GITHUB_STEP_SUMMARY"
           exit $rc
