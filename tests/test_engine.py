@@ -456,6 +456,57 @@ class TestConventions(unittest.TestCase):
         self.assertFalse(d.check_spec(spec, self.c.checks_for(self.h, jr)))  # not a rule in the Nordic market
 
 
+class TestReset(unittest.TestCase):
+    def test_reset_moves_to_backup_and_recreates(self):
+        from engine import reset as rs
+        h = make_home()
+        with open(os.path.join(h.path("inputs"), "secrets.json"), "w") as f:
+            json.dump({"jsearch_api_key": "k"}, f)
+        with open(h.path("document_choices"), "w") as f:
+            json.dump({"x||y": {"type": "phd"}}, f)
+        res = rs.reset(h, ["settings", "postings"])
+        self.assertTrue(os.path.isdir(res["backup"]))
+        self.assertIn("inputs/search_config.json", [p.replace(os.sep, "/") for p in res["moved"]])
+        with open(os.path.join(res["backup"], "inputs", "search_config.json")) as f:
+            self.assertEqual(json.load(f), CONFIG)                              # the old settings are kept in the backup
+        self.assertEqual(h.search_config()["keywords"], [])                    # fresh blank settings
+        self.assertTrue(os.path.exists(h.path("tracker")))                     # state recreated
+        self.assertFalse(os.path.exists(h.path("document_choices")))
+        self.assertTrue(os.path.exists(os.path.join(h.path("inputs"), "secrets.json")))   # keys not chosen: kept
+        with self.assertRaises(ValueError):
+            rs.reset(h, [])
+
+
+class TestNetworkLog(unittest.TestCase):
+    def test_requests_are_recorded_without_secrets(self):
+        from engine import netlog
+        h = make_home()
+        old = (http.transport, http.LOG_PATH, http.DELAY)
+        http.transport = lambda m, u, hd, d: http.Response(200, b'{"ok": true}', None, u, "application/json")
+        http.LOG_PATH, http.DELAY = netlog.log_path(h), 0
+        try:
+            http.get_json("https://api.adzuna.com/v1/api/jobs/gb/search/1?what=FPGA&where=Cambridge&app_id=ID1&app_key=SECRET9",
+                          headers={"Authorization": "Bearer TOKEN7"})
+            with http.sending("your profile and the posting"):
+                http.post_json("https://api.anthropic.com/v1/messages", {"model": "m", "messages": []}, headers={"x-api-key": "sk-XYZ"})
+            http.post_json("https://example.com/api/sync/decisions", {"decisions": {}})
+        finally:
+            http.transport, http.LOG_PATH, http.DELAY = old
+        with open(netlog.log_path(h), encoding="utf-8") as f:
+            raw = f.read()
+        for secret in ("SECRET9", "ID1", "TOKEN7", "sk-XYZ"):
+            self.assertNotIn(secret, raw)
+        self.assertIn("what=FPGA", raw)                                         # the search terms you share are shown
+        rep = netlog.report(h)
+        self.assertEqual(rep["total"], 3)
+        by = {g["purpose"]: g for g in rep["summary"]}
+        self.assertIn("Job search: Adzuna", by)
+        self.assertIn("Your online Job Agent", by)
+        ai = next(x for x in rep["recent"] if x["host"] == "api.anthropic.com")
+        self.assertEqual(ai["sent"], "your profile and the posting")
+        self.assertGreater(ai["sent_bytes"], 0)
+
+
 class TestExtractAndSources(unittest.TestCase):
     def setUp(self):
         http.DELAY = 0
@@ -647,6 +698,16 @@ class TestApp(unittest.TestCase):
         self.assertEqual(self.j("/api/writing", {"type": "nope", "data": {}})[0], 400)
         self.j("/api/writing", {"type": "senior", "data": None})
         self.assertEqual(self.j("/api/writing/posting", {"key": "missing||x", "type": "phd"})[0], 404)
+
+    def test_reset_api_lists_parts(self):
+        code, r = self.j("/api/reset")
+        self.assertEqual([p["key"] for p in r["parts"]], ["settings", "keys", "profile", "postings", "documents"])
+        self.assertEqual(self.j("/api/reset", {"parts": []})[0], 400)
+
+    def test_network_api(self):
+        code, r = self.j("/api/network?days=7")
+        self.assertEqual(code, 200)
+        self.assertIn("summary", r)
 
     def test_template_job(self):
         import time

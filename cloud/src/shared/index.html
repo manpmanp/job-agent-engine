@@ -93,6 +93,13 @@ iframe.form { width:100%; height:78vh; border:1px solid var(--border); border-ra
 body.cloud .local-only { display:none !important; }
 body:not(.cloud) .cloud-only { display:none !important; }
 ul.plain { margin:4px 0 0 18px; padding:0; }
+[hidden] { display:none !important; }
+details.info summary { cursor:pointer; color:var(--muted); font-size:12px; } details.info ul { font-size:12px; color:var(--muted); }
+details.info li { margin:3px 0; }
+table.net { width:100%; border-collapse:collapse; font-size:12px; margin-top:8px; }
+table.net th, table.net td { text-align:left; padding:5px 6px; border-top:1px solid var(--border); vertical-align:top; }
+table.net th { color:var(--muted); font-weight:bold; } table.net td.n { text-align:right; white-space:nowrap; }
+.netwrap { overflow-x:auto; } .url { word-break:break-all; }
 .region { margin:0 0 12px; } .region b { display:block; font-size:13px; margin-bottom:6px; }
 .region .chips { margin:0; }
 .site { display:flex; gap:8px; align-items:baseline; padding:6px 0; border-top:1px solid var(--border); flex-wrap:wrap; }
@@ -291,6 +298,31 @@ details.grp > summary { cursor:pointer; font-weight:bold; color:var(--accent); }
       <div><label class="f" for="k-adzuna">Adzuna app key <span class="muted small" id="k-adzuna-s"></span></label><input type="password" id="k-adzuna" autocomplete="off"></div>
     </div>
     <div class="row" style="margin-top:12px"><button class="b primary" id="btn-save-set">Save settings</button></div>
+  </div>
+  <div class="card local-only">
+    <div class="row"><b>Network activity</b><span class="spacer"></span><button class="b sm" id="net-refresh">Refresh</button></div>
+    <p class="muted small" style="margin:4px 0 0">What this app received from the internet and what it sent, recorded on this computer for every request, including the ones made in the background (daily run, sync). API keys are never shown or recorded.</p>
+    <details class="info" style="margin-top:8px"><summary>What can leave this computer, and when</summary><div><ul class="plain">
+      <li><b>Your search terms and places</b> go to the job sources you switched on (Job sites tab), during a search.</li>
+      <li><b>Employer job boards, careers pages and posting pages</b> are only requested by address; nothing about you is sent.</li>
+      <li><b>To Anthropic</b>, with your own key only: when you press "Write with AI" or read a CV with AI, and after each search if "Review new postings with AI" is on. Each entry below names the material it carried.</li>
+      <li><b>To your online Job Agent</b>, if connected: your accept/reject decisions, which postings have documents, and your employer list. Never your CV, profile or documents.</li>
+      <li><b>Never</b>: no analytics, tracking or reports to anyone else.</li>
+      <li>Not in this list: installing the Python packages on first start (from pypi.org), and the extra files a page loads itself when it is read in the headless browser.</li>
+    </ul></div></details>
+    <div id="net-sum" class="small muted" style="margin-top:8px">Loading...</div>
+    <details class="info" style="margin-top:8px"><summary>Recent requests</summary><div class="netwrap" id="net-recent"></div></details>
+  </div>
+  <div class="card local-only">
+    <b>Start over</b>
+    <p class="muted small" style="margin:4px 0 0">Resets the app to a fresh start. Nothing is deleted: what you reset is moved to a dated folder under <i>backups</i> in your agent folder, so you can get it back.</p>
+    <div id="rs-box" hidden>
+      <div id="rs-parts" style="margin-top:8px"></div>
+      <div class="row" style="margin-top:8px"><button class="b bad on" id="rs-go">Move to a backup and start over</button>
+        <button class="b" id="rs-cancel">Cancel</button></div>
+    </div>
+    <div class="row" style="margin-top:10px" id="rs-open-row"><button class="b bad" id="rs-open">Start over...</button></div>
+    <div class="small" id="rs-r" style="margin-top:8px"></div>
   </div>
   <div class="card">
     <b>About</b>
@@ -635,8 +667,26 @@ $('#btn-cloud').onclick = async () => {
   try { await api('/api/cloud', { url: $('#c-url').value.trim(), token: $('#c-token').value.trim() }); runJob('/api/cloud/pull'); loadCloud(); } catch (e) { toast(e.message); }
 };
 $('#btn-cloud-off').onclick = async () => { try { await api('/api/cloud', { url: '', token: '__clear__' }); toast('Disconnected'); loadCloud(); refresh(); } catch (e) { toast(e.message); } };
+function fmtBytes(n) { n = +n || 0; return n < 1024 ? n + ' B' : n < 1048576 ? (n / 1024).toFixed(1) + ' kB' : (n / 1048576).toFixed(1) + ' MB'; }
+async function loadNet() {
+  if (CLOUD) return;
+  let r; try { r = await api('/api/network?days=30'); } catch (e) { $('#net-sum').textContent = e.message; return; }
+  if (!r.total) { $('#net-sum').textContent = 'Nothing recorded yet (the record starts with this version).'; $('#net-recent').innerHTML = ''; return; }
+  $('#net-sum').classList.remove('muted');
+  $('#net-sum').innerHTML = `<div>Last ${r.days} days: ${r.total} request(s), sent ${fmtBytes(r.sent_bytes)}, received ${fmtBytes(r.received_bytes)}.</div>
+    <div class="netwrap"><table class="net"><tr><th>Purpose</th><th>Sites</th><th class="n">Requests</th><th class="n">Sent</th><th class="n">Received</th><th>Last</th></tr>` +
+    r.summary.map(g => `<tr><td>${esc(g.purpose)}${g.failed ? ` <span class="tag warn">${g.failed} failed</span>` : ''}</td>
+      <td>${esc(g.hosts.slice(0, 4).join(', '))}${g.host_count > 4 ? ` and ${g.host_count - 4} more` : ''}</td>
+      <td class="n">${g.requests}</td><td class="n">${fmtBytes(g.sent_bytes)}</td><td class="n">${fmtBytes(g.received_bytes)}</td><td>${esc(g.last.replace('T', ' ').slice(0, 16))}</td></tr>`).join('') + '</table></div>';
+  $('#net-recent').innerHTML = `<table class="net"><tr><th>When</th><th>Purpose and address</th><th>Sent</th><th class="n">Out / in</th></tr>` +
+    r.recent.slice(0, 200).map(x => `<tr><td>${esc(x.ts.replace('T', ' ').slice(5, 16))}</td>
+      <td>${esc(x.purpose)}<div class="url muted">${esc(x.method)} ${esc(x.url)}</div></td>
+      <td>${esc(x.sent || (x.method === 'GET' ? 'only the address' : ''))}${x.error ? `<div class="err-line">${esc(x.error)}</div>` : ''}</td>
+      <td class="n">${fmtBytes(x.sent_bytes)} / ${fmtBytes(x.received_bytes)}</td></tr>`).join('') + '</table>';
+}
+$('#net-refresh').onclick = loadNet;
 async function loadSettings() {
-  loadCloud();
+  loadCloud(); loadNet();
   try { SET = await api('/api/settings'); } catch (e) { return toast(e.message); }
   $('#enr').checked = !!SET.enrichment.enabled; $('#enr-prof').checked = !!SET.enrichment.send_profile;
   for (const [id, k] of [['k-anthropic', 'anthropic_api_key'], ['k-jsearch', 'jsearch_api_key'], ['k-adzuna-id', 'adzuna_app_id'], ['k-adzuna', 'adzuna_app_key']]) {
@@ -656,6 +706,23 @@ async function setSchedule(on) {
   catch (e) { toast(e.message); }
 }
 $('#sch').onchange = e => setSchedule(e.target.checked);
+$('#rs-open').onclick = async () => {
+  try { const r = await api('/api/reset');
+    $('#rs-parts').innerHTML = r.parts.map(p => `<div class="switch"><input type="checkbox" id="rs-${p.key}" data-part="${p.key}" checked><label for="rs-${p.key}">${esc(p.label)}</label></div>`).join('');
+    $('#rs-box').hidden = false; $('#rs-open-row').hidden = true; $('#rs-r').textContent = '';
+  } catch (e) { toast(e.message); }
+};
+$('#rs-cancel').onclick = () => { $('#rs-box').hidden = true; $('#rs-open-row').hidden = false; };
+$('#rs-go').onclick = async () => {
+  const parts = $$('#rs-parts input:checked').map(c => c.dataset.part);
+  if (!parts.length) return toast('Choose at least one part');
+  try { const r = await api('/api/reset', { parts });
+    $('#rs-box').hidden = true; $('#rs-open-row').hidden = false;
+    $('#rs-r').innerHTML = r.backup_rel ? `Done. The previous files are in <b>${esc(r.backup_rel)}</b> in your agent folder.` : 'Done; there was nothing to move.';
+    SITES = null; WS = null; await refresh(); loadPostings(); loadSettings();
+    try { if ($('#form').getAttribute('src')) $('#form').contentWindow.location.reload(); } catch (e) { }
+  } catch (e) { toast(e.message); }
+};
 $('#btn-quit').onclick = async () => { await api('/api/quit', {}).catch(() => {}); document.body.innerHTML = '<main><h1>Job Agent has stopped.</h1><p class="muted">Start it again with the Job Agent launcher. You can close this tab.</p></main>'; };
 
 // ----------------------------------------------------------- job sites

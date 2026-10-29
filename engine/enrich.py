@@ -179,10 +179,11 @@ def enrich(home):
             and MARK not in str(r.get("Notes") or "")][:limit]
     updates, failed = [], 0
     for r in todo:
-        resp, data = http.post_json(API_URL, {
-            "model": model, "max_tokens": 1200,
-            "messages": [{"role": "user", "content": _prompt(r, descs.get(r.get("URL")), cfg, prof)}],
-        }, headers={"x-api-key": key, "anthropic-version": "2023-06-01"})
+        with http.sending("posting review: the posting's text and your search settings" + (", and a summary of your profile" if prof else "")):
+            resp, data = http.post_json(API_URL, {
+                "model": model, "max_tokens": 1200,
+                "messages": [{"role": "user", "content": _prompt(r, descs.get(r.get("URL")), cfg, prof)}],
+            }, headers={"x-api-key": key, "anthropic-version": "2023-06-01"})
         try:
             text = "".join(b.get("text", "") for b in (data or {}).get("content", []) if b.get("type") == "text")
             j = json.loads(text[text.index("{"): text.rindex("}") + 1])

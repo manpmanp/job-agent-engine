@@ -292,6 +292,12 @@ data. Your agent home (inputs, tracker, notes, decisions and generated
 documents) stays wherever you put it and should never be committed to a
 public repository.
 
+The app records every request it makes to the internet, including those
+of the daily run, and shows them under **Settings > Network activity**:
+what was sent (search terms, a named set of material for an AI draft, your
+decisions to your own online Job Agent) and how much came back. Nothing is
+sent anywhere else; there is no analytics or tracking.
+
 ## License and authorship
 
 MIT License, see `LICENSE`. Copyright (c) 2026 manpmanp.

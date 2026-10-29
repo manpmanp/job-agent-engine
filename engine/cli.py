@@ -389,6 +389,23 @@ def cmd_app(h, args):
     serve(h, port=args.port, open_browser=not args.no_browser)
 
 
+def cmd_reset(h, args):
+    from . import reset as rs
+    parts = [p.strip() for p in (args.parts or ",".join(rs.PARTS)).split(",") if p.strip()]
+    bad = [p for p in parts if p not in rs.PARTS]
+    if bad:
+        raise SystemExit(f"unknown part(s): {', '.join(bad)}; choose from: {', '.join(rs.PARTS)}")
+    print(f"Start over in {h.root}. These parts are moved to a backup folder (nothing is deleted):")
+    for p in parts:
+        print(f"  - {rs.LABELS[p]}")
+    if not args.yes:
+        if input("Type 'reset' to continue: ").strip().lower() != "reset":
+            print("nothing changed")
+            return
+    res = rs.reset(h, parts)
+    print(f"done; the previous files are in {res['backup']}" if res["backup"] else "done; there was nothing to move")
+
+
 def cmd_open(h, args):
     """Opens the weekly page in the default browser, from the local file."""
     import webbrowser
@@ -435,6 +452,8 @@ def main(argv=None):
     x = sp.add_parser("cloud"); x.add_argument("action", nargs="?", default="pull", choices=["pull", "connect", "disconnect", "search", "status"])
     x.add_argument("url", nargs="?"); x.add_argument("token", nargs="?")
     x = sp.add_parser("app"); x.add_argument("--port", type=int, default=8765); x.add_argument("--no-browser", action="store_true")
+    x = sp.add_parser("reset"); x.add_argument("--parts", help="comma list: settings,keys,profile,postings,documents (default: all)")
+    x.add_argument("--yes", action="store_true", help="do not ask")
     sp.add_parser("open")
     x = sp.add_parser("form"); x.add_argument("--port", type=int, default=8765); x.add_argument("--no-browser", action="store_true")
     sp.add_parser("demo")
@@ -448,6 +467,8 @@ def main(argv=None):
     if args.cmd == "demo":
         return cmd_demo(None, args)
     h = home_mod.resolve_home(args.home)
+    from .collect import http as _http
+    _http.LOG_PATH = os.path.join(os.path.dirname(h.path("notes")), "network_log.jsonl")
     created = ensure_home(h)
     if args.cmd == "init":
         args._created = created
@@ -458,7 +479,7 @@ def main(argv=None):
     {"init": cmd_init, "status": cmd_status, "plan": cmd_plan, "add-postings": cmd_add_postings,
      "weekly": cmd_weekly, "sync": cmd_sync, "intake": cmd_intake, "tailor": cmd_tailor,
      "checkpoint": cmd_checkpoint, "note": cmd_note, "collect": cmd_collect, "fetch": cmd_fetch, "verify": cmd_verify,
-     "enrich": cmd_enrich, "run": cmd_run, "schedule": cmd_schedule, "open": cmd_open, "form": cmd_form, "app": cmd_app, "cloud": cmd_cloud}[args.cmd](h, args)
+     "enrich": cmd_enrich, "run": cmd_run, "schedule": cmd_schedule, "open": cmd_open, "form": cmd_form, "app": cmd_app, "cloud": cmd_cloud, "reset": cmd_reset}[args.cmd](h, args)
 
 
 if __name__ == "__main__":

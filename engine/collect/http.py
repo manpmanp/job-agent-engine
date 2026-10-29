@@ -23,7 +23,11 @@ in one place:
   charset the server names,
 - retries once on timeouts and 5xx, never on 4xx,
 - never raises to the caller: every call returns a Response with .ok,
-  .status and .error, so one failing source never stops a run.
+  .status and .error, so one failing source never stops a run,
+- records every request in the agent home's state/network_log.jsonl
+  (LOG_PATH): when, where, why, the address with key-like values hidden,
+  what was sent (a short note from the caller, or the size and field names
+  of the body) and how much came back. Header values are never recorded.
 
 Tests replace `transport` with a function returning canned responses.
 """
@@ -50,6 +54,89 @@ ROBOTS_TTL = 24 * 3600
 
 _last_hit = {}
 _robots = {}
+
+LOG_PATH = None          # set by the CLI to <home>/state/network_log.jsonl
+LOG_MAX_BYTES = 2 * 1024 * 1024
+_note = None             # what the current request sends, set with sending()
+SECRET_PARAMS = re.compile(r"(key|token|secret|password|app_id|appid|auth|sig)", re.I)
+
+
+class sending:
+    """with http.sending("your profile and the posting"): http.post_json(...)
+    Names, for the network log, what personal material a request carries."""
+    def __init__(self, what):
+        self.what = what
+
+    def __enter__(self):
+        global _note
+        self._prev, _note = _note, self.what
+
+    def __exit__(self, *a):
+        global _note
+        _note = self._prev
+
+
+PURPOSES = [
+    (r"jobsearch\.api\.jobtechdev\.se", "Job search: Platsbanken (Arbetsförmedlingen)"),
+    (r"(^|\.)(jsearch|openwebninja|rapidapi)\.", "Job search: JSearch (Google for Jobs)"),
+    (r"api\.adzuna\.com", "Job search: Adzuna"),
+    (r"(hacker-news\.firebaseio\.com|hn\.algolia\.com)", "Job search: Hacker News"),
+    (r"ycombinator\.com", "Job search: Y Combinator"),
+    (r"(greenhouse\.io|lever\.co|ashbyhq\.com|myworkdayjobs\.com|smartrecruiters\.com)", "Employer job board"),
+    (r"api\.anthropic\.com", "AI (Anthropic API, your key)"),
+    (r"\.workers\.dev$", "Your online Job Agent"),
+]
+
+
+def _purpose(host, path):
+    if path.startswith("/api/sync/"):
+        return "Your online Job Agent"
+    if path.endswith("/robots.txt"):
+        return "Site rules (robots.txt)"
+    for pat, label in PURPOSES:
+        if re.search(pat, host or ""):
+            return label
+    return "Web page (posting or careers page)"
+
+
+def _safe_url(url):
+    p = urllib.parse.urlsplit(url)
+    q = urllib.parse.parse_qsl(p.query, keep_blank_values=True)
+    q = [(k, "***" if SECRET_PARAMS.search(k) else v) for k, v in q]
+    return urllib.parse.urlunsplit((p.scheme, p.netloc, p.path, urllib.parse.urlencode(q), ""))
+
+
+def _sent_summary(body, data):
+    if _note:
+        return _note
+    if data is None:
+        return ""
+    if isinstance(body, dict):
+        return "fields: " + ", ".join(sorted(str(k) for k in body))[:200]
+    return f"{len(data)} bytes"
+
+
+def log_event(method, url, status, sent_bytes, received_bytes, sent="", error=None, purpose=None):
+    """One line in the network log (also used for browser renders)."""
+    if not LOG_PATH:
+        return
+    p = urllib.parse.urlsplit(url or "")
+    rec = {"ts": time.strftime("%Y-%m-%dT%H:%M:%S"), "method": method, "host": p.hostname or "",
+           "url": _safe_url(url or ""), "purpose": purpose or _purpose(p.hostname, p.path),
+           "sent": sent, "sent_bytes": sent_bytes, "received_bytes": received_bytes, "status": status}
+    if error:
+        rec["error"] = str(error)[:200]
+    try:
+        os.makedirs(os.path.dirname(LOG_PATH), exist_ok=True)
+        if os.path.exists(LOG_PATH) and os.path.getsize(LOG_PATH) > LOG_MAX_BYTES:
+            with open(LOG_PATH, "r", encoding="utf-8") as f:
+                keep = f.readlines()[-3000:]
+            with open(LOG_PATH, "w", encoding="utf-8") as f:
+                f.writelines(keep)
+        with open(LOG_PATH, "a", encoding="utf-8") as f:
+            f.write(json.dumps(rec, ensure_ascii=False) + "\n")
+    except OSError:
+        pass
 
 
 class Response:
@@ -229,6 +316,7 @@ def request(method, url, headers=None, body=None, check_robots=False):
     for attempt in (1, 2):
         _polite_wait(url)
         r = transport(method, url, h, data)
+        log_event(method, url, r.status, len(data or b""), len(r.body or b""), _sent_summary(body, data), r.error)
         if r.error is None and r.status < 500:
             return r
         if attempt == 2:

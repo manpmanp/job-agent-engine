@@ -174,12 +174,14 @@ def pull(home, log=print):
     applied = dec.apply(home, seniority_cfg=cfg.get("seniority")) if merged else {"applied": 0}
     sent = 0
     if to_send:
-        r2, res = http.post_json(f"{url}/api/sync/decisions", {"decisions": to_send}, headers=hdr)
+        with http.sending(f"{len(to_send)} accept/reject decision(s) with their reasons and notes"):
+            r2, res = http.post_json(f"{url}/api/sync/decisions", {"decisions": to_send}, headers=hdr)
         sent = (res or {}).get("applied", 0)
     drafted = [f"{x.get('URL') or ''}||{x.get('Title') or ''}" for x in tr.read_all_rows(home.path("tracker"))
                if str(x.get("CV/Cover Letter Drafted (Y/N)") or "").upper() == "Y"]
     if drafted:
-        http.post_json(f"{url}/api/sync/drafted", {"keys": drafted}, headers=hdr)
+        with http.sending(f"which {len(drafted)} posting(s) have documents (link and title only; never the documents)"):
+            http.post_json(f"{url}/api/sync/drafted", {"keys": drafted}, headers=hdr)
     _write(os.path.join(os.path.dirname(home.path("notes")), "cloud_config.json"), data.get("config") or {})
     now = data.get("now") or datetime.now(timezone.utc).isoformat()
     st.update({"last_pull": datetime.now().isoformat(timespec="minutes"), "error": None,
@@ -194,5 +196,6 @@ def pull(home, log=print):
 def start_search(home):
     """Asks the online Job Agent to start a search now (it runs there; fetch later)."""
     url, hdr = _auth(home)
-    r, res = http.post_json(f"{url}/api/sync/run", {}, headers=hdr)
+    with http.sending("a request to start a search there"):
+        r, res = http.post_json(f"{url}/api/sync/run", {}, headers=hdr)
     return bool(res and res.get("ok")), (res or {}).get("message") or r.error or f"HTTP {r.status}"

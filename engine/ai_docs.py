@@ -176,13 +176,14 @@ def parse_json_answer(text):
     raise ValueError("the JSON object in the answer is incomplete")
 
 
-def ask(home, prompt, max_tokens=12000):
+def ask(home, prompt, max_tokens=12000, what="a request you started"):
     key = api_key(home)
     if not key:
         raise RuntimeError("no Anthropic API key (Settings, or ANTHROPIC_API_KEY)")
-    r, data = http.post_json(API_URL, {"model": _model(home), "max_tokens": max_tokens,
-                                       "messages": [{"role": "user", "content": prompt}]},
-                             headers={"x-api-key": key, "anthropic-version": "2023-06-01"})
+    with http.sending(what):
+        r, data = http.post_json(API_URL, {"model": _model(home), "max_tokens": max_tokens,
+                                           "messages": [{"role": "user", "content": prompt}]},
+                                 headers={"x-api-key": key, "anthropic-version": "2023-06-01"})
     if data is None:
         raise RuntimeError(f"API error: {r.error or 'HTTP ' + str(r.status)} {r.text()[:300] if r.body else ''}")
     return "".join(b.get("text", "") for b in data.get("content", []) if b.get("type") == "text")

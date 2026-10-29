@@ -419,6 +419,13 @@ def _make_handler(home, token, jobs, httpd_ref):
                 return self._send(200, self._settings_get())
             if u.path == "/api/employers":
                 return self._send(200, _read_json(home.path("employers"), {"mode": "extend", "employers": []}) or {})
+            if u.path == "/api/network":
+                from . import netlog
+                days = int((q.get("days") or ["30"])[0] or 30)
+                return self._send(200, netlog.report(home, days=max(1, min(days, 365))))
+            if u.path == "/api/reset":
+                from . import reset as rs
+                return self._send(200, {"parts": [{"key": k, "label": v} for k, v in rs.LABELS.items()]})
             if u.path == "/api/writing":
                 from . import conventions
                 return self._send(200, conventions.editor_data(home))
@@ -481,7 +488,8 @@ def _make_handler(home, token, jobs, httpd_ref):
                 if cloud_sync.connected(home):   # the online search uses the same list
                     url, hdr = cloud_sync._auth(home)
                     from .collect import http as _h
-                    _h.post_json(f"{url}/api/sync/config", {"employers": {"mode": "override", "employers": emps}}, headers=hdr)
+                    with _h.sending(f"your employer list ({len(emps)} names and careers pages)"):
+                        _h.post_json(f"{url}/api/sync/config", {"employers": {"mode": "override", "employers": emps}}, headers=hdr)
                 return self._send(200, {"saved": len(emps)})
             if p == "/api/cloud":
                 from . import cloud_sync
@@ -530,7 +538,9 @@ def _make_handler(home, token, jobs, httpd_ref):
 
                 def work(log):
                     log(f"writing documents for {row.get('Employer')}: {row.get('Title')} with {ai_docs._model(home)} ...")
-                    ans = ai_docs.ask(home, ai_docs.tailor_prompt(home, row))
+                    ans = ai_docs.ask(home, ai_docs.tailor_prompt(home, row),
+                                      what="document draft: your profile, uploaded CVs and letters, reference files, "
+                                           "personal rules and the posting")
                     res = ai_docs.apply_tailor_answer(home, row, ans)
                     for x in res["problems"]:
                         log(f"problem: {x}")
@@ -561,7 +571,8 @@ def _make_handler(home, token, jobs, httpd_ref):
 
                 def work(log):
                     log(f"reading {e.get('from_file') or e['id']} into your profile ...")
-                    ans = ai_docs.ask(home, ai_docs.profile_prompt(home, ai_docs.source_text(home, e), e.get("kind", "cv").upper()), 8000)
+                    ans = ai_docs.ask(home, ai_docs.profile_prompt(home, ai_docs.source_text(home, e), e.get("kind", "cv").upper()), 8000,
+                                      what="profile reading: the text of the CV or letter you uploaded")
                     ai_docs.apply_profile_answer(home, ans, e["id"])
                     log("profile updated")
                 job = jobs.run_fn("Read CV into profile", work)
@@ -586,6 +597,16 @@ def _make_handler(home, token, jobs, httpd_ref):
                 return self._send(code, res)
             if p == "/api/settings":
                 return self._send(200, self._settings_post(body))
+            if p == "/api/reset":
+                from . import reset as rs
+                if jobs.busy():
+                    return busy()
+                try:
+                    res = rs.reset(home, list(body.get("parts") or []))
+                except ValueError as e:
+                    return self._send(400, {"error": str(e)})
+                res["backup_rel"] = os.path.relpath(res["backup"], home.root) if res["backup"] else None
+                return self._send(200, res)
             if p == "/api/writing":
                 from . import conventions
                 try:

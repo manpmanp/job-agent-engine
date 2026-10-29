@@ -300,7 +300,10 @@ def render_dom(url, timeout=BROWSER_TIMEOUT):
                     pg.wait_for_load_state("networkidle", timeout=15000)
                 except Exception:
                     pass  # long-polling pages never go quiet; use what is there
-                return pg.content(), None
+                html = pg.content()
+                http.log_event("GET", url, 200, 0, len(html.encode("utf-8", "replace")),
+                               purpose="Web page in a headless browser (the page loads its own files too)")
+                return html, None
             finally:
                 b.close()
     except ImportError:
@@ -315,6 +318,8 @@ def render_dom(url, timeout=BROWSER_TIMEOUT):
                             "--virtual-time-budget=15000", "--dump-dom", url],
                            capture_output=True, timeout=timeout)
         if r.returncode == 0 and r.stdout:
+            http.log_event("GET", url, 200, 0, len(r.stdout),
+                           purpose="Web page in a headless browser (the page loads its own files too)")
             return r.stdout.decode("utf-8", errors="replace"), None
         return None, f"browser render failed (exit {r.returncode})"
     except Exception as e:
