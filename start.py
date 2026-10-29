@@ -54,9 +54,12 @@ def pause_on_error(msg):
     sys.exit(1)
 
 
-def _same(a, b):
+def _in_venv():
+    """True when this process runs inside .venv. A venv's python is a symlink
+    to the base interpreter, so comparing executables is not enough; the
+    active environment (sys.prefix) is what tells them apart."""
     try:
-        return os.path.samefile(a, b)
+        return os.path.realpath(sys.prefix) == os.path.realpath(VENV)
     except OSError:
         return False
 
@@ -68,7 +71,7 @@ def ensure_environment(argv):
     if sys.version_info < MIN_PY:
         pause_on_error(f"Python {MIN_PY[0]}.{MIN_PY[1]} or newer is needed (this is {sys.version.split()[0]}). "
                        "Install it from https://www.python.org/downloads/ and start again.")
-    in_venv = os.path.exists(VENV_PY) and _same(sys.executable, VENV_PY)
+    in_venv = os.path.exists(VENV_PY) and _in_venv()
     if not os.path.exists(VENV_PY):
         say("First start: preparing Job Agent (about a minute, only once)...")
         import venv
@@ -78,7 +81,10 @@ def ensure_environment(argv):
             pause_on_error(f"Could not create the Python environment in {VENV}: {e}\n"
                            "On Debian/Ubuntu install it with: sudo apt install python3-venv")
     req = open(REQ, "rb").read()
-    if not os.path.exists(STAMP) or open(STAMP, "rb").read() != req:
+    stale = not os.path.exists(STAMP) or open(STAMP, "rb").read() != req
+    if not stale:  # the stamp can be right while packages are missing (a venv made by other tools)
+        stale = subprocess.run([VENV_PY, "-c", "import openpyxl, docx, pypdf"], capture_output=True).returncode != 0
+    if stale:
         say("Installing the packages Job Agent needs...")
         r = subprocess.run([VENV_PY, "-m", "pip", "install", "--disable-pip-version-check", "--quiet", "-r", REQ])
         if r.returncode != 0:
