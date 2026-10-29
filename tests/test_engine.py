@@ -17,12 +17,13 @@ import os
 import shutil
 import sys
 import tempfile
+import time
 import unittest
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.dirname(HERE))
 
-from engine import home as home_mod, tracker as tr, cli          # noqa: E402
+from engine import home as home_mod, tracker as tr, cli, app as app_mod          # noqa: E402
 from engine.collect import http, match, sources, verify as verify_mod  # noqa: E402
 import engine.collect as collect  # noqa: E402
 
@@ -511,6 +512,24 @@ class TestNetworkLog(unittest.TestCase):
         ai = next(x for x in rep["recent"] if x["host"] == "api.anthropic.com")
         self.assertEqual(ai["sent"], "your profile and the posting")
         self.assertGreater(ai["sent_bytes"], 0)
+
+
+class TestPresence(unittest.TestCase):
+    def test_stops_only_when_no_tab_is_left(self):
+        P = app_mod.Presence
+        p = P()
+        t0 = p.started
+        self.assertFalse(p.should_stop(False, t0 + 60))                  # no page yet: wait
+        self.assertTrue(p.should_stop(False, t0 + P.FIRST + 1))          # a page never came
+        p = P(); p.beat("a"); now = time.time()
+        self.assertFalse(p.should_stop(False, now + 30))
+        p.bye("a")
+        self.assertFalse(p.should_stop(False, p.bye_at + 2))             # a reload says hello within the grace time
+        self.assertTrue(p.should_stop(False, p.bye_at + P.GRACE + 1))
+        self.assertFalse(p.should_stop(True, p.bye_at + P.GRACE + 1))    # never while a job runs
+        p = P(); p.beat("a"); p.beat("b"); p.bye("a")
+        self.assertFalse(p.should_stop(False, time.time() + P.GRACE + 1))   # another tab is still open
+        self.assertTrue(p.should_stop(False, time.time() + P.IDLE + 1))     # ... until it stops beating
 
 
 class TestWindowsConsole(unittest.TestCase):

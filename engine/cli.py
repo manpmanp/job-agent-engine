@@ -386,7 +386,7 @@ def cmd_app(h, args):
         if not args.no_browser:
             webbrowser.open(f"http://127.0.0.1:{port}/")
         return
-    serve(h, port=args.port, open_browser=not args.no_browser)
+    serve(h, port=args.port, open_browser=not args.no_browser, keep_running=args.keep_running)
 
 
 def cmd_reset(h, args):
@@ -452,6 +452,7 @@ def main(argv=None):
     x = sp.add_parser("cloud"); x.add_argument("action", nargs="?", default="pull", choices=["pull", "connect", "disconnect", "search", "status"])
     x.add_argument("url", nargs="?"); x.add_argument("token", nargs="?")
     x = sp.add_parser("app"); x.add_argument("--port", type=int, default=8765); x.add_argument("--no-browser", action="store_true")
+    x.add_argument("--keep-running", action="store_true", help="do not stop when the page is closed")
     x = sp.add_parser("reset"); x.add_argument("--parts", help="comma list: settings,keys,profile,postings,documents (default: all)")
     x.add_argument("--yes", action="store_true", help="do not ask")
     sp.add_parser("open")

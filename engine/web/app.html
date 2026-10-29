@@ -344,9 +344,10 @@ const $$ = (s, el=document) => [...el.querySelectorAll(s)];
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let S = null, P = { postings:[], rejection_reasons:[] }, filter = 'undecided', jobTimer = null, lastJob = 0;
 
+const TAB = Math.random().toString(36).slice(2) + Date.now().toString(36);
 async function api(path, body) {
   const r = await fetch(path, { method: body === undefined ? 'GET' : 'POST',
-    headers: { 'Content-Type':'application/json', 'X-Agent-Token': API.token }, body: body === undefined ? undefined : JSON.stringify(body) });
+    headers: { 'Content-Type':'application/json', 'X-Agent-Token': API.token, 'X-Agent-Tab': TAB }, body: body === undefined ? undefined : JSON.stringify(body) });
   const j = await r.json().catch(() => ({}));
   if (!r.ok) throw new Error(j.error || ('HTTP ' + r.status));
   return j;
@@ -903,6 +904,17 @@ async function saveType() {
                  sections: EDIT.sections, letter: { pages: EDIT.letter.pages, focus: EDIT.letter.focus } };
   try { WS = await api('/api/writing', { type: CUR, data }); toast('Saved. New documents for this type follow it.'); renderTypeChips(); editType(CUR); }
   catch (e) { toast(e.message); }
+}
+
+// ----------------------------------------------------------- presence
+// The app stops by itself a few seconds after its last tab is closed, so it
+// never stays behind in the background. The page says it is open every 20
+// seconds and says goodbye when it closes (a reload says hello again at once).
+if (!CLOUD) {
+  const alive = () => api('/api/alive', {}).catch(() => {});
+  setInterval(alive, 20000);
+  window.addEventListener('pagehide', () => { try { navigator.sendBeacon('/api/bye?t=' + encodeURIComponent(API.token) + '&tab=' + TAB); } catch (e) { } });
+  window.addEventListener('pageshow', e => { if (e.persisted) alive(); });
 }
 
 // ----------------------------------------------------------- start

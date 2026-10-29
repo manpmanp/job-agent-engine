@@ -186,7 +186,48 @@ def _last_notes(home, n=14):
 
 
 # -------------------------------------------------------------- server
-def _make_handler(home, token, jobs, httpd_ref):
+class Presence:
+    """Knows whether the app's page is still open, so the app can stop by
+    itself when its last tab is closed instead of staying behind in the
+    background. Each tab sends a beat with every request and every 20
+    seconds, and a goodbye when it closes. The app stops when no tab is
+    left: GRACE seconds after a goodbye (a reload says hello again at once),
+    IDLE seconds after the last beat (browsers slow timers in hidden tabs to
+    about one a minute), or FIRST seconds after start if no page ever
+    connected. It never stops while a job runs."""
+    GRACE, IDLE, FIRST = 8, 180, 600
+
+    def __init__(self):
+        self.tabs, self.started, self.bye_at, self.seen = {}, time.time(), None, False
+        self.lock = threading.Lock()
+
+    def beat(self, tab):
+        if not tab:
+            return
+        with self.lock:
+            self.tabs[tab] = time.time()
+            self.seen = True
+
+    def bye(self, tab):
+        with self.lock:
+            self.tabs.pop(tab, None)
+            self.bye_at = time.time()
+
+    def should_stop(self, busy, now=None):
+        now = now or time.time()
+        if busy:
+            return False
+        with self.lock:
+            if any(now - ts < self.IDLE for ts in self.tabs.values()):
+                return False
+            if not self.seen:
+                return now - self.started > self.FIRST
+            if self.bye_at and not self.tabs:
+                return now - self.bye_at > self.GRACE
+            return True
+
+
+def _make_handler(home, token, jobs, httpd_ref, presence=None):
     intake = Intake(home)
 
     class Handler(BaseHTTPRequestHandler):
@@ -216,7 +257,10 @@ def _make_handler(home, token, jobs, httpd_ref):
 
         def _authorized(self, query=None):
             t = self.headers.get("X-Agent-Token", "") or ((query or {}).get("t") or [""])[0]
-            return self._host_ok() and secrets.compare_digest(t, token)
+            ok = self._host_ok() and secrets.compare_digest(t, token)
+            if ok and presence is not None:
+                presence.beat(self.headers.get("X-Agent-Tab", ""))
+            return ok
 
         def _body(self):
             n = int(self.headers.get("Content-Length") or 0)
@@ -467,6 +511,12 @@ def _make_handler(home, token, jobs, httpd_ref):
             return self._send(404, {"error": "not found"})
 
         def do_POST(self):
+            u0 = urlsplit(self.path)
+            if u0.path == "/api/bye":           # sent by the page as it closes (navigator.sendBeacon)
+                q0 = parse_qs(u0.query)
+                if self._host_ok() and secrets.compare_digest((q0.get("t") or [""])[0], token) and presence is not None:
+                    presence.bye((q0.get("tab") or [""])[0])
+                return self._send(204, b"")
             if not self._authorized():
                 return self._send(403, {"error": "missing or wrong token"})
             try:
@@ -476,6 +526,8 @@ def _make_handler(home, token, jobs, httpd_ref):
             u = urlsplit(self.path)
             p = u.path
             busy = lambda: self._send(409, {"error": "another job is running"})
+            if p == "/api/alive":
+                return self._send(200, {"ok": True})
             if p == "/api/decision":
                 code, res = self._decide(body)
                 return self._send(code, res)
@@ -684,14 +736,24 @@ def find_running(port_from=8765, span=20, home_root=None):
     return None
 
 
-def serve(home, port=8765, open_browser=True, path="/"):
+def _watch(presence, jobs, httpd):
+    while True:
+        time.sleep(2)
+        if presence.should_stop(jobs.busy()):
+            print("the app's page was closed; Job Agent stops (start it again with the launcher)", flush=True)
+            httpd.shutdown()
+            return
+
+
+def serve(home, port=8765, open_browser=True, path="/", keep_running=False):
     token = secrets.token_urlsafe(24)
     jobs = Jobs()
     ref = [None]
+    presence = None if keep_running else Presence()
     httpd, chosen = None, None
     for p in range(port, port + 20):
         try:
-            httpd = ThreadingHTTPServer(("127.0.0.1", p), _make_handler(home, token, jobs, ref))
+            httpd = ThreadingHTTPServer(("127.0.0.1", p), _make_handler(home, token, jobs, ref, presence))
             chosen = p
             break
         except OSError:
@@ -699,6 +761,8 @@ def serve(home, port=8765, open_browser=True, path="/"):
     if httpd is None:
         raise SystemExit(f"no free port between {port} and {port + 19}")
     ref[0] = httpd
+    if presence is not None:
+        threading.Thread(target=_watch, args=(presence, jobs, httpd), daemon=True).start()
     sched.refresh(home)
     url = f"http://127.0.0.1:{chosen}{path}"
     print(f"Job agent is running for {home.root}")
