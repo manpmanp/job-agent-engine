@@ -49,7 +49,7 @@ CVs and cover letters there and click **Update** in the form (tab 3), or run:
 Every run also picks up new files there. A file is imported once (by its
 content); the copy in the intake folder is left where it is.
 
-**Route 2: a blank form.** Use the Candidate tab of the input forms
+**Route 2: a blank form.** Use the **Candidate profile** tab on the app's Setup page
 (`./run.sh --setup` opens them and saves straight into your agent home), or
 edit `inputs/candidate/profile_form.json` directly, then:
 

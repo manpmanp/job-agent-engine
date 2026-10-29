@@ -129,8 +129,8 @@ class TestMatching(unittest.TestCase):
 
     def test_ats_detection(self):
         self.assertEqual(sources.detect_ats("https://jobs.ashbyhq.com/axelera")[0], "ashby")
-        k, p = sources.detect_ats("https://axis.wd3.myworkdayjobs.com/External_Career_Site")
-        self.assertEqual((k, p["tenant"], p["site"]), ("workday", "axis", "External_Career_Site"))
+        k, p = sources.detect_ats("https://exampleco.wd3.myworkdayjobs.com/External_Career_Site")
+        self.assertEqual((k, p["tenant"], p["site"]), ("workday", "exampleco", "External_Career_Site"))
         self.assertEqual(sources.detect_ats("https://examplewd.wd3.myworkdayjobs.com/en-US/External")[1]["site"], "External")
         self.assertEqual(sources.detect_ats("indeed:AFRY")[0], "agent_only")
         self.assertEqual(sources.detect_ats("https://www.example.com/careers")[0], "html")

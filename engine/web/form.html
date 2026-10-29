@@ -13,7 +13,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Agent Input Forms</title>
+<title>Job Agent Setup</title>
 <style>
   :root {
     --bg:#f6f7f9; --panel:#ffffff; --border:#d8dce3; --text:#1d232c; --muted:#5d6775;
@@ -67,7 +67,7 @@
 </head>
 <body>
 <header>
-  <h1>Agent input forms</h1>
+  <h1>Job Agent setup</h1>
   <p>Fill in what you want the agent to use. Only the search keywords and locations are required; everything else is optional and can be added or changed at any time. Nothing leaves your computer.</p>
   <p class="mode" id="mode-line"></p>
 </header>
@@ -191,7 +191,7 @@
         <span class="status" id="intake-status"></span>
       </div>
       <table class="files" id="intake-files"></table>
-      <p class="hint" id="intake-offline" style="display:none">The Update button needs the form to be started with <code>./run.sh --setup</code> (or <code>./run.sh form</code>). Opened as a plain file, use this instead after copying the files:<br><code>./run.sh intake scan</code></p>
+      <p class="hint" id="intake-offline" style="display:none">The Update button works when the form is opened from the Job Agent app. Opened as a plain file, use this instead after copying the files:<br><code>./run.sh intake scan</code></p>
     </div>
 
     <p class="hint">You can combine routes: documents now, form entries later. When a newer entry differs from an older one from the other route, the newest is used and the change is listed for you to confirm:</p>

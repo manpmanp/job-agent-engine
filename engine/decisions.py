@@ -101,14 +101,14 @@ def apply(home, decisions_path=None, seniority_cfg=None):
         ts = d.get("ts", "")
         if d.get("decision") == "accepted":
             row["Status"] = APPROVED_STATUS
-            row["Notes"] = f'{row.get("Notes") or ""} | Accepted via weekly page ({ts})'.strip(" |")
+            row["Notes"] = f'{row.get("Notes") or ""} | Accepted ({ts})'.strip(" |")
             updated.append(row)
         elif d.get("decision") == "rejected":
             reasons = d.get("reasons") or ([d["reason"]] if d.get("reason") else ["Not specified"])
             note = d.get("note", "")
             joined = "; ".join(reasons)
             row["Status"] = f"Rejected: {joined}"
-            row["Notes"] = f'{row.get("Notes") or ""} | Rejected via weekly page ({ts}): {joined}{" - " + note if note else ""}'.strip(" |")
+            row["Notes"] = f'{row.get("Notes") or ""} | Rejected ({ts}): {joined}{" - " + note if note else ""}'.strip(" |")
             updated.append(row)
             for reason in reasons:
                 rejections.append({"Date": today, "Employer": row.get("Employer"), "Title": row.get("Title"),

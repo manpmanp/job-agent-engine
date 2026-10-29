@@ -68,7 +68,11 @@ def build(_home_arg=None):
 
     prev = os.path.join(DEMO_DIR, "preview")
     os.makedirs(prev, exist_ok=True)
-    shutil.copy2(h.path("weekly_html"), os.path.join(prev, "jobs-on-market.html"))
+    # the preview is published: replace this machine's folder path with the repository-relative one
+    with open(h.path("weekly_html"), "r", encoding="utf-8") as f:
+        page = f.read().replace(os.path.abspath(root), "docs/demo/home").replace(os.path.abspath(root).replace("\\", "\\\\"), "docs/demo/home")
+    with open(os.path.join(prev, "jobs-on-market.html"), "w", encoding="utf-8") as f:
+        f.write(page)
     summaries = sorted(os.listdir(h.path("weekly_summary")))
     if summaries:
         shutil.copy2(os.path.join(h.path("weekly_summary"), summaries[-1]), os.path.join(prev, "weekly_summary_example.md"))

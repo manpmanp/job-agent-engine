@@ -145,7 +145,7 @@
     <div><strong id="newCount">0</strong>new this week</div>
     <div><strong id="acceptedCount">0</strong>accepted</div>
     <div><strong id="rejectedCount">0</strong>rejected</div>
-    <div><strong>2026-10-29 14:02</strong>last generated<span class="muted" style="display:block;font-size:11px;font-style:italic;margin-top:2px;">Demo run with fictional postings.</span></div>
+    <div><strong>2026-10-29 14:18</strong>last generated<span class="muted" style="display:block;font-size:11px;font-style:italic;margin-top:2px;">Demo run with fictional postings.</span></div>
   </div>
 </header>
 <div class="controls">
@@ -258,7 +258,7 @@
 </footer>
 <script>
 const REASONS = ["Location too far / not commutable", "Company not a target employer", "Seniority level mismatch", "Field / specialty mismatch", "Technical skills mismatch", "Role doesn't interest me", "Work arrangement mismatch (on-site / hybrid / remote)", "Employment type mismatch (contract / temporary / part-time)", "Work authorization / visa requirement", "Deadline passed"];
-const HOME_ID = "8e558117231f4104a2c842114bd1f49a";
+const HOME_ID = "8479f4c95ddb45fe9156a8c29c04ed85";
 // Pages opened from local files share one browser storage in some browsers,
 // so everything is kept per agent home.
 const STORE_KEY = 'jobAgentDecisions:' + HOME_ID;
@@ -455,7 +455,7 @@ async function syncDecisions() {
       setSyncStatus('Pick the \'state\' folder in your agent home (one-time setup)...');
       dirHandle = await window.showDirectoryPicker({ mode: 'readwrite' });
       if (!(await isThisHomesStateDir(dirHandle))) {
-        setSyncStatus('That is not the state folder of this agent home (/home/claude/jae-push/docs/demo/home/state). Nothing was saved; click Sync again and pick that folder.', true);
+        setSyncStatus('That is not the state folder of this agent home (docs/demo/home/state). Nothing was saved; click Sync again and pick that folder.', true);
         return;
       }
       await idbSet(DIR_HANDLE_KEY, dirHandle);

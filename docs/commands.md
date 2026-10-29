@@ -22,8 +22,8 @@ before the command, or with the `JOB_AGENT_HOME` environment variable
 | Command | What it does |
 |---|---|
 | *(none)* | `./run.sh` on its own creates the agent home if needed and does today's run (`run auto`). |
-| `--setup` (or `setup`) | Installs the dependencies the first time (Python packages into `.venv/` in the engine folder, nothing system-wide), creates the agent home, then opens the input forms in your browser. Add `--browser` to also install Playwright with Chromium into `.venv/`, used to read posting pages that are built in the browser (optional; an installed Chrome is used otherwise). |
-| `form [--port N] [--no-browser]` | Opens the input forms without the install step. Served locally (127.0.0.1 only), so Save writes straight into the agent home and Update imports documents from the intake folders. Stop with Ctrl+C. |
+| `--setup` (or `setup`) | Installs the Python packages into `.venv/` in the engine folder (nothing system-wide; `run.sh` also does this by itself whenever they are missing), creates the agent home, and opens the app on its Setup page. Add `--browser` to also install Playwright's headless Chromium (about 100 MB, once) for posting pages built in the browser, `--remove-browser` to remove it. |
+| `form [--port N] [--no-browser]` | Opens the app on its Setup page (search setup and profile). |
 | `test` | Runs the offline test suite. |
 | `clean` | Removes what the engine no longer uses or rebuilds on demand: Node modules from versions before 0.4, Python caches, Finder's `.DS_Store` files, and folders left empty after the 0.4.2 reorganisation. Never touches `.venv` or any agent home. |
 | `init` | Creates a new agent home with blank inputs and empty state files, and lists what it created. Every other command does the same silently when something is missing (including `output/` and the weekly page). Never overwrites existing files. |
@@ -38,7 +38,7 @@ before the command, or with the `JOB_AGENT_HOME` environment variable
 | `cloud [pull\|connect <address> <token>\|disconnect\|search\|status]` | Your online search (`cloud/`): `pull` fetches new postings, descriptions and decisions and sends back decisions made here (also done by every run); `connect` saves the address and sync token and fetches; `search` starts a search online. |
 | `app [--port N] [--no-browser]` | Opens the local app in your browser (127.0.0.1 only). Plain `./run.sh` in a terminal does the same. If it is already running, the browser is pointed at it. |
 | `add-postings <file.json>` | Merges found or updated posting rows into the tracker. |
-| `weekly ["note"]` | Writes the weekly page (`output/jobs-on-market.html`) and the weekly summary. |
+| `weekly ["note"]` | Writes the static weekly page (`output/jobs-on-market.html`, for use without the app) and the weekly summary. |
 | `open` | Opens the weekly page from the local file in your default browser (builds it first if missing). |
 | `sync [file]` | Applies new or changed Accept/Reject decisions, then refreshes the page. |
 | `intake cv\|cl <file>` | Stores a prepared CV or cover letter and extracts its text. |

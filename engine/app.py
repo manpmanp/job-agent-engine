@@ -10,7 +10,7 @@
 """
 Started by the launchers (launchers/start.py, or the double-click files) or with
 './run.sh app'. Serves engine/web/app.html on http://127.0.0.1:<port>/ and the
-input forms on /form.
+search-setup and profile form on /form.
 
 Safety: listens on 127.0.0.1 only, accepts API calls only with a random
 per-session token injected into the page (other web pages cannot call it),

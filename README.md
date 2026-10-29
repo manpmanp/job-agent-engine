@@ -11,124 +11,16 @@
 
 # Job-search agent engine
 
-A local, file-based engine for an AI job-search agent. It searches for job
-postings that match your keywords and locations, keeps every posting in a
-tracker spreadsheet, gives you a weekly web page where you Accept or Reject
-each one, and drafts a tailored CV, cover letter and job-description
-snapshot for every posting you accept. It never applies, sends or posts
-anything on your behalf.
+A job-search app that runs on your own computer. It searches for job
+postings that match your keywords and places, keeps every posting in a
+tracker spreadsheet, lets you Accept or Reject each one, and drafts a CV,
+cover letter and job-description snapshot for every posting you accept.
+It never applies, sends or posts anything on your behalf.
 
 The engine contains no personal data. Everything about you lives in your
 own **agent home** folder and is read at run time. To start you only need
 search keywords and locations. Everything else is optional and can be
 added whenever you like.
-
----
-
-## How it runs
-
-The engine works on its own. An AI agent is optional and adds what the
-engine cannot do by rules alone.
-
-```
-                       internet (public job data)
-                                 |
-        Arbetsformedlingen API, employer job boards (Greenhouse, Lever,
-        Ashby, Workday, SmartRecruiters), employer career pages
-                                 |
-                                 v
- +-------------------------------------------+        +---------------------------+
- |  The engine   ./run.sh ...                |        |  Optional: an AI agent     |
- |  collect   fetch, match, classify, dedupe |  <---  |  (e.g. Claude) following   |
- |  verify    re-check that postings are open|        |  agent/AGENT_PROMPT.md:    |
- |  sync      apply your Accept/Reject       |  --->  |  LinkedIn / Indeed, judges |
- |  weekly    weekly page + summary          |        |  unclear postings, writes  |
- |  tailor    CV / CL (template or full)     |        |  fully tailored CV / CL    |
- |  enrich    optional AI review via API key |        +---------------------------+
- +-------------------------------------------+
-                  |  reads / writes
-                  v
- +-------------------------------------------+        +---------------------------+
- |  Your agent home (private, on your disk)  | <----  |  You: forms, CV upload,    |
- |  inputs/  state/  output/                 |        |  Accept / Reject, review   |
- +-------------------------------------------+        +---------------------------+
-```
-
-### What the engine does by itself (no AI needed)
-
-- **Collects postings online** (`./run.sh collect`):
-  - Arbetsformedlingen's open JobSearch API (all of Platsbanken), one query
-    per keyword.
-  - Every employer in your list: through its job-board API when the
-    careers URL belongs to Greenhouse, Lever, Ashby, Workday or
-    SmartRecruiters; otherwise from the careers page itself, using its
-    structured job data, or its job links as leads, which are then opened
-    and read so they become confirmed postings with a description.
-  - Optional aggregators, off by default: JSearch (Google for Jobs, which
-    covers LinkedIn, Indeed and company sites, through your own API key),
-    Adzuna (your key; 19 countries, not Sweden or Denmark), and Hacker
-    News "Who is hiring?" and YC job posts (no key).
-  - Keeps postings whose title matches a keyword (optionally also the
-    description, see `match_scope`) and whose location matches one of
-    yours, or that are remote if you accept remote.
-  - Sets seniority, category, work arrangement and a skills summary by
-    rules, and skips anything already tracked, so your decisions are never
-    overwritten.
-- **Reads any posting page** (`./run.sh fetch <url>`): the structured
-  JobPosting data most job sites publish for search engines, else the
-  page's main text without menus and footers, else, for pages built in
-  the browser, a headless-browser render that waits for the page to settle.
-  The text is kept for tailoring and the JD snapshot; `--add` tracks it.
-- **Checks postings are still open** (`./run.sh verify`) and moves closed
-  ones to Expired.
-- **Builds the weekly page and summary**, applies your decisions, writes
-  template documents for accepted postings.
-- **Optional AI review** (`./run.sh enrich`) with your own Anthropic API
-  key, to refine category, seniority and fit notes.
-- **One command for a whole run**: `./run.sh run auto` does the full weekly
-  pass on your search day and a sync on other days. `./run.sh schedule`
-  prints the line to run it every morning (cron, or launchd on a Mac).
-
-Every source is called politely: the engine names itself, waits between
-requests to the same site, respects robots.txt (RFC 9309) for ordinary
-pages, fetches pages only from public addresses, and only uses public job
-data. Text read from pages is treated as data, never as instructions. A source that fails is reported and skipped; the run
-always finishes.
-
-### What an AI agent adds (optional)
-
-LinkedIn and Indeed do not allow automated collection, so the engine
-leaves them to an agent that reads them through its own tools, read-only.
-The agent also judges unclear postings (unconfirmed leads, missing
-locations, borderline seniority) and writes fully tailored CVs and cover
-letters from your material. It uses the same commands, so engine and agent
-share one tracker.
-
-### A typical week
-
-| When | Who | What happens |
-|---|---|---|
-| Every morning | engine (scheduled) | `run auto`: on your search day collect → verify → sync → weekly page; other days sync and templates |
-| Search day, optional | agent | LinkedIn, Indeed, web search, judgement on new rows, tailored documents |
-| Any time | you | open the weekly page, Accept or Reject, click **Sync decisions** |
-| Any time | you | add or change candidate data with `intake` |
-
----
-
-## What you get at each level of input
-
-| You provide | You get |
-|---|---|
-| Keywords + locations | Online collection from Arbetsformedlingen, posting tracker, weekly page and summary, Accept/Reject sync, **template** CV/CL for accepted postings (structure and prompts built from the posting's keywords; nothing invented, no name needed) |
-| + employer list or preset | Collection from each employer's job board or careers page, with a coverage report every run |
-| + Anthropic API key (optional) | AI review of each collected posting |
-| + profile (form) or an existing CV/CL | Fit notes on new postings, **tailored** CV/CL built only from your own material |
-| + personal characteristics | Cover-letter motivation based on how you actually work |
-| + personal tailoring rules / checks | Your mandatory entries and style rules, checked automatically |
-| + document style | Your fonts and colours |
-
-`./run.sh status` lists every feature as on or off, why, and what would
-switch it on. A missing optional input is never an error.
 
 ---
 
@@ -220,6 +112,115 @@ app fetches the postings and decisions from there. See
 
 builds a fictional job search in `docs/demo/home/`; open it with
 `./run.sh --home docs/demo/home app`. Example documents are in `docs/demo/preview/`.
+
+## How it runs
+
+The engine works on its own. An AI agent is optional and adds what the
+engine cannot do by rules alone.
+
+```
+                       internet (public job data)
+                                 |
+        Arbetsformedlingen API, employer job boards (Greenhouse, Lever,
+        Ashby, Workday, SmartRecruiters), employer career pages
+                                 |
+                                 v
+ +-------------------------------------------+        +---------------------------+
+ |  The engine   ./run.sh ...                |        |  Optional: an AI agent     |
+ |  collect   fetch, match, classify, dedupe |  <---  |  (e.g. Claude) following   |
+ |  verify    re-check that postings are open|        |  agent/AGENT_PROMPT.md:    |
+ |  sync      apply your Accept/Reject       |  --->  |  LinkedIn / Indeed, judges |
+ |  weekly    weekly page + summary          |        |  unclear postings, writes  |
+ |  tailor    CV / CL (template or full)     |        |  fully tailored CV / CL    |
+ |  enrich    optional AI review via API key |        +---------------------------+
+ +-------------------------------------------+
+                  |  reads / writes
+                  v
+ +-------------------------------------------+        +---------------------------+
+ |  Your agent home (private, on your disk)  | <----  |  You, in the app: setup,   |
+ |  inputs/  state/  output/                 |        |  Accept / Reject, review   |
+ +-------------------------------------------+        +---------------------------+
+```
+
+### What the engine does by itself (no AI needed)
+
+- **Collects postings online** (`./run.sh collect`):
+  - Arbetsformedlingen's open JobSearch API (all of Platsbanken), one query
+    per keyword.
+  - Every employer in your list: through its job-board API when the
+    careers URL belongs to Greenhouse, Lever, Ashby, Workday or
+    SmartRecruiters; otherwise from the careers page itself, using its
+    structured job data, or its job links as leads, which are then opened
+    and read so they become confirmed postings with a description.
+  - Optional aggregators, off by default: JSearch (Google for Jobs, which
+    covers LinkedIn, Indeed and company sites, through your own API key),
+    Adzuna (your key; 19 countries, not Sweden or Denmark), and Hacker
+    News "Who is hiring?" and YC job posts (no key).
+  - Keeps postings whose title matches a keyword (optionally also the
+    description, see `match_scope`) and whose location matches one of
+    yours, or that are remote if you accept remote.
+  - Sets seniority, category, work arrangement and a skills summary by
+    rules, and skips anything already tracked, so your decisions are never
+    overwritten.
+- **Reads any posting page** (`./run.sh fetch <url>`): the structured
+  JobPosting data most job sites publish for search engines, else the
+  page's main text without menus and footers, else, for pages built in
+  the browser, a headless-browser render that waits for the page to settle.
+  The text is kept for tailoring and the JD snapshot; `--add` tracks it.
+- **Checks postings are still open** (`./run.sh verify`) and moves closed
+  ones to Expired.
+- **Shows every posting in the app** (and on a static weekly page),
+  applies your Accept/Reject decisions, and writes template documents for
+  accepted postings.
+- **Optional AI review** (`./run.sh enrich`) with your own Anthropic API
+  key, to refine category, seniority and fit notes.
+- **One command for a whole run**: `./run.sh run auto` does the full weekly
+  pass on your search day and a sync on other days. The app's
+  **Run every morning** switch (or `./run.sh schedule install`) runs it
+  daily: launchd on a Mac, cron on Linux, Task Scheduler on Windows.
+
+Every source is called politely: the engine names itself, waits between
+requests to the same site, respects robots.txt (RFC 9309) for ordinary
+pages, fetches pages only from public addresses, and only uses public job
+data. Text read from pages is treated as data, never as instructions.
+A source that fails is reported and skipped; the run always finishes.
+
+### What an AI agent adds (optional)
+
+LinkedIn and Indeed do not allow automated collection, so the engine
+leaves them to an agent that reads them through its own tools, read-only.
+The agent also judges unclear postings (unconfirmed leads, missing
+locations, borderline seniority) and writes fully tailored CVs and cover
+letters from your material. It uses the same commands, so engine and agent
+share one tracker.
+
+### A typical week
+
+| When | Who | What happens |
+|---|---|---|
+| Every morning | engine (scheduled) | `run auto`: on your search day collect → verify → sync → weekly page; other days sync and templates |
+| Search day, optional | agent | LinkedIn, Indeed, web search, judgement on new rows, tailored documents |
+| Any time | you | open the app, Accept or Reject postings, make documents |
+| Any time | you | add or change your CV or profile on the app's Setup page |
+
+---
+
+## What you get at each level of input
+
+| You provide | You get |
+|---|---|
+| Keywords + locations | Online collection from Arbetsformedlingen, posting tracker, the app's posting list and a weekly summary, Accept/Reject, **template** CV/CL for accepted postings (structure and prompts built from the posting's keywords; nothing invented, no name needed) |
+| + employer list or preset | Collection from each employer's job board or careers page, with a coverage report every run |
+| + Anthropic API key (optional) | AI review of each collected posting |
+| + profile (form) or an existing CV/CL | Fit notes on new postings, **tailored** CV/CL built only from your own material |
+| + personal characteristics | Cover-letter motivation based on how you actually work |
+| + personal tailoring rules / checks | Your mandatory entries and style rules, checked automatically |
+| + document style | Your fonts and colours |
+
+`./run.sh status` lists every feature as on or off, why, and what would
+switch it on. A missing optional input is never an error.
+
+---
 
 ## Using the terminal (optional)
 

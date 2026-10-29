@@ -29,7 +29,7 @@ fi
 
 # "setup" or "--setup" anywhere in the arguments: install the dependencies
 # into .venv (first time, or when requirements changed), create the agent
-# home, then open the input forms in the browser.
+# home, then open the app's Setup page in the browser.
 # "clean": removes files the engine no longer uses or that are rebuilt on
 # demand (Node modules from versions before 0.4, Python caches, Finder's
 # .DS_Store files) and folders left empty by the 0.4.2 reorganisation.
