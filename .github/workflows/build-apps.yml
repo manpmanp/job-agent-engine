@@ -1,11 +1,11 @@
 # Job-search agent engine
 # File:    .github/workflows/build-apps.yml
-# Purpose: Builds the double-click apps (macOS, Windows, Linux) with PyInstaller; attaches them to a release on version tags.
+# Purpose: Builds one package per system: macOS disk image, Windows installer, Linux archive. Attaches them to a release on version tags.
 # Author:  manpmanp <manp.node@gmail.com>
 # Generated with Claude (Anthropic), under the author's direction and review.
 # License: MIT (see LICENSE)
-# Version: 0.4.0
-# Date:    2026-10-28
+# Version: 0.4.1
+# Date:    2026-10-29
 name: build-apps
 on:
   workflow_dispatch:
@@ -21,15 +21,29 @@ jobs:
       - uses: actions/setup-python@v5
         with: { python-version: "3.12" }
       - run: pip install -r requirements.txt && python -m unittest discover -s tests
-  build:
+
+  macos:
     needs: test
-    strategy:
-      matrix:
-        include:
-          - { os: macos-latest, asset: JobAgent-macOS.zip }
-          - { os: windows-latest, asset: JobAgent-Windows.zip }
-          - { os: ubuntu-latest, asset: JobAgent-Linux.zip }
-    runs-on: ${{ matrix.os }}
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install pyinstaller -r requirements.txt
+      - run: pyinstaller --noconfirm packaging/job_agent.spec
+      - name: Smoke test
+        run: '"dist/Job Agent.app/Contents/MacOS/JobAgent" --home "$RUNNER_TEMP/home" --cli status'
+      - name: Disk image
+        run: |
+          mkdir -p dmg && cp -R "dist/Job Agent.app" dmg/ && ln -s /Applications dmg/Applications
+          cp "packaging/macos/READ ME FIRST.txt" dmg/
+          hdiutil create -volname "Job Agent" -srcfolder dmg -ov -format UDZO JobAgent-macOS.dmg
+      - uses: actions/upload-artifact@v4
+        with: { name: JobAgent-macOS, path: JobAgent-macOS.dmg }
+
+  windows:
+    needs: test
+    runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -38,18 +52,57 @@ jobs:
       - run: pyinstaller --noconfirm packaging/job_agent.spec
       - name: Smoke test
         shell: bash
+        run: dist/JobAgent.exe --home "$RUNNER_TEMP/home" --cli status
+      - name: Installer
+        shell: pwsh
         run: |
-          if [ "$RUNNER_OS" = "macOS" ]; then BIN="dist/Job Agent.app/Contents/MacOS/JobAgent";
-          elif [ "$RUNNER_OS" = "Windows" ]; then BIN="dist/JobAgent.exe"; else BIN="dist/JobAgent"; fi
-          "$BIN" --home "$RUNNER_TEMP/home" --cli status
-      - name: Package
-        shell: bash
-        run: |
-          cd dist
-          if [ "$RUNNER_OS" = "macOS" ]; then ditto -c -k --keepParent "Job Agent.app" "../${{ matrix.asset }}";
-          elif [ "$RUNNER_OS" = "Windows" ]; then 7z a "../${{ matrix.asset }}" JobAgent.exe; else zip "../${{ matrix.asset }}" JobAgent; fi
+          if (-not (Get-Command iscc -ErrorAction SilentlyContinue)) { choco install innosetup -y --no-progress }
+          $iscc = (Get-Command iscc -ErrorAction SilentlyContinue).Source
+          if (-not $iscc) { $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe" }
+          & $iscc packaging\windows\jobagent.iss
+          Copy-Item dist\JobAgent-Windows-Setup.exe .
       - uses: actions/upload-artifact@v4
-        with: { name: "${{ matrix.asset }}", path: "${{ matrix.asset }}" }
-      - if: startsWith(github.ref, 'refs/tags/v')
-        uses: softprops/action-gh-release@v2
-        with: { files: "${{ matrix.asset }}" }
+        with: { name: JobAgent-Windows-Setup, path: JobAgent-Windows-Setup.exe }
+
+  linux:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install pyinstaller -r requirements.txt
+      - run: pyinstaller --noconfirm packaging/job_agent.spec
+      - name: Smoke test
+        run: dist/JobAgent --home "$RUNNER_TEMP/home" --cli status
+      - name: Archive
+        run: |
+          mkdir -p JobAgent-Linux && cp dist/JobAgent packaging/linux/install.sh "packaging/linux/READ ME FIRST.txt" JobAgent-Linux/
+          chmod +x JobAgent-Linux/JobAgent JobAgent-Linux/install.sh
+          tar czf JobAgent-Linux.tar.gz JobAgent-Linux
+      - uses: actions/upload-artifact@v4
+        with: { name: JobAgent-Linux, path: JobAgent-Linux.tar.gz }
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [macos, windows, linux]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with: { path: out, merge-multiple: true }
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            out/JobAgent-macOS.dmg
+            out/JobAgent-Windows-Setup.exe
+            out/JobAgent-Linux.tar.gz
+          body: |
+            Download the file for your computer:
+
+            | Computer | File | Then |
+            |---|---|---|
+            | Mac | **JobAgent-macOS.dmg** | Open it, drag Job Agent to Applications. First start: System Settings > Privacy & Security > Open Anyway. |
+            | Windows | **JobAgent-Windows-Setup.exe** | Run it (if Windows warns: More info > Run anyway). Start Job Agent from the Start menu. |
+            | Linux | **JobAgent-Linux.tar.gz** | `tar xzf JobAgent-Linux.tar.gz && cd JobAgent-Linux && ./install.sh` |
+
+            No Python or other software needed. Everything runs on your computer.

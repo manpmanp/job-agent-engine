@@ -1,0 +1,19 @@
+Job Agent for macOS
+===================
+
+1. Drag "Job Agent" onto the Applications folder in this window.
+2. Open Applications and double-click "Job Agent".
+   The first time, macOS says it cannot check the app for malicious
+   software (the app is not signed by Apple yet):
+   - click Done (or Cancel),
+   - open System Settings > Privacy & Security, scroll down, and click
+     "Open Anyway" next to "Job Agent", then confirm.
+   This is needed only once.
+3. Job Agent opens in your web browser. It runs only on your Mac.
+   Your job search is kept in the "JobAgent" folder in your home folder.
+
+To stop it: Settings > Quit the app.
+To open it again: double-click "Job Agent" (if it is already running,
+your browser is simply pointed at it).
+
+Help and source code: https://github.com/manpmanp/job-agent-engine

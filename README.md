@@ -132,63 +132,75 @@ switch it on. A missing optional input is never an error.
 
 ---
 
-## Get started (no terminal needed)
+## Get started
 
-### 1. Get it
+Pick your computer. Each package has everything it needs: no Python or
+other software to install. Downloads are on the
+[Releases page](https://github.com/manpmanp/job-agent-engine/releases/latest).
 
-Pick one:
+### Mac
 
-- **Ready-made app** (nothing else to install): download the file for
-  your computer from the [Releases page](https://github.com/manpmanp/job-agent-engine/releases):
-  `JobAgent-macOS.zip`, `JobAgent-Windows.zip` or `JobAgent-Linux.zip`,
-  and unzip it.
-- **From the code**: on the repository page click **Code > Download ZIP**
-  and unzip it (or `git clone` it). This needs Python 3.9 or newer
-  ([python.org](https://www.python.org/downloads/); on Windows tick
-  "Add python.exe to PATH").
+1. Download **JobAgent-macOS.dmg** and open it.
+2. Drag **Job Agent** onto **Applications**.
+3. Open **Job Agent** from Applications. The first time, macOS says it
+   cannot check the app (it is not signed by Apple yet): click **Done**,
+   then **System Settings > Privacy & Security > Open Anyway**. Only once.
 
-### 2. Open it
+### Windows
 
-Double-click:
+1. Download **JobAgent-Windows-Setup.exe** and run it. If Windows says
+   "Windows protected your PC", click **More info > Run anyway** (the app
+   is not signed by Microsoft yet). No administrator rights are needed.
+2. Start **Job Agent** from the Start menu.
 
-| Computer | Ready-made app | From the code |
-|---|---|---|
-| Mac | **Job Agent** | **Job Agent.command** |
-| Windows | **JobAgent.exe** | **Job Agent.bat** |
-| Linux | **JobAgent** | **job-agent.sh** |
+### Linux
 
-The app opens in your web browser. It runs only on your own computer
-(nothing is put online) and keeps your job search in a **JobAgent**
-folder in your home folder.
+1. Download **JobAgent-Linux.tar.gz**, then:
 
-The first start from the code takes about a minute while it prepares
-itself. The ready-made apps are not signed by Apple or Microsoft yet, so
-the first time: on a Mac, right-click the app and choose **Open**; on
-Windows, click **More info > Run anyway**.
+   ```
+   tar xzf JobAgent-Linux.tar.gz
+   cd JobAgent-Linux
+   ./install.sh
+   ```
 
-### 3. Use it
+2. Start **Job Agent** from your applications menu (or run `job-agent`).
+
+### Then, on any computer
+
+Job Agent opens in your web browser. It runs only on your computer and
+keeps your job search in a **JobAgent** folder in your home folder.
 
 1. **Setup:** type what to search for (job titles or skills) and where
-   (towns, regions or countries). Optionally drop in your CV.
+   (towns, regions or countries). Optionally drop in your CV, and list
+   employers you want watched.
 2. **Home > Search now.** New postings appear under **Postings**.
 3. **Postings:** **Accept** the ones you want; **Reject** the others with a
    reason (future searches learn from it).
 4. **Documents:** for each accepted posting, make a **template** (your
    details plus the posting's keywords, experience left as placeholders),
    or, if you added your CV, a **tailored draft**:
-   - **Copy for Claude**: copies everything to your clipboard. Paste it
+   - **Copy for Claude** copies everything to your clipboard. Paste it
      into any Claude chat, then paste the answer back with **Paste
      Claude's answer**. No key needed.
-   - **Write with AI**: does the same in one click, with your own
+   - **Write with AI** does the same in one click, with your own
      Anthropic API key (Settings).
+
    Drafts are Word files in your folder. Nothing is ever sent or applied
    for you.
 5. **Settings > Run every morning:** the search then runs by itself
    every day, even when the app is closed.
 
 **Add a posting** reads any job link you found yourself and adds it.
+Close the app with **Settings > Quit the app**.
 
-Close the app with **Settings > Quit the app** (or close its window).
+### Running it from the code instead
+
+For developers, or if you prefer not to use the packages: install
+Python 3.9 or newer, download this repository (**Code > Download ZIP**,
+or `git clone`), and follow the short README in the folder for your
+computer: [`launchers/macos`](launchers/macos/README.md),
+[`launchers/windows`](launchers/windows/README.md) or
+[`launchers/linux`](launchers/linux/README.md).
 
 ### Online search (optional)
 
@@ -247,7 +259,8 @@ decisions** (pick the `state` folder once), then `./run.sh sync`.
 ## Repository layout
 
 ```
-start.py, Job Agent.*    double-click launchers (macOS, Windows, Linux)
+launchers/<system>/     double-click launchers to run from the code, one folder per system
+start.py                what the launchers and the packaged apps run
 run.sh                  terminal entry point
 app/                    the local app (one web page)
 engine/                 Python engine, the app server and the .docx renderer
@@ -262,7 +275,8 @@ demo/                   fictional data and example output
 docs/                   inputs, intake, commands, state files, document spec
 tests/                  offline tests with recorded API responses
 cloud/                  the optional online search (Cloudflare Worker + D1)
-packaging/, .github/    builds of the ready-made apps, CI
+packaging/<system>/     what goes into each system's package (installer script, instructions)
+.github/workflows/      tests, and the builds of the three packages
 ```
 
 More detail: `docs/commands.md` (every command), `docs/inputs.md` (every

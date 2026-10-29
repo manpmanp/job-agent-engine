@@ -5,12 +5,12 @@
 # Author:  manpmanp <manp.node@gmail.com>
 # Generated with Claude (Anthropic), under the author's direction and review.
 # License: MIT (see LICENSE)
-# Version: 0.4.0
+# Version: 0.4.1
 # Date:    2026-10-28
 
 """
-Double-click "Job Agent.command" (macOS), "Job Agent.bat" (Windows) or
-"job-agent.sh" (Linux), or run:  python3 start.py
+Double-click the launcher in launchers/macos, launchers/windows or
+launchers/linux, or run:  python3 start.py
 
 First start: creates a private Python environment in .venv/ next to this
 file and installs the few packages the engine needs (nothing system-wide),
@@ -130,7 +130,20 @@ def choose_home(explicit=None):
     return home
 
 
+def _restore_output():
+    """Windowed app builds start without a console, so Python sets
+    sys.stdout to None; when the app runs itself as a background job, the
+    output pipe is still there, so it is reopened for the live job log."""
+    for name, fd in (("stdout", 1), ("stderr", 2)):
+        if getattr(sys, name) is None:
+            try:
+                setattr(sys, name, open(fd, "w", encoding="utf-8", errors="replace", closefd=False))
+            except OSError:
+                setattr(sys, name, open(os.devnull, "w"))
+
+
 def main(argv):
+    _restore_output()
     for stream in (sys.stdout, sys.stderr):
         try:
             stream.reconfigure(encoding="utf-8", errors="replace")

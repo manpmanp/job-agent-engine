@@ -5,9 +5,9 @@
 # Author:  manpmanp <manp.node@gmail.com>
 # Generated with Claude (Anthropic), under the author's direction and review.
 # License: MIT (see LICENSE)
-# Version: 0.4.0
-# Date:    2026-10-28
-cd "$(dirname "$0")" || exit 1
+# Version: 0.4.1
+# Date:    2026-10-29
+cd "$(dirname "$0")/../.." || exit 1   # the engine folder
 PY="$(command -v python3 || true)"
 for p in /opt/homebrew/bin/python3 /usr/local/bin/python3; do [ -z "$PY" ] && [ -x "$p" ] && PY="$p"; done
 if [ -z "$PY" ]; then

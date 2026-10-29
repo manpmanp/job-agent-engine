@@ -1,0 +1,13 @@
+Job Agent for Windows
+=====================
+
+Job Agent opens in your web browser and runs only on your computer.
+Your job search is kept in the "JobAgent" folder in your user folder.
+
+Start it from the Start menu ("Job Agent") or the desktop icon.
+To stop it: Settings > Quit the app.
+
+Uninstall: Settings > Apps > Installed apps > Job Agent > Uninstall.
+Your JobAgent folder (postings, CVs, letters) is not removed.
+
+Help and source code: https://github.com/manpmanp/job-agent-engine

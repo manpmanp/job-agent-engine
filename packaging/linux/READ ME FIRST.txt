@@ -1,0 +1,15 @@
+Job Agent for Linux
+===================
+
+1. Unpack:      tar xzf JobAgent-Linux.tar.gz
+2. Install:     cd JobAgent-Linux && ./install.sh
+   (copies Job Agent to ~/.local/bin and adds it to your applications
+   menu; no administrator rights needed)
+3. Start it from the applications menu ("Job Agent"), or run: job-agent
+
+Job Agent opens in your web browser and runs only on your computer.
+Your job search is kept in ~/JobAgent.
+To stop it: Settings > Quit the app.
+Uninstall:  ./install.sh --remove   (your ~/JobAgent folder is kept)
+
+Help and source code: https://github.com/manpmanp/job-agent-engine
