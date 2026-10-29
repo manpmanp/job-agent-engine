@@ -166,6 +166,7 @@ details.grp > summary { cursor:pointer; font-weight:bold; color:var(--accent); }
       <span class="chip" data-f="rejected">Rejected</span>
       <span class="chip" data-f="expired">Expired</span>
       <span class="chip" data-f="all">All</span>
+      <span class="chip local-only" data-f="unmatched" title="Every other job the last search saw on each site">Not matched <span id="c-unmatched" hidden></span></span>
     </div>
     <span class="spacer"></span>
     <input type="search" id="q" placeholder="Filter by title, employer, place..." style="max-width:280px">
@@ -447,7 +448,7 @@ $('#btn-verify').onclick = () => runJob('/api/verify');
 // ----------------------------------------------------------- postings
 async function loadPostings() {
   try { P = await api('/api/postings'); } catch (e) { return toast(e.message); }
-  renderPostings(); renderDocs();
+  renderPostings(); renderDocs(); loadListings();
 }
 function decisionOf(p) { return p.status.startsWith('Approved') ? 'accepted' : p.status.startsWith('Rejected') ? 'rejected' : ''; }
 function inFilter(p) {
@@ -460,9 +461,36 @@ function inFilter(p) {
 }
 $$('#filters .chip').forEach(c => c.onclick = () => { filter = c.dataset.f; renderPostings(); });
 $('#q').oninput = renderPostings;
+let LST = null;
+async function loadListings() {
+  if (CLOUD) return;
+  try { LST = await api('/api/listings'); } catch (e) { LST = { listings: [] }; }
+  const c = $('#c-unmatched'); c.hidden = !LST.listings.length; c.textContent = '(' + LST.listings.length + ')';
+  if (filter === 'unmatched') renderPostings();
+}
+function renderUnmatched(q) {
+  const items = (LST ? LST.listings : []).filter(x => !q || [x.title, x.employer, x.location, x.source, x.why].join(' ').toLowerCase().includes(q));
+  if (!LST || !LST.listings.length) {
+    $('#plist').innerHTML = `<div class="card empty">${LST ? 'Every job the last search saw matched, or no search has run since this version.' : 'Loading...'}</div>`; return;
+  }
+  const groups = {};
+  items.forEach(x => (groups[x.employer || x.source || 'Other'] = groups[x.employer || x.source || 'Other'] || []).push(x));
+  window._unm = items;
+  $('#plist').innerHTML = `<p class="muted small" style="margin-top:0">All other jobs the search of ${esc(LST.run_date || '')} saw on each site, with why they were not matched.
+      Add one and it is read and put in your postings.</p>` +
+    Object.entries(groups).sort((a, b) => a[0].localeCompare(b[0])).map(([g, xs]) => `<div class="card"><b>${esc(g)}</b>
+      <span class="muted small">${xs.length} job(s)</span>${xs.map(x => {
+        const i = items.indexOf(x);
+        return `<div class="site"><a class="nm" href="${esc(x.url)}" target="_blank" rel="noopener noreferrer">${esc(x.title)}</a>
+          <span class="tag">${esc(x.why)}</span>${x.location ? `<span class="small muted">${esc(x.location)}</span>` : ''}
+          <span class="spacer"></span><button class="b sm" data-job onclick="addUnmatched(${i})">Add to my postings</button></div>`;
+      }).join('')}</div>`).join('');
+}
+function addUnmatched(i) { const x = window._unm[i]; runJob('/api/fetch', { url: x.url, employer: x.employer, title: x.title }); }
 function renderPostings() {
   $$('#filters .chip').forEach(c => c.classList.toggle('on', c.dataset.f === filter));
   const q = $('#q').value.toLowerCase().trim();
+  if (filter === 'unmatched') return renderUnmatched(q);
   const newest = P.postings.reduce((m, p) => p.found > m ? p.found : m, '');
   const list = P.postings.filter(inFilter)
     .filter(p => !q || [p.title, p.employer, p.location, p.category].join(' ').toLowerCase().includes(q))

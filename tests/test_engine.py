@@ -225,6 +225,12 @@ class TestCollect(unittest.TestCase):
         self.assertEqual(rows["ASIC Design Engineer"]["Remote/Hybrid/Onsite"], "Hybrid")
         self.assertIn("Indeed Only", s["skipped_agent_only"])
         self.assertEqual(s["errors"], [])
+        with open(self.h.path("all_listings"), encoding="utf-8") as f:
+            unm = {x["title"]: x for x in json.load(f)["listings"]}      # every job seen, with why it was left out
+        self.assertEqual(unm["Senior FPGA Engineer"]["why"], "outside your places")
+        self.assertEqual(unm["Marketing Manager"]["why"], "none of your keywords")
+        self.assertNotIn("FPGA Engineer", unm)                         # matched ones are postings, not listed here
+        self.assertEqual(s["not_matched"], len(unm))
         # second run: nothing new, existing rows untouched
         before = tr.read_all_rows(self.h.path("tracker"))
         s2 = collect.collect(self.h, run_date="2026-11-09")
@@ -703,6 +709,13 @@ class TestApp(unittest.TestCase):
         code, r = self.j("/api/reset")
         self.assertEqual([p["key"] for p in r["parts"]], ["settings", "keys", "profile", "postings", "documents"])
         self.assertEqual(self.j("/api/reset", {"parts": []})[0], 400)
+
+    def test_listings_api(self):
+        with open(self.h.path("all_listings"), "w", encoding="utf-8") as f:
+            json.dump({"run_date": "2026-11-02", "listings": [{"title": "Sales", "employer": "X", "url": "https://x.example/1",
+                                                                "why": "none of your keywords", "location": "", "source": "s"}]}, f)
+        code, r = self.j("/api/listings")
+        self.assertEqual((code, len(r["listings"]), r["listings"][0]["why"]), (200, 1, "none of your keywords"))
 
     def test_network_api(self):
         code, r = self.j("/api/network?days=7")

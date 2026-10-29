@@ -419,6 +419,11 @@ def _make_handler(home, token, jobs, httpd_ref):
                 return self._send(200, self._settings_get())
             if u.path == "/api/employers":
                 return self._send(200, _read_json(home.path("employers"), {"mode": "extend", "employers": []}) or {})
+            if u.path == "/api/listings":
+                data = _read_json(home.path("all_listings"), {}) or {}
+                tracked = {r.get("URL") for r in tr.read_all_rows(home.path("tracker")) if r.get("URL")}
+                items = [x for x in data.get("listings") or [] if x.get("url") not in tracked]
+                return self._send(200, {"run_date": data.get("run_date"), "listings": items})
             if u.path == "/api/network":
                 from . import netlog
                 days = int((q.get("days") or ["30"])[0] or 30)

@@ -80,6 +80,7 @@ DEFAULT_PATHS = {
     "rejection_log": "state/rejection_patterns.csv",
     "decisions": "state/decisions_sync.json",
     "new_postings": "state/new_postings",
+    "all_listings": "state/all_listings.json",
     "sync_logs": "state/sync_logs",
     "search_progress": "state/search_progress",
     "weekly_html": "output/jobs-on-market.html",

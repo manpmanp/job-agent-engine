@@ -26,6 +26,7 @@ the first time they are needed, from the empty versions in
 | `sync_logs/` | engine | One audit file per sync plus `latest_state.json` for diffing. |
 | `search_progress/` | engine (`checkpoint`) | Per-run phase and employer checkpoints. |
 | `network_log.jsonl` | engine (every request) | One line per request to the internet: time, purpose, address (key-like values hidden), what was sent, bytes out and in, status. Shown in the app under Settings > Network activity. Header values, where API keys travel, are never recorded. Trimmed to the newest 3000 lines past 2 MB. |
+| `all_listings.json` | engine (`collect`) | Every job the last search saw that did not become a posting, with why (`none of your keywords`, `outside your places`, `excluded word: ...`). Shown in the app under Postings > Not matched, where one click adds it. |
 | `document_choices.json` | the app (Documents tab), `tailor choose` | The position type or market you chose for single postings. |
 
 `backups/<date_time>/` in the agent home (not in `state/`) holds what

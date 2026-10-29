@@ -144,8 +144,10 @@ def collect(home, run_date=None, only=None):
                               f"{len(found)} candidates" + (f"; {err}" if err else ""))
 
     summary["candidates"] = len(candidates)
-    rows, kept_full = _filter_and_build(cfg, home, candidates, keywords, locations, run_date)
+    skipped = []
+    rows, kept_full = _filter_and_build(cfg, home, candidates, keywords, locations, run_date, skipped=skipped)
     summary["kept"] = len(rows)
+    summary["not_matched"] = save_all_listings(home, run_date, skipped, rows, partial=only is not None)
 
     existing = tr.read_all_rows(home.path("tracker"))
     keys = {(r.get("URL"), r.get("Title")) for r in existing}
@@ -174,7 +176,8 @@ def collect(home, run_date=None, only=None):
         tr.update(home.path("tracker"), new_rows, seniority_cfg=cfg.get("seniority"),
                   act_asap_after_days=int(cfg.get("act_asap_after_days", 7)))
     print(f"collected {summary['candidates']} listing(s), {summary['kept']} matched, {summary['new']} new, "
-          f"{summary['already_tracked']} already tracked, {summary['repeated_in_run']} found twice in this run")
+          f"{summary['already_tracked']} already tracked, {summary['repeated_in_run']} found twice in this run; "
+          f"{len(skipped)} not matched (listed in the app under Postings > Not matched)")
     for e in summary["errors"]:
         print(f"  [source error] {e}")
     if summary["skipped_agent_only"]:
@@ -182,7 +185,38 @@ def collect(home, run_date=None, only=None):
     return summary
 
 
-def _filter_and_build(cfg, home, candidates, keywords, locations, run_date, explicit=False):
+def _skipped(c, why):
+    return {"title": (c.get("title") or "").strip(), "employer": c.get("employer") or "", "location": c.get("location_text") or "",
+            "url": c.get("url") or "", "source": c.get("source") or "", "published": c.get("published") or "",
+            "deadline": c.get("deadline") or "", "why": why}
+
+
+def save_all_listings(home, run_date, skipped, kept_rows, partial=False):
+    """Every listing the search saw on each site, matched or not, for the
+    app's "Not matched" view. A partial run (one source) only replaces the
+    listings it saw again."""
+    path = home.path("all_listings")
+    old = {}
+    if partial:
+        try:
+            with open(path, "r", encoding="utf-8") as f:
+                old = {x["url"]: x for x in json.load(f).get("listings", []) if x.get("url")}
+        except (OSError, ValueError, KeyError):
+            old = {}
+    for row, c in kept_rows:
+        old.pop(c.get("url"), None)
+        old.pop(row.get("URL"), None)
+    for s in skipped:
+        if s["url"]:
+            old[s["url"]] = s
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump({"run_date": run_date, "listings": sorted(old.values(), key=lambda x: (x["employer"].lower(), x["title"].lower()))},
+                  f, indent=1, ensure_ascii=False)
+    return len(old)
+
+
+def _filter_and_build(cfg, home, candidates, keywords, locations, run_date, explicit=False, skipped=None):
     scope = cfg.get("match_scope", "title")
     exclude = cfg.get("exclude_terms") or []
     remote_ok = (cfg.get("work_arrangement") or {}).get("remote_ok", True)
@@ -203,6 +237,9 @@ def _filter_and_build(cfg, home, candidates, keywords, locations, run_date, expl
         if explicit and not hit:
             hit, where = ["(none)"], "a URL you gave"
         if not hit:
+            if skipped is not None:
+                excluded = next((x for x in exclude if x and match._has(match.fold(x), match.fold(c.get("title")))), None)
+                skipped.append(_skipped(c, f"excluded word: {excluded}" if excluded else "none of your keywords"))
             continue
         if c.get("_wd_path") and not c.get("description"):
             sources.workday_details(c)  # only for matched listings: one request each
@@ -215,6 +252,8 @@ def _filter_and_build(cfg, home, candidates, keywords, locations, run_date, expl
                 confirm["done"] += 1
             hit, where = match_keywords_for(c, keywords, scope, exclude)
             if not hit:
+                if skipped is not None:
+                    skipped.append(_skipped(c, "none of your keywords (after reading the posting)"))
                 continue
         loc = match.match_location(c.get("location_text"), locations, remote_ok, c.get("is_remote"))
         if loc is None and explicit:
@@ -224,6 +263,8 @@ def _filter_and_build(cfg, home, candidates, keywords, locations, run_date, expl
             if c.get("lead") or not c.get("location_text") or vague:
                 loc = "unknown"  # leads and location-less listings are kept for confirmation
             else:
+                if skipped is not None:
+                    skipped.append(_skipped(c, "outside your places"))
                 continue
         stated = sources.stated_deadline(c.get("description"))
         board_deadline = c.get("deadline") or ""
