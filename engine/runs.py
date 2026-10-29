@@ -22,7 +22,7 @@ import os
 import sys
 from datetime import date
 
-from . import decisions, documents, weekly, checkpoint
+from . import decisions, documents, weekly, checkpoint, conventions
 from . import enrich as enrich_mod
 from .collect import collect, verify as verify_mod
 from .home import REPO_DIR
@@ -44,11 +44,13 @@ def _templates_if_needed(home):
         if os.path.exists(target) or os.path.exists(os.path.splitext(target)[0] + ".md"):
             continue
         cfg = home.search_config()
-        cv, cl = documents.template_specs(r, home.profile(), style,
+        conv = conventions.for_row(home, r, cfg)
+        st = conventions.style_for(home, conv)
+        cv, cl = documents.template_specs(r, home.profile(), st,
                                           description=documents.saved_description(home, r.get("URL")),
-                                          vocabulary=list(cfg.get("skill_terms") or []) + list(cfg.get("keywords") or []))
-        documents.render(cv, target, style=style)
-        documents.render(cl, os.path.join(home.path("cl_out"), "TEMPLATE_" + names["cl"]), style=style)
+                                          vocabulary=list(cfg.get("skill_terms") or []) + list(cfg.get("keywords") or []), conv=conv)
+        documents.render(cv, target, style=st)
+        documents.render(cl, os.path.join(home.path("cl_out"), "TEMPLATE_" + names["cl"]), style=st)
         n += 1
     if n:
         print(f"template documents written for {n} accepted posting(s)")

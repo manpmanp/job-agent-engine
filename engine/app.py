@@ -260,6 +260,14 @@ def _make_handler(home, token, jobs, httpd_ref):
 
         def _postings(self):
             cfg = home.search_config()
+            from . import conventions
+            cat = conventions.catalogue(home)
+
+            def written_for(r):
+                try:
+                    return conventions.summary(conventions.for_row(home, r, cfg, cat))
+                except Exception:
+                    return ""
             out = []
             for r in tr.read_all_rows(home.path("tracker")):
                 key = f"{r.get('URL') or ''}||{r.get('Title') or ''}"
@@ -275,7 +283,7 @@ def _make_handler(home, token, jobs, httpd_ref):
                     "status": r.get("Status") or "", "bucket": tr.status_bucket(r.get("Status")),
                     "notes": r.get("Notes") or "", "drafted": str(r.get("CV/Cover Letter Drafted (Y/N)") or "N").upper() == "Y",
                     "urgent": compute_action(r.get("Deadline"), announce, int(cfg.get("act_asap_after_days", 7))),
-                    "docs": _docs_for(home, r),
+                    "docs": _docs_for(home, r), "written_for": written_for(r),
                 })
             reasons = cfg.get("rejection_reasons") or []
             return {"postings": out, "rejection_reasons": reasons}

@@ -254,9 +254,12 @@ candidate sources marked "awaiting extraction", or a document in the chat):
   profile, the uploaded documents, the reference files and the personal
   rules. Then:
   ```
-  ./run.sh tailor check <spec.json>
+  ./run.sh tailor conventions "<URL>||<Title>"
+  ./run.sh tailor check <spec.json> --posting "<URL>||<Title>"
   ./run.sh tailor render <spec.json> --posting "<URL>||<Title>"
   ```
+  `conventions` says how documents are written for that posting's
+  country, sector (industry or academia) and level.
   Fix anything `check` reports before rendering.
 - `tailoring_full` off: `./run.sh tailor template --all-pending` produces
   template documents for a hypothetical candidate from the posting's

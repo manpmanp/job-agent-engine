@@ -356,6 +356,63 @@ if __name__ == "__main__":
     unittest.main()
 
 
+class TestConventions(unittest.TestCase):
+    """The same role is written differently for a US and a Swedish employer."""
+    def setUp(self):
+        from engine import conventions
+        self.c = conventions
+        self.h = make_home()
+
+    def row(self, title, location, category="Industry - Engineering/Design", seniority=None):
+        from engine.collect import match as m
+        return {"Title": title, "Employer": "Example Inc", "Location": location, "Category": category,
+                "Seniority Level": seniority or m.seniority(title), "URL": "https://example.com/j/1"}
+
+    def test_market_sector_level(self):
+        us = self.c.for_row(self.h, self.row("Senior ASIC Design Engineer", "San Diego, CA"))
+        se = self.c.for_row(self.h, self.row("ASIC Design Engineer", "Lund, Sweden"))
+        self.assertEqual((us["market"], us["sector"], us["level"], us["page_size"]), ("us", "industry", "senior", "Letter"))
+        self.assertEqual((se["market"], se["level"], se["page_size"]), ("nordic", "mid", "A4"))
+        self.assertEqual(self.c.closing(us), "Sincerely,")
+        self.assertEqual(self.c.closing(se), "Kind regards,")
+        pd = self.c.for_row(self.h, self.row("Postdoc in computer architecture", "Gothenburg, Sweden", "Academia - Postdoc/Researcher"))
+        self.assertEqual((pd["sector"], pd["level"]), ("academia", "mid"))
+        self.assertEqual(self.c.for_row(self.h, self.row("PhD student in hardware design", "Lund, Sweden"))["level"], "junior")
+        self.assertEqual(self.c.for_row(self.h, self.row("Graduate FPGA Engineer", "Toronto, ON"))["market"], "canada")
+        self.assertEqual(self.c.for_row(self.h, self.row("FPGA Engineer", "Remote"), {})["market"], "international")
+        self.assertIn("Market: United States", self.c.as_text(us))
+
+    def test_override_and_own_file(self):
+        r = self.row("FPGA Engineer", "San Diego, CA")
+        self.assertEqual(self.c.for_row(self.h, r, {"document_market": "nordic"})["market"], "us")      # detected country wins
+        self.assertEqual(self.c.for_row(self.h, self.row("FPGA Engineer", "Remote"), {"document_market": "nordic"})["market"], "nordic")
+        with open(self.h.path("document_conventions"), "w") as f:
+            json.dump({"markets": {"us": {"letter": {"closing": "Best regards,"}}}}, f)
+        conv = self.c.for_row(self.h, r)
+        self.assertEqual(self.c.closing(conv), "Best regards,")
+        self.assertEqual(conv["page_size"], "Letter")                     # the rest of the market stays
+        self.assertEqual(self.c.style_for(self.h, conv)["page_size"], "Letter")
+
+    def test_templates_and_checks(self):
+        from engine import documents as d
+        us = self.c.for_row(self.h, self.row("FPGA Engineer", "Austin, TX"))
+        cv, cl = d.template_specs(self.row("FPGA Engineer", "Austin, TX"), {}, conv=us)
+        heads = [s["heading"] for s in cv["sections"]]
+        self.assertNotIn("References", heads)                             # US: no references line
+        self.assertRegex(cl["date"], r"^[A-Z][a-z]+ \d{1,2}, \d{4}$")
+        jr = self.c.for_row(self.h, self.row("Graduate FPGA Engineer", "Lund, Sweden"))
+        heads = [s["heading"] for s in d.template_specs(self.row("Graduate FPGA Engineer", "Lund, Sweden"), {}, conv=jr)[0]["sections"]]
+        self.assertLess(heads.index("Education"), heads.index("Work Experience"))
+        ac = self.c.for_row(self.h, self.row("Postdoc in hardware", "Lund, Sweden", "Academia - Postdoc/Researcher"))
+        heads = [s["heading"] for s in d.template_specs(self.row("Postdoc in hardware", "Lund, Sweden"), {}, conv=ac)[0]["sections"]]
+        self.assertIn("Publications", heads)
+        self.assertIn("Research Experience", heads)
+        spec = {"type": "cv", "mode": "full", "banner": {"name": "Jane Example"},
+                "sections": [{"heading": "Profile", "paragraphs": ["Date of birth: 1990-01-01"]}]}
+        self.assertTrue(d.check_spec(spec, self.c.checks_for(self.h, us)))
+        self.assertFalse(d.check_spec(spec, self.c.checks_for(self.h, jr)))  # not a rule in the Nordic market
+
+
 class TestExtractAndSources(unittest.TestCase):
     def setUp(self):
         http.DELAY = 0

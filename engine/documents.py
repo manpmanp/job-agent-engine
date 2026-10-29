@@ -110,9 +110,11 @@ def saved_description(home, url):
     return ""
 
 
-def template_specs(row, profile=None, style=None, description=None, vocabulary=None):
+def template_specs(row, profile=None, style=None, description=None, vocabulary=None, conv=None):
     """CV and CL specs for a hypothetical candidate, built from the posting.
-    Uses only profile fields that exist; everything else is a placeholder."""
+    Uses only profile fields that exist; everything else is a placeholder.
+    conv (engine/conventions.py) adapts sections, order, salutation, date
+    and references to the market, sector and level."""
     profile = profile or {}
     style = style or {}
     ident = profile.get("identity") or {}
@@ -149,14 +151,18 @@ def template_specs(row, profile=None, style=None, description=None, vocabulary=N
     sections.append({"heading": "Languages", "table": [[l.get("language", ""), l.get("level", "")] for l in langs] if langs else
                      [["[Language]", "[Level: native / fluent / professional / basic]"]]})
     sections.append({"heading": "References", "paragraphs": [profile.get("references") or "References available upon request."]})
-    cv = {"type": "cv", "mode": "template", "template_note": TEMPLATE_NOTE, "banner": banner, "sections": sections}
+    note = TEMPLATE_NOTE
+    if conv:
+        sections = _apply_conventions(sections, conv, profile)
+        note += " Written for: " + _conv_line(conv) + "."
+    cv = {"type": "cv", "mode": "template", "template_note": note, "banner": banner, "sections": sections}
 
     top = ", ".join(kws[:3]) if kws else "[the two or three most important requirements]"
-    cl = {"type": "cl", "mode": "template", "template_note": TEMPLATE_NOTE,
+    cl = {"type": "cl", "mode": "template", "template_note": note,
           "banner": {"name": name, "title": title, "subtitle": "", "contact": banner["contact"]},
-          "date": date.today().isoformat(),
+          "date": _letter_date(conv),
           "recipient": [employer, ", ".join(dict.fromkeys(x.strip() for x in str(row.get("Location") or "[Location]").split(",") if x.strip()))],
-          "salutation": "Dear Hiring Team,",
+          "salutation": _salutation(conv),
           "paragraphs": [
               f"[Opening: name the role ({title}) and state, in one or two sentences, the strongest real connection "
               f"between your background and what {employer} is asking for. Then a short bridge into why you are writing.]",
@@ -170,6 +176,52 @@ def template_specs(row, profile=None, style=None, description=None, vocabulary=N
           "closing": style.get("cl_closing") or "Kind regards,",
           "signature": ident.get("name") or "[Your name]"}
     return cv, cl
+
+
+def _conv_line(conv):
+    l = conv.get("labels") or {}
+    return f"{l.get('market', conv.get('market'))}, {conv.get('sector')}, {conv.get('level')} level (CV {conv.get('cv_pages') or '?'} page(s))"
+
+
+def _salutation(conv):
+    s = str(((conv or {}).get("letter") or {}).get("salutation") or "Dear Hiring Manager,")
+    return re.split(r"\s*\(", s)[0].strip() or "Dear Hiring Manager,"
+
+
+def _letter_date(conv, today=None):
+    d = today or date.today()
+    market = (conv or {}).get("market")
+    if market in ("us", "canada"):
+        return f"{d:%B} {d.day}, {d.year}"
+    if market and market != "nordic":
+        return f"{d.day} {d:%B} {d.year}"
+    return d.isoformat()
+
+
+def _apply_conventions(sections, conv, profile):
+    by = {s["heading"]: s for s in sections}
+    if conv.get("sector") == "academia":
+        exp = by.get("Work Experience")
+        if exp:
+            exp["heading"] = "Research Experience"
+        i = sections.index(by["Education"]) + 1
+        if not profile.get("publications"):
+            sections.insert(i, {"heading": "Publications", "paragraphs": [
+                "[Every publication exactly as published: authors (your name marked), title, venue, year. "
+                "Group journal and conference papers; take them from your authoritative list.]"]})
+            i += 1
+        sections.insert(i, {"heading": "Teaching and Supervision", "paragraphs": [
+            "[Courses you taught or assisted, and students you supervised, with years. Leave out if none.]"]})
+        if not profile.get("references"):
+            by["References"]["paragraphs"] = ["[Two or three referees: name, title, affiliation, e-mail.]"]
+    elif str(conv.get("references") or "").lower().startswith("omit"):
+        sections = [s for s in sections if s["heading"] != "References"]
+    if conv.get("level") == "junior":
+        exp = next(s for s in sections if s["heading"] in ("Work Experience", "Research Experience"))
+        edu = by["Education"]
+        sections.remove(edu)
+        sections.insert(sections.index(exp), edu)
+    return sections
 
 
 # --------------------------------------------------------------------- checks

@@ -17,7 +17,7 @@ from datetime import date
 
 from . import home as home_mod
 from . import tracker as tr
-from . import decisions, checkpoint, weekly, documents
+from . import decisions, checkpoint, weekly, documents, conventions
 from .profile import Intake
 
 
@@ -212,17 +212,28 @@ def cmd_tailor(h, args):
         for r in rows:
             names = documents.filenames_for(r)
             cfg = h.search_config()
-            cv, cl = documents.template_specs(r, h.profile(), style,
+            conv = conventions.for_row(h, r, cfg)
+            st = conventions.style_for(h, conv)
+            cv, cl = documents.template_specs(r, h.profile(), st,
                                               description=documents.saved_description(h, r.get("URL")),
-                                              vocabulary=list(cfg.get("skill_terms") or []) + list(cfg.get("keywords") or []))
-            p1 = documents.render(cv, os.path.join(h.path("cv_out"), "TEMPLATE_" + names["cv"]), style=style)
-            p2 = documents.render(cl, os.path.join(h.path("cl_out"), "TEMPLATE_" + names["cl"]), style=style)
-            print(f"template documents for {r.get('Employer')} / {r.get('Title')}:\n  {p1}\n  {p2}")
+                                              vocabulary=list(cfg.get("skill_terms") or []) + list(cfg.get("keywords") or []), conv=conv)
+            p1 = documents.render(cv, os.path.join(h.path("cv_out"), "TEMPLATE_" + names["cv"]), style=st)
+            p2 = documents.render(cl, os.path.join(h.path("cl_out"), "TEMPLATE_" + names["cl"]), style=st)
+            print(f"template documents for {r.get('Employer')} / {r.get('Title')} ({conventions.summary(conv)}):\n  {p1}\n  {p2}")
+        return
+    if sub == "conventions":
+        # tailor conventions "<URL>||<Title>"   (how this posting's documents should be written)
+        conv = conventions.for_row(h, _row_by_key(h, a[1]))
+        print(conventions.as_text(conv))
         return
     if sub == "check":
+        # tailor check <spec.json> [--posting "<URL>||<Title>"]   (with --posting: the market's checks too)
         with open(a[1], "r", encoding="utf-8") as f:
             spec = json.load(f)
-        probs = documents.check_spec(spec, h.tailoring_checks(), style)
+        checks = h.tailoring_checks()
+        if "--posting" in a:
+            checks = conventions.checks_for(h, conventions.for_row(h, _row_by_key(h, a[a.index("--posting") + 1])))
+        probs = documents.check_spec(spec, checks, style)
         print("passed" if not probs else "problems:\n" + "\n".join(f"  - {p}" for p in probs))
         if probs:
             sys.exit(1)
@@ -231,7 +242,9 @@ def cmd_tailor(h, args):
         # tailor render <spec.json> --posting "<URL>||<Title>"   (kind taken from spec.type)
         with open(a[1], "r", encoding="utf-8") as f:
             spec = json.load(f)
-        probs = documents.check_spec(spec, h.tailoring_checks(), style)
+        conv = conventions.for_row(h, _row_by_key(h, a[a.index("--posting") + 1]))
+        style = conventions.style_for(h, conv)
+        probs = documents.check_spec(spec, conventions.checks_for(h, conv), style)
         if probs and "--force" not in a:
             print("not rendered, fix these first (or pass --force):\n" + "\n".join(f"  - {p}" for p in probs))
             sys.exit(1)

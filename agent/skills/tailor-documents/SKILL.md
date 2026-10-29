@@ -30,7 +30,19 @@ JD snapshot. Drafts only; nothing is ever sent.
   this mode. Stop here.
 - **Full mode** (`tailoring_full` on): continue below.
 
-## 1. Read the posting
+## 1. Read how this posting's documents are written
+
+Run `./run.sh tailor conventions "<URL>||<Title>"`. It names the market
+(from the posting's country: a US resume differs from a Swedish CV),
+the sector (industry or academia) and the level (junior, mid, senior),
+and gives page size, length, personal details, tone, metrics, references,
+salutation and closing for that combination. Follow it. The posting wins
+where it asks for something specific, and `tailoring_rules.md` wins over
+both. Its "Never include" list is checked by `tailor check --posting`.
+When this procedure comes inside a prompt from the app, the same block is
+already included under "How documents are written for this posting".
+
+## 2. Read the posting
 
 Fetch the full job description, not a snippet. The text saved by
 `collect` or `./run.sh fetch <url>` is the first place to look; fetch the
@@ -41,7 +53,7 @@ culture or working-style cues. If the description cannot be fully
 retrieved, say so and ask the user for the text rather than drafting from
 a fragment.
 
-## 2. Read the candidate material, in this order of authority
+## 3. Read the candidate material, in this order of authority
 
 1. `inputs/tailoring_rules.md`: the candidate's own mandatory rules. They
    override everything below except the no-invention rule.
@@ -55,7 +67,7 @@ a fragment.
    `.../cl/`: the candidate's proven wording. Prefer the one closest to
    this posting's type and employer.
 5. `inputs/characteristics.md` (if present): only for the motivation part
-   of the cover letter; see section 5.
+   of the cover letter; see section 6.
 
 **Never invent.** Tailoring means selecting, ordering, emphasizing and
 matching the posting's language. It never adds a skill, tool, project,
@@ -63,7 +75,7 @@ responsibility, date, title or number that the material does not contain.
 If the material is ambiguous about what the candidate personally did, ask
 the user instead of choosing the generous or the cautious reading.
 
-## 3. Build every important claim the same way
+## 4. Build every important claim the same way
 
 Requirement, relevance, evidence, ownership, context, fit:
 
@@ -95,7 +107,7 @@ Rules that follow from this:
   source; never shortened or paraphrased.
 - Mention only the location(s) the candidate is applying for.
 
-## 4. CV
+## 5. CV
 
 - Sections are chosen per posting, not fixed. A typical industry CV:
   profile, experience, technical skills (two-column table), education,
@@ -103,14 +115,14 @@ Rules that follow from this:
   research contributions and teaching where the material supports them.
 - Mandatory entries named in `tailoring_rules.md` or
   `tailoring_checks.json` are always present.
-- Follow `document_market` conventions (default `nordic`: concise, plain,
-  one to two pages, matter-of-fact, no boasting, no headline metrics on
-  non-research industry roles).
+- Follow the conventions from step 1: section order (junior: education
+  near the top; academia: publications, teaching, referees), length per
+  level, how much to quantify, and what personal details to leave out.
 - Keep sections from splitting awkwardly across pages; use
   `page_break_before` on a section only when the rendered PDF shows it is
   needed.
 
-## 5. Cover letter: a motivation letter, not a second CV
+## 6. Cover letter: a motivation letter, not a second CV
 
 Default shape (short letters may combine parts):
 1. **Opening:** the role and the strongest real connection to it, then a
@@ -130,15 +142,16 @@ reflects a characteristic relevant to this posting, tied to a real
 situation, worded freshly for this letter. Never quote that file, name it,
 or use assessment terminology in the letter.
 
-## 6. Style
+## 7. Style
 
 - If `document_style.avoid_em_dash` is true (default), no em dash in any
   sentence; ranges such as dates may use an en dash.
 - Apply every style rule in `tailoring_rules.md`.
 
-## 7. Render and verify
+## 8. Render and verify
 
-1. `./run.sh tailor check <spec>` for each spec; fix every problem.
+1. `./run.sh tailor check <spec> --posting "<URL>||<Title>"` for each
+   spec; fix every problem.
 2. `./run.sh tailor render <spec> --posting "<URL>||<Title>"`.
 3. `./run.sh tailor jd "<URL>||<Title>" --text <full description file>`.
 4. Convert the .docx files to PDF and look at every page: template look,
@@ -148,7 +161,7 @@ or use assessment terminology in the letter.
    projects marked, numbers verified, titles exact, style rules applied.
 6. `./run.sh tailor done "<URL>||<Title>"`.
 
-## 8. Report
+## 9. Report
 
 File names; mode (full or template); what was emphasized and why; which
 requirements mapped to which evidence; optional sections included and why;

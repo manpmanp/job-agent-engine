@@ -1,0 +1,725 @@
+{
+ "_help": "How CVs and cover letters are usually written, by market (country group), sector and level. engine/conventions.py picks the market from the posting's location, the sector from its category and title, and the level from its seniority, then merges market + sector + level (later ones add to or replace earlier ones). Override or extend any part in your own inputs/document_conventions.json. These are common practice, not law, except where a rule says so; when a posting asks for something specific, the posting wins. A market's must_not_contain list is checked like tailoring_checks (a document containing one of them is not rendered).",
+ "markets": {
+  "nordic": {
+   "label": "Nordic (Sweden, Norway, Denmark, Finland, Iceland)",
+   "countries": [
+    "SE",
+    "NO",
+    "DK",
+    "FI",
+    "IS"
+   ],
+   "page_size": "A4",
+   "spelling": "British English (or the local language if the posting is in it)",
+   "date_format": "YYYY-MM-DD",
+   "cv_pages": {
+    "junior": "1-2",
+    "mid": "2",
+    "senior": "2-3"
+   },
+   "photo": "usually omitted (more common in Denmark); never needed",
+   "personal_details": "name, phone, e-mail, city; no date of birth, marital status, ID number or photo unless asked",
+   "work_authorization": "state it briefly if you are not an EU/EEA citizen (for example permanent residence)",
+   "tone": "factual, modest and concrete; no superlatives or self-promotion; show collaboration and how you work",
+   "metrics": "sparingly: only verified results that the posting values; research postings welcome one or two per project",
+   "profile_section": "a short profile of 3-4 lines is usual",
+   "references": "'References available upon request' is acceptable; names only when asked",
+   "letter": {
+    "pages": "1",
+    "salutation": "Dear Hiring Manager, (or the contact person's name)",
+    "closing": "Kind regards,",
+    "focus": "why this employer and team, what you would contribute, how you work with others; avoid repeating the CV"
+   },
+   "language": "write in the posting's language; Swedish/Norwegian/Danish postings usually expect the local language unless they say English is fine",
+   "notes": [
+    "Employers value balance, teamwork and practical results more than personal branding."
+   ]
+  },
+  "dach": {
+   "label": "Germany, Austria, Switzerland",
+   "countries": [
+    "DE",
+    "AT",
+    "CH",
+    "LI"
+   ],
+   "page_size": "A4",
+   "spelling": "British or US English used consistently; German if the posting is in German",
+   "date_format": "MM/YYYY in the CV, DD.MM.YYYY in the letter",
+   "cv_pages": {
+    "junior": "1-2",
+    "mid": "2",
+    "senior": "2-3"
+   },
+   "photo": "traditionally common in Germany and Austria, but optional and not legally required; omit for international companies",
+   "personal_details": "name, address, phone, e-mail; date of birth and nationality are traditional but optional",
+   "work_authorization": "state it if you are not an EU/EEA (or Swiss) citizen",
+   "tone": "formal, precise, complete; exact dates; no unexplained gaps",
+   "metrics": "welcome when precise and verifiable",
+   "profile_section": "optional short profile",
+   "references": "not listed; work certificates (Arbeitszeugnisse) and degree certificates are often attached",
+   "letter": {
+    "pages": "1",
+    "salutation": "Dear Ms/Mr <surname>, (Sehr geehrte Frau/Herr <surname>,)",
+    "closing": "Kind regards, (Mit freundlichen Grüßen)",
+    "focus": "formal motivation letter (Anschreiben): position, qualifications that match, earliest start date and salary expectation if the posting asks"
+   },
+   "language": "German postings expect German documents unless English is stated",
+   "notes": [
+    "A traditional German CV (Lebenslauf) is tabular, reverse-chronological, and ends with place, date and signature; international employers do not expect the signature."
+   ]
+  },
+  "uk_ie": {
+   "label": "United Kingdom and Ireland",
+   "countries": [
+    "GB",
+    "UK",
+    "IE"
+   ],
+   "page_size": "A4",
+   "spelling": "British English",
+   "date_format": "Month YYYY",
+   "cv_pages": {
+    "junior": "1-2",
+    "mid": "2",
+    "senior": "2-3"
+   },
+   "photo": "omit",
+   "personal_details": "name, phone, e-mail, town; omit date of birth, age, marital status, photo (UK equality law makes employers avoid these)",
+   "work_authorization": "state right to work or visa status if relevant",
+   "tone": "professional, clear, results-oriented without exaggeration",
+   "metrics": "welcome where real",
+   "profile_section": "a personal profile/statement of 3-5 lines at the top is usual",
+   "references": "'References available on request', or two referees when asked",
+   "letter": {
+    "pages": "1",
+    "salutation": "Dear <name>, (or Dear Hiring Manager,)",
+    "closing": "Yours sincerely, (with a name) / Kind regards,",
+    "focus": "match the essential criteria of the job description point by point"
+   },
+   "language": "English",
+   "notes": [
+    "Public sector and university posts often require a supporting statement that addresses each criterion of the person specification."
+   ],
+   "must_not_contain": [
+    "Date of birth",
+    "Marital status",
+    "Nationality:",
+    "Religion:"
+   ]
+  },
+  "us": {
+   "label": "United States",
+   "countries": [
+    "US"
+   ],
+   "page_size": "Letter",
+   "spelling": "US English",
+   "date_format": "Month YYYY",
+   "cv_pages": {
+    "junior": "1",
+    "mid": "1-2",
+    "senior": "2"
+   },
+   "photo": "never",
+   "personal_details": "name, phone, e-mail, city and state, LinkedIn/portfolio; never date of birth, age, photo, marital status, nationality or religion (US equal-employment rules make employers avoid them)",
+   "work_authorization": "state visa or sponsorship needs only when relevant, briefly (for example 'Requires H-1B sponsorship')",
+   "tone": "confident and achievement-oriented; every bullet starts with an action verb",
+   "metrics": "expected: quantify impact (%, time, cost, scale, performance) wherever the material verifies it",
+   "profile_section": "a 2-3 line summary is optional; skills section with the posting's exact keywords (applicant tracking systems)",
+   "references": "omit; never write 'References available upon request'",
+   "letter": {
+    "pages": "under 1 (3-4 short paragraphs)",
+    "salutation": "Dear Hiring Manager, (or the name)",
+    "closing": "Sincerely,",
+    "focus": "the value you bring to the team's problems; direct and specific"
+   },
+   "language": "English",
+   "notes": [
+    "Industry uses a 'resume'; 'CV' means the long academic document. Use the posting's terminology for titles and skills so applicant tracking systems match them."
+   ],
+   "must_not_contain": [
+    "Date of birth",
+    "Marital status",
+    "Nationality:",
+    "Religion:",
+    "References available upon request"
+   ]
+  },
+  "canada": {
+   "label": "Canada",
+   "countries": [
+    "CA"
+   ],
+   "page_size": "Letter",
+   "spelling": "Canadian English (British-style spellings such as 'colour', '-ize' accepted)",
+   "date_format": "Month YYYY",
+   "cv_pages": {
+    "junior": "1-2",
+    "mid": "2",
+    "senior": "2-3"
+   },
+   "photo": "never",
+   "personal_details": "name, phone, e-mail, city and province; no date of birth, age, photo, marital status (human-rights codes)",
+   "work_authorization": "state citizenship, permanent residence or work permit status briefly if relevant",
+   "tone": "professional and achievement-oriented, somewhat less assertive than the US",
+   "metrics": "welcome where real",
+   "profile_section": "short summary of qualifications is usual",
+   "references": "omit, or 'available upon request'",
+   "letter": {
+    "pages": "1",
+    "salutation": "Dear Hiring Manager,",
+    "closing": "Sincerely,",
+    "focus": "fit with the role and the organization"
+   },
+   "language": "English; in Quebec, French is expected unless the posting is in English",
+   "notes": [],
+   "must_not_contain": [
+    "Date of birth",
+    "Marital status",
+    "Nationality:",
+    "Religion:"
+   ]
+  },
+  "australia_nz": {
+   "label": "Australia and New Zealand",
+   "countries": [
+    "AU",
+    "NZ"
+   ],
+   "page_size": "A4",
+   "spelling": "Australian/British English",
+   "date_format": "Month YYYY",
+   "cv_pages": {
+    "junior": "2",
+    "mid": "2-3",
+    "senior": "3-4"
+   },
+   "photo": "omit",
+   "personal_details": "name, phone, e-mail, suburb/city; no date of birth, age, photo, marital status",
+   "work_authorization": "state citizenship, permanent residency or visa (with work rights) clearly; it is often asked",
+   "tone": "plain, direct and practical",
+   "metrics": "welcome where real",
+   "profile_section": "a career summary/objective of 3-4 lines is usual",
+   "references": "two referees, often with contact details, or 'available on request'",
+   "letter": {
+    "pages": "1",
+    "salutation": "Dear <name>,",
+    "closing": "Kind regards,",
+    "focus": "the role's key requirements; public sector and universities ask for a separate statement addressing each selection criterion"
+   },
+   "language": "English",
+   "notes": [
+    "Selection criteria statements (often 1-2 pages, one heading per criterion, with concrete examples) are common for government and university jobs."
+   ],
+   "must_not_contain": [
+    "Date of birth",
+    "Marital status",
+    "Nationality:",
+    "Religion:"
+   ]
+  },
+  "france": {
+   "label": "France and French-speaking postings",
+   "countries": [
+    "FR",
+    "MC"
+   ],
+   "page_size": "A4",
+   "spelling": "French if the posting is in French; British or US English otherwise",
+   "date_format": "MM/YYYY",
+   "cv_pages": {
+    "junior": "1",
+    "mid": "1-2",
+    "senior": "2"
+   },
+   "photo": "optional and increasingly omitted",
+   "personal_details": "name, phone, e-mail, city; age and photo optional",
+   "work_authorization": "state it if you are not an EU/EEA citizen",
+   "tone": "structured and formal; concise CV",
+   "metrics": "welcome where real",
+   "profile_section": "a one-line title and a short profile are usual",
+   "references": "omit",
+   "letter": {
+    "pages": "1",
+    "salutation": "Madame, Monsieur, (in French)",
+    "closing": "formal closing formula in French letters (Je vous prie d'agréer...); 'Kind regards,' in English",
+    "focus": "lettre de motivation: you, them, us; formal register"
+   },
+   "language": "French postings expect French documents unless English is stated",
+   "notes": []
+  },
+  "benelux": {
+   "label": "Netherlands, Belgium, Luxembourg",
+   "countries": [
+    "NL",
+    "BE",
+    "LU"
+   ],
+   "page_size": "A4",
+   "spelling": "British or US English used consistently; Dutch/French/German if the posting is in it",
+   "date_format": "MM/YYYY",
+   "cv_pages": {
+    "junior": "1-2",
+    "mid": "2",
+    "senior": "2"
+   },
+   "photo": "optional",
+   "personal_details": "name, phone, e-mail, city; date of birth optional",
+   "work_authorization": "state it if you are not an EU/EEA citizen",
+   "tone": "direct, concise and to the point (especially in the Netherlands)",
+   "metrics": "welcome where real",
+   "profile_section": "short profile is usual",
+   "references": "'available on request'",
+   "letter": {
+    "pages": "1",
+    "salutation": "Dear <name>,",
+    "closing": "Kind regards,",
+    "focus": "short and specific: why this job, what you bring"
+   },
+   "language": "Dutch postings in the Netherlands often accept English for technical roles; Belgian postings follow the region's language",
+   "notes": []
+  },
+  "southern_europe": {
+   "label": "Spain, Italy, Portugal, Greece, Malta, Cyprus",
+   "countries": [
+    "ES",
+    "IT",
+    "PT",
+    "GR",
+    "MT",
+    "CY"
+   ],
+   "page_size": "A4",
+   "spelling": "British English (or the local language if the posting is in it)",
+   "date_format": "MM/YYYY",
+   "cv_pages": {
+    "junior": "1-2",
+    "mid": "2",
+    "senior": "2-3"
+   },
+   "photo": "common but optional",
+   "personal_details": "name, phone, e-mail, city; date of birth and nationality traditional but optional",
+   "work_authorization": "state it if you are not an EU/EEA citizen",
+   "tone": "formal and complete",
+   "metrics": "welcome where real",
+   "profile_section": "short profile is usual",
+   "references": "omit",
+   "letter": {
+    "pages": "1",
+    "salutation": "Dear <name>,",
+    "closing": "Kind regards,",
+    "focus": "formal motivation letter"
+   },
+   "language": "the posting's language",
+   "data_consent_clause": {
+    "IT": "Autorizzo il trattamento dei dati personali contenuti nel mio curriculum vitae in base al Regolamento UE 2016/679 (GDPR)."
+   },
+   "notes": [
+    "In Italy a data-processing consent sentence at the end of the CV is customary; Europass format is common in the public sector."
+   ]
+  },
+  "central_eastern": {
+   "label": "Central and Eastern Europe and the Baltics",
+   "countries": [
+    "PL",
+    "CZ",
+    "SK",
+    "HU",
+    "SI",
+    "HR",
+    "RO",
+    "BG",
+    "EE",
+    "LV",
+    "LT",
+    "RS",
+    "UA"
+   ],
+   "page_size": "A4",
+   "spelling": "British or US English used consistently; the local language if the posting is in it",
+   "date_format": "MM/YYYY",
+   "cv_pages": {
+    "junior": "1-2",
+    "mid": "2",
+    "senior": "2-3"
+   },
+   "photo": "common but optional",
+   "personal_details": "name, phone, e-mail, city",
+   "work_authorization": "state it if you are not an EU/EEA citizen",
+   "tone": "professional and complete",
+   "metrics": "welcome where real",
+   "profile_section": "short profile is usual",
+   "references": "omit",
+   "letter": {
+    "pages": "1",
+    "salutation": "Dear <name>,",
+    "closing": "Kind regards,",
+    "focus": "formal motivation letter"
+   },
+   "language": "the posting's language; English is common for international companies",
+   "data_consent_clause": {
+    "PL": "I agree to the processing of personal data provided in this document for realising the recruitment process pursuant to the Regulation (EU) 2016/679 (GDPR)."
+   },
+   "notes": [
+    "In Poland a GDPR consent sentence at the end of the CV is customary and often requested in the posting."
+   ]
+  },
+  "international": {
+   "label": "Other or unknown country (neutral international style)",
+   "countries": [],
+   "page_size": "A4",
+   "spelling": "British or US English used consistently",
+   "date_format": "Month YYYY",
+   "cv_pages": {
+    "junior": "1-2",
+    "mid": "2",
+    "senior": "2-3"
+   },
+   "photo": "omit",
+   "personal_details": "name, phone, e-mail, city",
+   "work_authorization": "state it if relevant",
+   "tone": "professional, concrete, no exaggeration",
+   "metrics": "where real and relevant",
+   "profile_section": "short profile",
+   "references": "'available on request'",
+   "letter": {
+    "pages": "1",
+    "salutation": "Dear Hiring Manager,",
+    "closing": "Kind regards,",
+    "focus": "fit with the role"
+   },
+   "language": "the posting's language",
+   "notes": []
+  }
+ },
+ "sectors": {
+  "industry": {
+   "label": "Industry",
+   "cv_kind": "industry CV/resume",
+   "sections": [
+    "Profile",
+    "Work Experience",
+    "Technical Skills",
+    "Education",
+    "Languages"
+   ],
+   "publications": "a short 'Selected publications' (2-4) only if the role is research-oriented; otherwise leave out",
+   "emphasis": "products, systems and results you delivered; tools and methods the posting names; scope and responsibility"
+  },
+  "academia": {
+   "label": "Academia (PhD, postdoc, researcher, lecturer, professor)",
+   "cv_kind": "full academic CV (no page limit)",
+   "sections": [
+    "Profile",
+    "Research Experience / Academic Positions",
+    "Education",
+    "Publications",
+    "Grants and Awards",
+    "Teaching and Supervision",
+    "Talks and Service",
+    "Technical Skills",
+    "Languages",
+    "References"
+   ],
+   "cv_pages": {
+    "junior": "2-3",
+    "mid": "3+",
+    "senior": "no limit"
+   },
+   "publications": "complete list with exact titles, venues and years from the authoritative source, grouped by type (journal, conference, other); mark your own name",
+   "references": "usually two or three referees with title, affiliation and e-mail",
+   "letter": {
+    "pages": "1-2",
+    "focus": "fit with the group's research, your main results, what you plan to do there, and teaching where relevant"
+   },
+   "extras": [
+    "research statement or plan when asked",
+    "teaching statement when asked (US faculty posts)",
+    "publication list as a separate file when asked"
+   ],
+   "emphasis": "research contributions, publications, independence, supervision and teaching, funding",
+   "metrics": "research results (performance, efficiency, citations of the work) are welcome; give one or two per project"
+  }
+ },
+ "levels": {
+  "junior": {
+   "label": "Junior / graduate / entry",
+   "emphasis": "education, thesis and projects first or near the top; internships and part-time roles count; skills with where they were used",
+   "older_roles": "keep everything relevant"
+  },
+  "mid": {
+   "label": "Experienced / mid-level",
+   "emphasis": "most recent and most relevant roles in detail; education after experience",
+   "older_roles": "shorten roles older than about ten years"
+  },
+  "senior": {
+   "label": "Senior / staff / lead / principal / architect / manager",
+   "emphasis": "scope and ownership: systems or products you were responsible for, technical decisions, leading or mentoring, cross-team work, outcomes; a strong 3-4 line profile",
+   "older_roles": "one line each for early roles; drop very old ones"
+  }
+ },
+ "country_names": {
+  "SE": [
+   "sweden",
+   "sverige"
+  ],
+  "NO": [
+   "norway",
+   "norge"
+  ],
+  "DK": [
+   "denmark",
+   "danmark"
+  ],
+  "FI": [
+   "finland",
+   "suomi"
+  ],
+  "IS": [
+   "iceland"
+  ],
+  "DE": [
+   "germany",
+   "deutschland"
+  ],
+  "AT": [
+   "austria",
+   "osterreich"
+  ],
+  "CH": [
+   "switzerland",
+   "schweiz",
+   "suisse",
+   "svizzera"
+  ],
+  "LI": [
+   "liechtenstein"
+  ],
+  "GB": [
+   "united kingdom",
+   "england",
+   "scotland",
+   "wales",
+   "northern ireland",
+   "great britain"
+  ],
+  "IE": [
+   "ireland",
+   "eire"
+  ],
+  "US": [
+   "united states",
+   "usa",
+   "u.s.",
+   "united states of america"
+  ],
+  "CA": [
+   "canada"
+  ],
+  "AU": [
+   "australia"
+  ],
+  "NZ": [
+   "new zealand"
+  ],
+  "FR": [
+   "france"
+  ],
+  "MC": [
+   "monaco"
+  ],
+  "NL": [
+   "netherlands",
+   "nederland",
+   "holland"
+  ],
+  "BE": [
+   "belgium",
+   "belgie",
+   "belgique"
+  ],
+  "LU": [
+   "luxembourg"
+  ],
+  "ES": [
+   "spain",
+   "espana"
+  ],
+  "IT": [
+   "italy",
+   "italia"
+  ],
+  "PT": [
+   "portugal"
+  ],
+  "GR": [
+   "greece",
+   "ellada"
+  ],
+  "MT": [
+   "malta"
+  ],
+  "CY": [
+   "cyprus"
+  ],
+  "PL": [
+   "poland",
+   "polska"
+  ],
+  "CZ": [
+   "czech republic",
+   "czechia",
+   "cesko"
+  ],
+  "SK": [
+   "slovakia",
+   "slovensko"
+  ],
+  "HU": [
+   "hungary",
+   "magyarorszag"
+  ],
+  "SI": [
+   "slovenia",
+   "slovenija"
+  ],
+  "HR": [
+   "croatia",
+   "hrvatska"
+  ],
+  "RO": [
+   "romania"
+  ],
+  "BG": [
+   "bulgaria"
+  ],
+  "EE": [
+   "estonia",
+   "eesti"
+  ],
+  "LV": [
+   "latvia",
+   "latvija"
+  ],
+  "LT": [
+   "lithuania",
+   "lietuva"
+  ],
+  "RS": [
+   "serbia",
+   "srbija"
+  ],
+  "UA": [
+   "ukraine"
+  ]
+ },
+ "regions": {
+  "US": [
+   "AL",
+   "AK",
+   "AZ",
+   "AR",
+   "CA",
+   "CO",
+   "CT",
+   "DE",
+   "FL",
+   "GA",
+   "HI",
+   "ID",
+   "IL",
+   "IN",
+   "IA",
+   "KS",
+   "KY",
+   "LA",
+   "ME",
+   "MD",
+   "MA",
+   "MI",
+   "MN",
+   "MS",
+   "MO",
+   "MT",
+   "NE",
+   "NV",
+   "NH",
+   "NJ",
+   "NM",
+   "NY",
+   "NC",
+   "ND",
+   "OH",
+   "OK",
+   "OR",
+   "PA",
+   "RI",
+   "SC",
+   "SD",
+   "TN",
+   "TX",
+   "UT",
+   "VT",
+   "VA",
+   "WA",
+   "WV",
+   "WI",
+   "WY",
+   "DC",
+   "California",
+   "Texas",
+   "Massachusetts",
+   "Oregon",
+   "Colorado",
+   "Arizona",
+   "North Carolina",
+   "Illinois",
+   "Florida",
+   "Virginia",
+   "Michigan",
+   "Pennsylvania",
+   "New Jersey",
+   "New York",
+   "Minnesota",
+   "Utah",
+   "Ohio",
+   "Maryland",
+   "Idaho",
+   "Washington, DC"
+  ],
+  "CA": [
+   "ON",
+   "QC",
+   "BC",
+   "AB",
+   "MB",
+   "SK",
+   "NS",
+   "NB",
+   "NL",
+   "PE",
+   "YT",
+   "NT",
+   "NU",
+   "Ontario",
+   "Quebec",
+   "British Columbia",
+   "Alberta",
+   "Manitoba",
+   "Nova Scotia"
+  ],
+  "AU": [
+   "NSW",
+   "VIC",
+   "QLD",
+   "TAS",
+   "ACT",
+   "New South Wales",
+   "Victoria",
+   "Queensland",
+   "Tasmania"
+  ]
+ }
+}

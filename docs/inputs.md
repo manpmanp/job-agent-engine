@@ -36,7 +36,7 @@ creates blank versions. Keys beginning with `_` are help text and ignored.
 | `credible_sources` | no | Sources that count as confirmation that a posting is live. |
 | `employer_presets` | no | Names of files in `engine/defaults/employer_presets/`. |
 | `rejection_reasons` | no | The checkbox list on the weekly page. |
-| `document_market` | no | Document conventions; default `nordic`. |
+| `document_market` | no | The writing conventions used when a posting's country cannot be detected (for example "Remote"); default `international`. Otherwise each posting gets its own country's conventions (`engine/defaults/document_conventions.json`). |
 | `calendar` | no | `enabled`, `calendar_id`. Events go only to this calendar. |
 | `git` | no | `commit_state`, `push`, if your agent home is a git repo. |
 | `page_title` | no | Title of the weekly page. |
@@ -56,7 +56,8 @@ A blank value keeps the default.
 | `inputs/tailoring_rules.md` | Your own mandatory rules for documents (entries that must always appear, exact wording for specific projects, style corrections). |
 | `inputs/tailoring_checks.json` | Mechanical checks: `cv_must_contain`, `cl_must_contain`, `must_not_contain`. `tailor render` refuses a spec that fails them. |
 | `inputs/references/` | Any authoritative files the agent should consult (a publication list, a detailed technical profile). |
-| `inputs/document_style.json` | `font`, `banner_color`, `accent_color`, `secondary_text_color`, `body_text_color`, `page_size` (A4/Letter), `avoid_em_dash`, `cl_closing`. |
+| `inputs/document_style.json` | `font`, `banner_color`, `accent_color`, `secondary_text_color`, `body_text_color`, `page_size` (A4/Letter), `avoid_em_dash`, `cl_closing`. Leave `page_size` and `cl_closing` out to follow each posting's market (Letter and "Sincerely," for the US, A4 and "Kind regards," for Sweden). |
+| `inputs/document_conventions.json` | Your changes to the writing conventions, in the same shape as `engine/defaults/document_conventions.json` (`markets`, `sectors`, `levels`); only what you write replaces the default, for example `{"markets": {"us": {"letter": {"closing": "Best regards,"}}}}`. |
 
 ## Using an existing folder layout: `agent_home.json`
 

@@ -496,6 +496,7 @@ function renderDocs() {
     return `<div class="card">
       <div class="row"><div style="flex:1"><b>${esc(p.title)}</b><div class="muted">${esc(p.employer)}${p.location ? ' &middot; ' + esc(p.location) : ''}${/^\d{4}-/.test(p.deadline || '') ? ' &middot; apply by ' + esc(p.deadline) : ''}</div></div>
         ${p.drafted ? '<span class="tag good">Drafted</span>' : p.docs.length ? '<span class="tag">Templates only</span>' : '<span class="tag warn">No documents yet</span>'}</div>
+      ${p.written_for ? `<div class="small muted" style="margin-top:6px">Written for: ${esc(p.written_for)}</div>` : ''}
       <div class="small" style="margin:8px 0">${docs || '<span class="muted">No files yet.</span>'}</div>
       <div class="row">
         ${full ? `${S.api_key ? `<button class="b primary" data-job onclick="aiDoc(${i})">Write with AI</button>` : ''}

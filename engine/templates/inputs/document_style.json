@@ -1,11 +1,9 @@
 {
-  "_help": "OPTIONAL. Look of generated CVs and cover letters. Any key left out falls back to the engine default (shown here).",
+  "_help": "OPTIONAL. Look of generated CVs and cover letters. Any key left out falls back to the engine default (shown here). Page size (A4 or Letter) and the cover-letter closing follow the market of each posting (see engine/defaults/document_conventions.json); add \"page_size\" or \"cl_closing\" here only to fix them for every document.",
   "font": "Calibri",
   "banner_color": "1F3864",
   "accent_color": "2E74B5",
   "secondary_text_color": "595959",
   "body_text_color": "222222",
-  "page_size": "A4",
-  "avoid_em_dash": true,
-  "cl_closing": "Kind regards,"
+  "avoid_em_dash": true
 }
