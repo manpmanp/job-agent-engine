@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
 # Job-search agent engine
-# File:    start.py
+# File:    launchers/start.py
 # Purpose: Cross-platform launcher: prepares its own Python environment on first start, then opens the local app.
 # Author:  manpmanp <manp.node@gmail.com>
 # Generated with Claude (Anthropic), under the author's direction and review.
 # License: MIT (see LICENSE)
-# Version: 0.4.1
+# Version: 0.4.3
 # Date:    2026-10-28
 
 """
 Double-click the launcher in launchers/macos, launchers/windows or
-launchers/linux, or run:  python3 start.py
+launchers/linux, or run:  python3 launchers/start.py
 
 First start: creates a private Python environment in .venv/ next to this
 file and installs the few packages the engine needs (nothing system-wide),
@@ -21,16 +21,18 @@ Later starts open the app directly. If it is already running, the browser
 is just pointed at it.
 
 Other uses:
-    start.py --home DIR          use another job-search folder
-    start.py --run auto          one run without the app (used by the daily schedule)
-    start.py --cli <command...>  any engine command, as with ./run.sh
+    launchers/start.py --home DIR          use another job-search folder
+    launchers/start.py --run auto          one run without the app (used by the daily schedule)
+    launchers/start.py --cli <command...>  any engine command, as with ./run.sh
 """
 import json
 import os
 import subprocess
 import sys
 
-HERE = os.path.dirname(os.path.abspath(sys.executable if getattr(sys, "frozen", False) else __file__))
+# The engine folder: one level above launchers/ (the packaged apps: the folder of the program).
+HERE = (os.path.dirname(os.path.abspath(sys.executable)) if getattr(sys, "frozen", False)
+        else os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 VENV = os.path.join(HERE, ".venv")
 VENV_PY = os.path.join(VENV, "Scripts", "python.exe") if os.name == "nt" else os.path.join(VENV, "bin", "python")
 STAMP = os.path.join(VENV, ".requirements.installed")

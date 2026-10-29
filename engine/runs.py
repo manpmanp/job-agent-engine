@@ -65,6 +65,9 @@ def run(home, mode="auto"):
         day = str((cfg.get("weekly_list") or {}).get("full_search_day", "Monday")).lower()
         mode = "weekly" if today.strftime("%A").lower() == day else "daily"
     lines = [f"run {mode} {today.isoformat()}"]
+    from . import schedule as _sched
+    if _sched.refresh(home):
+        lines.append("daily run updated to the new launcher location")
     from .profile import Intake
     scan = Intake(home).scan_intake_folders()
     if scan["imported"]:

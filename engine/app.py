@@ -8,7 +8,7 @@
 # Date:    2026-10-28
 
 """
-Started by the launcher (start.py, or the double-click files) or with
+Started by the launchers (launchers/start.py, or the double-click files) or with
 './run.sh app'. Serves engine/web/app.html on http://127.0.0.1:<port>/ and the
 input forms on /form.
 
@@ -639,6 +639,7 @@ def serve(home, port=8765, open_browser=True, path="/"):
     if httpd is None:
         raise SystemExit(f"no free port between {port} and {port + 19}")
     ref[0] = httpd
+    sched.refresh(home)
     url = f"http://127.0.0.1:{chosen}{path}"
     print(f"Job agent is running for {home.root}")
     print(f"Open {url}  (keep this window open; close it or press Ctrl+C to stop)")

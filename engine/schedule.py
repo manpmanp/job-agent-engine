@@ -9,7 +9,7 @@
 
 """
 One daily job per agent home, at HOUR:MINUTE local time, running
-'start.py --home <home> --run auto' (full search on your search day, a sync
+'launchers/start.py --home <home> --run auto' (full search on your search day, a sync
 on the other days). The log goes to <home>/state/run.log.
 
 - macOS: ~/Library/LaunchAgents/local.job-agent-engine.<id>.plist, loaded
@@ -37,7 +37,7 @@ def command(home):
     """The command the scheduler runs."""
     if getattr(sys, "frozen", False):  # packaged app
         return [sys.executable, "--home", home.root, "--run", "auto"]
-    return [sys.executable, os.path.join(REPO_DIR, "start.py"), "--home", home.root, "--run", "auto"]
+    return [sys.executable, os.path.join(REPO_DIR, "launchers", "start.py"), "--home", home.root, "--run", "auto"]
 
 
 def _log(home):
@@ -98,6 +98,37 @@ def status(home):
     except Exception as e:
         return False, f"could not check: {e}"
     return on, (f"runs every day at {HOUR:02d}:{MINUTE:02d}" if on else "off")
+
+
+def _installed_text(home):
+    try:
+        if sys.platform == "darwin":
+            with open(_plist_path(home), "r", encoding="utf-8") as f:
+                return f.read()
+        if os.name == "nt":
+            r = subprocess.run(["schtasks", "/Query", "/TN", _task_name(home), "/XML"], capture_output=True, text=True)
+            return r.stdout if r.returncode == 0 else ""
+        return "\n".join(l for l in _crontab().splitlines() if _tag(home) in l)
+    except OSError:
+        return ""
+
+
+def refresh(home):
+    """Reinstalls an installed daily run whose command is out of date (for
+    example after start.py moved to launchers/ in 0.4.3). Returns True if it
+    did. Silent and harmless when no daily run is installed."""
+    try:
+        on, _ = status(home)
+        if not on:
+            return False
+        text = _installed_text(home)
+        want = command(home)[1] if not getattr(sys, "frozen", False) else command(home)[0]
+        if text and want not in text:
+            ok, _ = install(home)
+            return ok
+    except Exception:
+        pass
+    return False
 
 
 def install(home):

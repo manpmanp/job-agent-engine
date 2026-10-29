@@ -30,13 +30,13 @@ jobs:
       - uses: actions/setup-python@v5
         with: { python-version: "3.12" }
       - run: pip install pyinstaller -r requirements.txt
-      - run: pyinstaller --noconfirm packaging/job_agent.spec
+      - run: pyinstaller --noconfirm launchers/job_agent.spec
       - name: Smoke test
         run: '"dist/Job Agent.app/Contents/MacOS/JobAgent" --home "$RUNNER_TEMP/home" --cli status'
       - name: Disk image
         run: |
           mkdir -p dmg && cp -R "dist/Job Agent.app" dmg/ && ln -s /Applications dmg/Applications
-          cp "packaging/macos/READ ME FIRST.txt" dmg/
+          cp "launchers/macos/package/READ ME FIRST.txt" dmg/
           hdiutil create -volname "Job Agent" -srcfolder dmg -ov -format UDZO JobAgent-macOS.dmg
       - uses: actions/upload-artifact@v4
         with: { name: JobAgent-macOS, path: JobAgent-macOS.dmg }
@@ -49,7 +49,7 @@ jobs:
       - uses: actions/setup-python@v5
         with: { python-version: "3.12" }
       - run: pip install pyinstaller -r requirements.txt
-      - run: pyinstaller --noconfirm packaging/job_agent.spec
+      - run: pyinstaller --noconfirm launchers/job_agent.spec
       - name: Smoke test
         shell: bash
         run: dist/JobAgent.exe --home "$RUNNER_TEMP/home" --cli status
@@ -59,7 +59,7 @@ jobs:
           if (-not (Get-Command iscc -ErrorAction SilentlyContinue)) { choco install innosetup -y --no-progress }
           $iscc = (Get-Command iscc -ErrorAction SilentlyContinue).Source
           if (-not $iscc) { $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe" }
-          & $iscc packaging\windows\jobagent.iss
+          & $iscc launchers\windows\package\jobagent.iss
           Copy-Item dist\JobAgent-Windows-Setup.exe .
       - uses: actions/upload-artifact@v4
         with: { name: JobAgent-Windows-Setup, path: JobAgent-Windows-Setup.exe }
@@ -72,12 +72,12 @@ jobs:
       - uses: actions/setup-python@v5
         with: { python-version: "3.12" }
       - run: pip install pyinstaller -r requirements.txt
-      - run: pyinstaller --noconfirm packaging/job_agent.spec
+      - run: pyinstaller --noconfirm launchers/job_agent.spec
       - name: Smoke test
         run: dist/JobAgent --home "$RUNNER_TEMP/home" --cli status
       - name: Archive
         run: |
-          mkdir -p JobAgent-Linux && cp dist/JobAgent packaging/linux/install.sh "packaging/linux/READ ME FIRST.txt" JobAgent-Linux/
+          mkdir -p JobAgent-Linux && cp dist/JobAgent launchers/linux/package/install.sh "launchers/linux/package/READ ME FIRST.txt" JobAgent-Linux/
           chmod +x JobAgent-Linux/JobAgent JobAgent-Linux/install.sh
           tar czf JobAgent-Linux.tar.gz JobAgent-Linux
       - uses: actions/upload-artifact@v4

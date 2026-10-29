@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Job-search agent engine
-# File:    packaging/linux/install.sh
+# File:    launchers/linux/package/install.sh
 # Purpose: Installs the Linux build for the current user (~/.local/bin + applications menu), or removes it with --remove.
 # Author:  manpmanp <manp.node@gmail.com>
 # Generated with Claude (Anthropic), under the author's direction and review.

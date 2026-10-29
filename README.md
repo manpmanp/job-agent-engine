@@ -261,9 +261,12 @@ decisions** (pick the `state` folder once), then `./run.sh sync`.
 ```
 README.md, LICENSE
 run.sh                  terminal entry point
-start.py                what the launchers and the packaged apps run
 requirements.txt        Python packages (installed into .venv/ automatically)
-launchers/<system>/     double-click to run from the code, one folder per system
+launchers/              everything to start Job Agent, per system:
+  <system>/             double-click launcher and its README (run from the code)
+  <system>/package/     what goes into that system's download (instructions, installer script)
+  start.py              what the launchers and the packaged apps run
+  job_agent.spec        build recipe for the packaged apps
 engine/                 the program
   collect/              online collectors, matching rules, posting reader, liveness checks
   web/                  the app page and the input form
@@ -273,7 +276,6 @@ agent/                  instructions and the CV / cover-letter procedure for an 
 cloud/                  the optional online search (Cloudflare Worker + D1)
 docs/                   reference documentation; docs/demo/ has fictional data and example output
 tests/                  offline tests with recorded responses; tests/shared/ is run by the Worker too
-packaging/<system>/     what goes into each system's package
 .github/workflows/      tests, and the builds of the three packages
 ```
 

@@ -14,4 +14,4 @@ if [ -z "$PY" ]; then
   echo "Job Agent needs Python 3. Install it from https://www.python.org/downloads/ and double-click this file again."
   read -r -p "Press Enter to close." _; exit 1
 fi
-exec "$PY" start.py "$@"
+exec "$PY" launchers/start.py "$@"
