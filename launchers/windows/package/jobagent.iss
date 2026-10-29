@@ -7,7 +7,7 @@
 ; Version: 0.4.1
 ; Date:    2026-10-29
 #ifndef AppVersion
-  #define AppVersion "0.4.6"
+  #define AppVersion "0.4.7"
 #endif
 [Setup]
 AppId={{6F1C2E7A-4B8D-4C2B-9E3A-JOBAGENTENGINE}
