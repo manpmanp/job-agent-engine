@@ -9,7 +9,7 @@
 
 """
 Started by the launcher (start.py, or the double-click files) or with
-'./run.sh app'. Serves app/index.html on http://127.0.0.1:<port>/ and the
+'./run.sh app'. Serves engine/web/app.html on http://127.0.0.1:<port>/ and the
 input forms on /form.
 
 Safety: listens on 127.0.0.1 only, accepts API calls only with a random
@@ -39,11 +39,11 @@ from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler
 from urllib.parse import urlsplit, parse_qs
 
 from . import __version__, decisions, documents, tracker as tr, schedule as sched
-from .home import REPO_DIR, _strip_help
+from .home import REPO_DIR, WEB_DIR, _strip_help
 from .profile import Intake
 
-APP_HTML = os.path.join(REPO_DIR, "app", "index.html")
-FORM = os.path.join(REPO_DIR, "forms", "candidate_form.html")
+APP_HTML = os.path.join(WEB_DIR, "app.html")
+FORM = os.path.join(WEB_DIR, "form.html")
 MAX_BODY = 25_000_000
 UPLOAD_EXT = {".pdf", ".docx", ".txt", ".md"}
 SECRET_KEYS = ("anthropic_api_key", "jsearch_api_key", "jsearch_host", "adzuna_app_id", "adzuna_app_key")

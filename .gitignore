@@ -10,7 +10,7 @@
 # Personal data never belongs in this repo. Keep your agent home outside
 # it, or in my_agent/ which is ignored.
 /my_agent/
-/demo/home*/
+/docs/demo/home*/
 node_modules/
 /.venv/
 __pycache__/

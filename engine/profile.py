@@ -23,8 +23,8 @@ Two ways to provide candidate data, both ending in the same profile.json:
    The original document also stays available as the wording reference for
    tailoring.
 
-2. A blank form (inputs_templates/candidate/profile_form.json, or
-   forms/candidate_form.html which writes the same format):
+2. A blank form (engine/templates/inputs/candidate/profile_form.json, or
+   the app's Setup page, which writes the same format):
        ./run.sh intake form my_profile.json
 
 Single fields can be set directly:

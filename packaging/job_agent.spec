@@ -15,7 +15,7 @@ from PyInstaller.utils.hooks import collect_submodules
 
 ROOT = os.path.abspath(os.path.join(SPECPATH, ".."))
 datas = [(os.path.join(ROOT, d), d) for d in
-         ("app", "forms", "defaults", "inputs_templates", "state_templates", "skills", "docs")]
+         ("engine/web", "engine/defaults", "engine/templates", "agent", "docs")]
 datas += [(os.path.join(ROOT, f), ".") for f in ("requirements.txt", "LICENSE", "README.md")]
 
 a = Analysis([os.path.join(ROOT, "start.py")], pathex=[ROOT], datas=datas,

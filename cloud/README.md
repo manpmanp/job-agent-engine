@@ -98,7 +98,7 @@ npm install
 cp .dev.vars.example .dev.vars      # set a password and token
 npm run dev                         # local Worker with a local database
 npm test                            # shared rule tests + end-to-end Worker tests
-npm run sync                        # after changing app/, forms/ or defaults/
+npm run sync                        # after changing engine/web/ or engine/defaults/
 ```
 
 Manual deploy without the button: `npx wrangler d1 create job-agent`

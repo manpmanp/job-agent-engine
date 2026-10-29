@@ -1,4 +1,4 @@
-# Weekly job list, 2026-10-28
+# Weekly job list, 2026-10-29
 
 _Demo run with fictional postings._
 

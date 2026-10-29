@@ -13,7 +13,7 @@
 
 The engine creates these in `state/` (or wherever `agent_home.json` points)
 the first time they are needed, from the empty versions in
-`state_templates/`. They are your job-search history: keep them private.
+`engine/templates/state/`. They are your job-search history: keep them private.
 
 | File | Written by | Purpose |
 |---|---|---|

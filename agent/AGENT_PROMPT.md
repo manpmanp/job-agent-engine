@@ -1,6 +1,6 @@
 <!--
   Job-search agent engine
-  File:    AGENT_PROMPT.md
+  File:    agent/AGENT_PROMPT.md
   Purpose: Instructions for the AI agent that runs the weekly search, sync and tailoring.
   Author:  manpmanp <manp.node@gmail.com>
   Generated with Claude (Anthropic), under the author's direction and review.
@@ -243,7 +243,7 @@ candidate sources marked "awaiting extraction", or a document in the chat):
 
 ### 7.2 Choose the mode
 
-- `tailoring_full` on: follow `skills/tailor-documents/SKILL.md`. Write a
+- `tailoring_full` on: follow `agent/skills/tailor-documents/SKILL.md`. Write a
   CV spec and a CL spec (format in `docs/document_spec.md`) from the
   profile, the uploaded documents, the reference files and the personal
   rules. Then:

@@ -188,8 +188,8 @@ def category(title, description, categories, rules=None):
 
 def default_vocabulary():
     import json, os
-    p = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
-                     "defaults", "skill_vocabulary.json")
+    from ..home import DEFAULTS_DIR
+    p = os.path.join(DEFAULTS_DIR, "skill_vocabulary.json")
     try:
         with open(p, "r", encoding="utf-8") as f:
             return list(json.load(f).get("terms", []))

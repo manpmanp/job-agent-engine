@@ -34,7 +34,7 @@ def _templates_if_needed(home):
     if not pend:
         return 0
     if caps["tailoring_full"][0]:
-        print(f"{len(pend)} accepted posting(s) wait for tailored documents (full mode: done by the agent, see AGENT_PROMPT.md)")
+        print(f"{len(pend)} accepted posting(s) wait for tailored documents (full mode: done by the agent, see agent/AGENT_PROMPT.md)")
         return 0
     style = home.document_style()
     n = 0

@@ -1,5 +1,5 @@
 {
-  "_help": "OPTIONAL blank form. Fill in whatever you want the agent to use; leave anything else empty. Submit it at any time with: ./run.sh intake form <this file>. You can also use forms/candidate_form.html, which writes the same format. Nothing here is required.",
+  "_help": "OPTIONAL blank form. Fill in whatever you want the agent to use; leave anything else empty. Submit it at any time with: ./run.sh intake form <this file>. You can also fill it in on the app's Setup page, which writes the same format. Nothing here is required.",
   "schema_version": 1,
   "identity": {
     "name": "",

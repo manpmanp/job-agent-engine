@@ -5,7 +5,7 @@ description: Write a tailored CV and cover letter for one accepted job posting f
 
 <!--
   Job-search agent engine
-  File:    skills/tailor-documents/SKILL.md
+  File:    agent/skills/tailor-documents/SKILL.md
   Purpose: Procedure for writing a tailored CV and cover letter for one accepted posting.
   Author:  manpmanp <manp.node@gmail.com>
   Generated with Claude (Anthropic), under the author's direction and review.

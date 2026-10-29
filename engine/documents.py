@@ -14,7 +14,7 @@ Two modes, chosen automatically from what the agent home contains:
 
 full      The candidate has a profile and/or uploaded CVs/letters. The agent
           writes a document spec (JSON, see docs/document_spec.md) from that
-          material only, following skills/tailor-documents/SKILL.md, then
+          material only, following agent/skills/tailor-documents/SKILL.md, then
           './run.sh tailor render' turns it into .docx.
 
 template  No candidate material (not even a name is required). The engine

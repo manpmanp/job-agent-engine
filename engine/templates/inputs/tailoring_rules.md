@@ -1,7 +1,7 @@
 # Personal tailoring rules (OPTIONAL)
 
 Rules that apply only to you and that the agent must follow on top of the
-generic rules in `skills/tailor-documents/SKILL.md` when it writes your CV
+generic rules in `agent/skills/tailor-documents/SKILL.md` when it writes your CV
 and cover letters. Leave this file empty if you have none.
 
 Examples of what belongs here:

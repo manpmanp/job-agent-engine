@@ -40,7 +40,7 @@ engine cannot do by rules alone.
  +-------------------------------------------+        +---------------------------+
  |  The engine   ./run.sh ...                |        |  Optional: an AI agent     |
  |  collect   fetch, match, classify, dedupe |  <---  |  (e.g. Claude) following   |
- |  verify    re-check that postings are open|        |  AGENT_PROMPT.md: adds     |
+ |  verify    re-check that postings are open|        |  agent/AGENT_PROMPT.md:    |
  |  sync      apply your Accept/Reject       |  --->  |  LinkedIn / Indeed, judges |
  |  weekly    weekly page + summary          |        |  unclear postings, writes  |
  |  tailor    CV / CL (template or full)     |        |  fully tailored CV / CL    |
@@ -218,8 +218,8 @@ app fetches the postings and decisions from there. See
 ./run.sh demo
 ```
 
-builds a fictional job search in `demo/home/`; open it with
-`./run.sh --home demo/home app`. Example documents are in `demo/preview/`.
+builds a fictional job search in `docs/demo/home/`; open it with
+`./run.sh --home docs/demo/home app`. Example documents are in `docs/demo/preview/`.
 
 ## Using the terminal (optional)
 
@@ -246,7 +246,7 @@ or by copying them into `inputs/intake/cv/` and `inputs/intake/cl/` (every
 run picks them up). When sources disagree, the newest wins and the change
 is listed for you to confirm (`intake conflicts`, or on the app's Home).
 
-Optionally, give an AI agent `AGENT_PROMPT.md` and the agent-home path,
+Optionally, give an AI agent `agent/AGENT_PROMPT.md` and the agent-home path,
 as a scheduled task or in a chat ("run the weekly pass", "sync my
 decisions"), for LinkedIn, Indeed and fully tailored documents.
 
@@ -259,23 +259,21 @@ decisions** (pick the `state` folder once), then `./run.sh sync`.
 ## Repository layout
 
 ```
-launchers/<system>/     double-click launchers to run from the code, one folder per system
-start.py                what the launchers and the packaged apps run
+README.md, LICENSE
 run.sh                  terminal entry point
-app/                    the local app (one web page)
-engine/                 Python engine, the app server and the .docx renderer
-engine/collect/         online collectors, matching rules, liveness checks
-AGENT_PROMPT.md         instructions for the AI agent
-skills/tailor-documents the CV / cover-letter procedure
-forms/                  browser forms: search setup and candidate profile
-inputs_templates/       blank inputs copied into a new agent home
-state_templates/        empty tracker, notes, rejection log, decisions file
-defaults/               engine defaults and employer presets
-demo/                   fictional data and example output
-docs/                   inputs, intake, commands, state files, document spec
-tests/                  offline tests with recorded API responses
+start.py                what the launchers and the packaged apps run
+requirements.txt        Python packages (installed into .venv/ automatically)
+launchers/<system>/     double-click to run from the code, one folder per system
+engine/                 the program
+  collect/              online collectors, matching rules, posting reader, liveness checks
+  web/                  the app page and the input form
+  defaults/             engine defaults, skill vocabulary, employer presets
+  templates/            blank inputs and empty state files for a new agent home
+agent/                  instructions and the CV / cover-letter procedure for an optional AI agent
 cloud/                  the optional online search (Cloudflare Worker + D1)
-packaging/<system>/     what goes into each system's package (installer script, instructions)
+docs/                   reference documentation; docs/demo/ has fictional data and example output
+tests/                  offline tests with recorded responses; tests/shared/ is run by the Worker too
+packaging/<system>/     what goes into each system's package
 .github/workflows/      tests, and the builds of the three packages
 ```
 

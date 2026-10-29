@@ -646,7 +646,7 @@ class TestCloudCopies(unittest.TestCase):
     def test_worker_copies_are_current(self):
         """cloud/src/shared/ must match the originals (run: cd cloud && npm run sync)."""
         root = os.path.dirname(HERE)
-        for src, dst in (("app/index.html", "index.html"), ("forms/candidate_form.html", "candidate_form.html"),
-                         ("defaults/search_defaults.json", "search_defaults.json"), ("defaults/skill_vocabulary.json", "skill_vocabulary.json")):
+        for src, dst in (("engine/web/app.html", "index.html"), ("engine/web/form.html", "candidate_form.html"),
+                         ("engine/defaults/search_defaults.json", "search_defaults.json"), ("engine/defaults/skill_vocabulary.json", "skill_vocabulary.json")):
             with open(os.path.join(root, src), "rb") as a, open(os.path.join(root, "cloud", "src", "shared", dst), "rb") as b:
                 self.assertEqual(a.read(), b.read(), f"{dst} is out of date: cd cloud && npm run sync")

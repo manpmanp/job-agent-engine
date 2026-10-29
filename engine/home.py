@@ -54,9 +54,12 @@ import subprocess
 
 ENGINE_DIR = os.path.dirname(os.path.abspath(__file__))
 REPO_DIR = os.path.dirname(ENGINE_DIR)
-DEFAULTS_DIR = os.path.join(REPO_DIR, "defaults")
-INPUT_TEMPLATES_DIR = os.path.join(REPO_DIR, "inputs_templates")
-STATE_TEMPLATES_DIR = os.path.join(REPO_DIR, "state_templates")
+DEFAULTS_DIR = os.path.join(ENGINE_DIR, "defaults")                 # engine defaults, skill vocabulary, presets
+INPUT_TEMPLATES_DIR = os.path.join(ENGINE_DIR, "templates", "inputs")  # blank inputs for a new agent home
+STATE_TEMPLATES_DIR = os.path.join(ENGINE_DIR, "templates", "state")   # empty tracker, notes, logs
+WEB_DIR = os.path.join(ENGINE_DIR, "web")                           # the app page and the input form
+AGENT_DIR = os.path.join(REPO_DIR, "agent")                         # instructions for an optional AI agent
+DEMO_DIR = os.path.join(REPO_DIR, "docs", "demo")                   # fictional demo data and example output
 
 DEFAULT_PATHS = {
     "inputs": "inputs",
@@ -126,7 +129,7 @@ def _is_blank(v):
 
 def meaningful_text(text, template_name=None):
     """True if a markdown input holds real content: not empty and not just
-    the unchanged template shipped in inputs_templates/."""
+    the unchanged template shipped in engine/templates/inputs/."""
     body = "\n".join(l.rstrip() for l in (text or "").strip().splitlines())
     if not body:
         return False
@@ -197,7 +200,7 @@ class Home:
         for preset in cfg.get("employer_presets", []) or []:
             p = _read_json(os.path.join(DEFAULTS_DIR, "employer_presets", f"{preset}.json"))
             if not p:
-                print(f"[warn] unknown employer preset '{preset}' (see defaults/employer_presets/)")
+                print(f"[warn] unknown employer preset '{preset}' (see engine/defaults/employer_presets/)")
                 continue
             for e in p.get("employers", []):
                 if e["name"] not in result:

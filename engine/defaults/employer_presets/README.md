@@ -1,6 +1,6 @@
 <!--
   Job-search agent engine
-  File:    defaults/employer_presets/README.md
+  File:    engine/defaults/employer_presets/README.md
   Purpose: How to add a reusable employer preset.
   Author:  manpmanp <manp.node@gmail.com>
   Generated with Claude (Anthropic), under the author's direction and review.

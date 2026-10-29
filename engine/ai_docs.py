@@ -21,7 +21,7 @@ Two tasks, each usable in two ways:
    for Claude"), you paste it into any Claude chat, and paste the answer
    back. The engine checks and renders it exactly as in way 1.
 
-Both follow skills/tailor-documents/SKILL.md, which is included in the
+Both follow agent/skills/tailor-documents/SKILL.md, which is included in the
 prompt. Answers are checked (tailor check) before anything is rendered,
 and documents are drafts: nothing is ever sent.
 """
@@ -33,7 +33,7 @@ from datetime import date
 
 from . import documents, tracker as tr
 from .collect import http
-from .home import REPO_DIR, meaningful_text, _read_text
+from .home import REPO_DIR, AGENT_DIR, INPUT_TEMPLATES_DIR, meaningful_text, _read_text
 
 API_URL = "https://api.anthropic.com/v1/messages"
 DEFAULT_MODEL = "claude-sonnet-5-5"
@@ -74,7 +74,7 @@ def _references(home):
 
 
 def _skill():
-    with open(os.path.join(REPO_DIR, "skills", "tailor-documents", "SKILL.md"), "r", encoding="utf-8") as f:
+    with open(os.path.join(AGENT_DIR, "skills", "tailor-documents", "SKILL.md"), "r", encoding="utf-8") as f:
         text = f.read()
     return re.sub(r"<!--[\s\S]*?-->", "", text.split("---", 2)[-1]).strip()
 
@@ -134,7 +134,7 @@ PROFILE_KEYS = {"schema_version", "identity", "summary", "experience", "educatio
 
 
 def profile_prompt(home, text, source_name="CV"):
-    with open(os.path.join(REPO_DIR, "inputs_templates", "candidate", "profile_form.json"), "r", encoding="utf-8") as f:
+    with open(os.path.join(INPUT_TEMPLATES_DIR, "candidate", "profile_form.json"), "r", encoding="utf-8") as f:
         form = {k: v for k, v in json.load(f).items() if not k.startswith("_")}
     return (
         "Turn this document into a candidate profile. Use ONLY what the document states, in its own wording; "

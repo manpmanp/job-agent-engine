@@ -11,16 +11,16 @@
 
     ./run.sh demo
 
-Result: demo/home/ (ignored by git) and refreshed previews in
-demo/preview/. No real person, employer posting or URL is involved.
+Result: docs/demo/home/ (ignored by git) and refreshed previews in
+docs/demo/preview/. No real person, employer posting or URL is involved.
 """
 import os
 import shutil
 
-from .home import REPO_DIR, Home
+from .home import DEMO_DIR, Home
 from . import cli
 
-DATA = os.path.join(REPO_DIR, "demo", "data")
+DATA = os.path.join(DEMO_DIR, "data")
 
 
 def _run(home, *argv):
@@ -29,7 +29,7 @@ def _run(home, *argv):
 
 
 def build(_home_arg=None):
-    root = os.path.join(REPO_DIR, "demo", "home")
+    root = os.path.join(DEMO_DIR, "home")
     if os.path.exists(root):
         try:
             shutil.rmtree(root)
@@ -66,7 +66,7 @@ def build(_home_arg=None):
     _run(h, "tailor", "jd", key)
     _run(h, "tailor", "done", key)
 
-    prev = os.path.join(REPO_DIR, "demo", "preview")
+    prev = os.path.join(DEMO_DIR, "preview")
     os.makedirs(prev, exist_ok=True)
     shutil.copy2(h.path("weekly_html"), os.path.join(prev, "jobs-on-market.html"))
     summaries = sorted(os.listdir(h.path("weekly_summary")))

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!--
   Job-search agent engine
-  File:    forms/candidate_form.html
+  File:    engine/web/form.html
   Purpose: Browser forms for the search setup and the optional candidate profile.
   Author:  manpmanp <manp.node@gmail.com>
   Generated with Claude (Anthropic), under the author's direction and review.
@@ -103,8 +103,8 @@
     <div class="check"><input type="checkbox" id="s-remote" checked><label for="s-remote" style="margin:0">Remote OK</label>
       <input type="checkbox" id="s-hybrid" checked><label for="s-hybrid" style="margin:0">Hybrid OK</label>
       <input type="checkbox" id="s-onsite" checked><label for="s-onsite" style="margin:0">On-site OK</label></div>
-    <label for="s-presets">Employer presets, comma separated (see <code>defaults/employer_presets/</code>)</label>
-    <input type="text" id="s-presets" placeholder="name of a file in defaults/employer_presets/">
+    <label for="s-presets">Employer presets, comma separated (see <code>engine/defaults/employer_presets/</code>)</label>
+    <input type="text" id="s-presets" placeholder="name of a file in engine/defaults/employer_presets/">
 
     <div class="bar">
       <button type="button" onclick="saveSearch()">Save search setup</button>

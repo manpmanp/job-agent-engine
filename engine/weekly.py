@@ -11,7 +11,7 @@
 Search plan, posting inbox and the weekly compilation.
 
 The search itself is carried out by the agent (an LLM with web/browser
-tools, following AGENT_PROMPT.md). The engine gives it the plan from the
+tools, following agent/AGENT_PROMPT.md). The engine gives it the plan from the
 user's search config and takes the results back as plain JSON rows:
 
     ./run.sh plan                       print the search plan

@@ -379,9 +379,8 @@ def cmd_open(h, args):
 
 
 def cmd_form(h, args):
-    from .formserver import serve
-    serve(h, port=args.port, open_browser=not args.no_browser)
-
+    from .app import serve
+    serve(h, port=args.port, open_browser=not args.no_browser, path="/#setup")
 
 def cmd_demo(h, args):
     from . import demo

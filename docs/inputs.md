@@ -22,7 +22,7 @@ creates blank versions. Keys beginning with `_` are help text and ignored.
 | `locations` | yes | Strings or objects `{"name", "country", "aliases": [...], "priority"}`, in priority order. Matching ignores accents (Vasteras = Västerås); use `aliases` for other spellings and nearby towns (Bærum for Oslo). `country` (SE, DK, ...) lets remote postings in that country through. |
 | `weekly_list` | no | `enabled` (default true), `full_search_day` (default Monday), `summary_markdown` (default true). |
 | `roles_description` | no | The kind of roles you want, in plain words. |
-| `categories` | no | Exactly one is assigned per posting. Defaults in `defaults/search_defaults.json`. |
+| `categories` | no | Exactly one is assigned per posting. Defaults in `engine/defaults/search_defaults.json`. |
 | `seniority` | no | `preferred`, `flag_as_too_senior`, `flag_as_too_junior`. Flagged postings are kept and colour-coded, never discarded. |
 | `work_arrangement` | no | `remote_ok`, `hybrid_ok`, `onsite_ok`. |
 | `max_commute` | no | Free text, for example `1.5h one-way`. |
@@ -33,7 +33,7 @@ creates blank versions. Keys beginning with `_` are help text and ignored.
 | `category_rules` | no | `{"<category>": ["term", ...]}`: first rule whose term appears in title or description sets the category. |
 | `enrichment` | no | Optional AI review: `enabled`, `model` (default `claude-haiku-5-5`), `send_profile` (default false: the profile is not sent), `max_per_run`. Needs `ANTHROPIC_API_KEY` or `inputs/secrets.json` `{"anthropic_api_key": "..."}`. |
 | `credible_sources` | no | Sources that count as confirmation that a posting is live. |
-| `employer_presets` | no | Names of files in `defaults/employer_presets/`. |
+| `employer_presets` | no | Names of files in `engine/defaults/employer_presets/`. |
 | `rejection_reasons` | no | The checkbox list on the weekly page. |
 | `document_market` | no | Document conventions; default `nordic`. |
 | `calendar` | no | `enabled`, `calendar_id`. Events go only to this calendar. |
