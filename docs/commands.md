@@ -25,6 +25,7 @@ before the command, or with the `JOB_AGENT_HOME` environment variable
 | `--setup` (or `setup`) | Installs the dependencies the first time (Python packages into `.venv/` in the engine folder, nothing system-wide), creates the agent home, then opens the input forms in your browser. Add `--browser` to also install Playwright with Chromium into `.venv/`, used to read posting pages that are built in the browser (optional; an installed Chrome is used otherwise). |
 | `form [--port N] [--no-browser]` | Opens the input forms without the install step. Served locally (127.0.0.1 only), so Save writes straight into the agent home and Update imports documents from the intake folders. Stop with Ctrl+C. |
 | `test` | Runs the offline test suite. |
+| `clean` | Removes what the engine no longer uses or rebuilds on demand: Node modules from versions before 0.4, Python caches, Finder's `.DS_Store` files, and folders left empty after the 0.4.2 reorganisation. Never touches `.venv` or any agent home. |
 | `init` | Creates a new agent home with blank inputs and empty state files, and lists what it created. Every other command does the same silently when something is missing (including `output/` and the weekly page). Never overwrites existing files. |
 | `status` | Lists every feature as on or off, why, and what would switch it on. |
 | `plan` | Prints the search plan from the search config, employer list and rejection history. |

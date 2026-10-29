@@ -10,7 +10,7 @@
 #
 # Single entry point for the job-search agent engine.
 #   ./run.sh [--home DIR] <command> [args]
-# Commands: --setup [--browser] (install + open the app), app, form, fetch, test, init, status, plan, collect, verify, enrich, run,
+# Commands: --setup [--browser] (install + open the app), app, clean, form, fetch, test, init, status, plan, collect, verify, enrich, run,
 #           schedule, open, add-postings, weekly, sync, intake, tailor, checkpoint,
 #           note, demo. See docs/commands.md.
 set -euo pipefail
@@ -30,6 +30,23 @@ fi
 # "setup" or "--setup" anywhere in the arguments: install the dependencies
 # into .venv (first time, or when requirements changed), create the agent
 # home, then open the input forms in the browser.
+# "clean": removes files the engine no longer uses or that are rebuilt on
+# demand (Node modules from versions before 0.4, Python caches, Finder's
+# .DS_Store files) and folders left empty by the 0.4.2 reorganisation.
+# Agent homes (my_agent/, ~/JobAgent, ...) and .venv are never touched.
+if [ "${1:-}" = "clean" ] || { [ "${1:-}" = "--home" ] && [ "${3:-}" = "clean" ]; }; then
+  cd "$ENGINE_DIR"
+  rm -rf node_modules package.json package-lock.json
+  find . -path ./.git -prune -o -path ./.venv -prune -o -path ./my_agent -prune -o -path ./cloud/node_modules -prune \
+       -o \( -name __pycache__ -o -name .DS_Store \) -print0 | xargs -0 rm -rf
+  for d in app forms defaults inputs_templates state_templates skills demo engine/templates/js; do
+    [ -d "$d" ] && [ -z "$(git ls-files "$d" 2>/dev/null)" ] && [ -z "$(find "$d" -type f 2>/dev/null)" ] && rm -rf "$d"
+  done
+  echo "cleaned: old Node modules, Python caches, .DS_Store files and empty old folders"
+  [ -d my_agent ] && echo "kept my_agent/ (an agent home; delete it yourself if you do not use it)"
+  exit 0
+fi
+
 SETUP=0; BROWSER=0; NOBROWSER=0; ARGS=()
 for a in "$@"; do
   case "$a" in
