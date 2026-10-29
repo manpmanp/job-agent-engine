@@ -141,7 +141,9 @@ def main():
             files = sorted(os.listdir(os.path.join(home, "output", "CV")))
             out["cv_files"] = files
         out["reset_parts"] = [p["key"] for p in call(base, token, "/api/reset")["parts"]]
-        out["uninstall_plan_lines"] = len(call(base, token, "/api/uninstall")["plan"])
+        plan = " | ".join(call(base, token, "/api/uninstall")["plan"])
+        out["uninstall_plan"] = {"daily_runs": "daily run" in plan, "settings_file": "settings file" in plan,
+                                 "program": "the app:" in plan or "private Python" in plan, "keeps_your_folder": "kept: your job-search folder" in plan}
         out["network_ok"] = "summary" in call(base, token, "/api/network")
         on = call(base, token, "/api/schedule", {"on": True})
         off = call(base, token, "/api/schedule", {"on": False})

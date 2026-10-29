@@ -559,7 +559,8 @@ class TestMaintenance(unittest.TestCase):
         mt.uninstall(None, log=lambda *_: None)
         self.assertTrue(self.runs_removed)
         self.assertFalse(os.path.exists(mt.SETTINGS))
-        self.assertFalse(os.path.exists(os.path.join(mt.REPO_DIR, ".venv")))
+        if os.name != "nt":                      # on Windows the running Python is in it: removed after the app closes
+            self.assertFalse(os.path.exists(os.path.join(mt.REPO_DIR, ".venv")))
         self.assertTrue(os.path.isdir(mt.DEFAULT_HOME))                          # your data stays
         self.assertTrue(os.path.isdir(mt.REPO_DIR))                              # and the engine folder
         mt.uninstall(None, remove_data=True, log=lambda *_: None)

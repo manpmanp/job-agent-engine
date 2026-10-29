@@ -37,6 +37,7 @@ def main(paths):
     diffs = [k for k in keys if len({runs[n].get(k) for n in names}) > 1]
     width = max(len(k) for k in keys)
     print("checked:", ", ".join(names))
+    print(f"{len(diffs)} difference(s)" + (": " + ", ".join(diffs) if diffs else f"; all {len(keys)} items are the same") + "\n")
     print(f"{'item'.ljust(width)}  " + "  ".join(n.ljust(16) for n in names))
     for k in keys:
         vals = [runs[n].get(k, "(missing)") for n in names]
