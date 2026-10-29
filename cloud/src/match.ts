@@ -18,6 +18,10 @@ export const GENERIC_TOKENS = new Set([
 const COUNTRY_NAMES: Record<string, string[]> = {
   SE: ["sweden", "sverige"], DK: ["denmark", "danmark"], NO: ["norway", "norge"],
   FI: ["finland", "suomi"], DE: ["germany", "deutschland"], NL: ["netherlands", "nederland"],
+  IS: ["iceland"], AT: ["austria", "osterreich"], CH: ["switzerland", "schweiz", "suisse"],
+  GB: ["united kingdom", "uk", "england", "scotland", "wales"], IE: ["ireland", "eire"],
+  FR: ["france"], BE: ["belgium", "belgie", "belgique"], ES: ["spain", "espana"], IT: ["italy", "italia"],
+  PL: ["poland", "polska"], US: ["united states", "usa"], CA: ["canada"], AU: ["australia"],
 };
 
 const SENIORITY_PATTERNS: [string, RegExp][] = [
@@ -72,6 +76,16 @@ function has(token: string, text: string): boolean {
   return new RegExp(`(?<!${W})${escapeRe(token)}(?!${W})`, "u").test(text);
 }
 
+// A keyword word in a title, also in a near form (see match.py _has_word).
+function hasWord(token: string, text: string): boolean {
+  if (has(token, text)) return true;
+  if (token.length < 5 || !/^[\p{L}\p{N}_]+$/u.test(token)) return false;
+  for (const w of text.match(/[\p{L}\p{N}_]+/gu) ?? []) {
+    if (w.length >= 5 && Math.abs(w.length - token.length) <= 3 && (w.startsWith(token) || token.startsWith(w))) return true;
+  }
+  return false;
+}
+
 function hasPhrase(tokens: string[], text: string): boolean {
   return new RegExp(`(?<!${W})${tokens.map(escapeRe).join("[\\s\\-]+")}(?!${W})`, "u").test(text);
 }
@@ -87,7 +101,7 @@ export function matchKeywords(title: unknown, description: unknown, keywords: st
   for (const kw of keywords) {
     const toks = keywordTokens(kw);
     if (!toks.length) continue;
-    if (toks.every((x) => has(x, t))) inTitle.push(kw);
+    if (toks.every((x) => hasWord(x, t))) inTitle.push(kw);
     else if (scope === "title_or_description" && titleRole && hasPhrase(toks, d)) inDesc.push(kw);
   }
   if (inTitle.length) return [inTitle, "title"];
@@ -98,8 +112,11 @@ export function matchKeywords(title: unknown, description: unknown, keywords: st
 export type Location = string | { name: string; country?: string; aliases?: string[]; priority?: number };
 
 export function locationNames(loc: Location): string[] {
-  if (typeof loc === "string") return [fold(loc)];
-  return [loc.name ?? "", ...(loc.aliases ?? [])].filter(Boolean).map(fold);
+  const names = typeof loc === "string" ? [fold(loc)] : [loc.name ?? "", ...(loc.aliases ?? [])].filter(Boolean).map(fold);
+  for (const n of [...names]) {
+    for (const alts of Object.values(COUNTRY_NAMES)) if (alts.includes(n)) for (const a of alts) if (!names.includes(a)) names.push(a);
+  }
+  return names;
 }
 
 function countriesOf(locations: Location[]): Set<string> {

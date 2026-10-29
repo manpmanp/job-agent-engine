@@ -25,6 +25,10 @@ GENERIC_TOKENS = {
 COUNTRY_NAMES = {
     "SE": ["sweden", "sverige"], "DK": ["denmark", "danmark"], "NO": ["norway", "norge"],
     "FI": ["finland", "suomi"], "DE": ["germany", "deutschland"], "NL": ["netherlands", "nederland"],
+    "IS": ["iceland"], "AT": ["austria", "osterreich"], "CH": ["switzerland", "schweiz", "suisse"],
+    "GB": ["united kingdom", "uk", "england", "scotland", "wales"], "IE": ["ireland", "eire"],
+    "FR": ["france"], "BE": ["belgium", "belgie", "belgique"], "ES": ["spain", "espana"], "IT": ["italy", "italia"],
+    "PL": ["poland", "polska"], "US": ["united states", "usa"], "CA": ["canada"], "AU": ["australia"],
 }
 
 SENIORITY_PATTERNS = [
@@ -69,6 +73,21 @@ def _has(token, text):
     return re.search(r"(?<![\w])" + re.escape(token) + r"(?![\w])", text) is not None
 
 
+def _has_word(token, text):
+    """A keyword word in a title, also in a near form: 'geolog' finds
+    'geologist', 'geotekniker' finds 'geoteknik', 'design' finds 'designer'
+    (both at least 5 letters, one starts with the other, at most 3 letters
+    apart). Short words (FPGA, ASIC, RTL) must match exactly."""
+    if _has(token, text):
+        return True
+    if len(token) < 5 or not re.fullmatch(r"\w+", token):
+        return False
+    for w in re.findall(r"\w+", text):
+        if len(w) >= 5 and abs(len(w) - len(token)) <= 3 and (w.startswith(token) or token.startswith(w)):
+            return True
+    return False
+
+
 def _has_phrase(tokens, text):
     """All tokens next to each other, in order (space or hyphen between)."""
     pat = r"(?<![\w])" + r"[\s\-]+".join(re.escape(t) for t in tokens) + r"(?![\w])"
@@ -91,7 +110,7 @@ def match_keywords(title, description, keywords, scope="title_or_description", e
         toks = keyword_tokens(kw)
         if not toks:
             continue
-        if all(_has(x, t) for x in toks):
+        if all(_has_word(x, t) for x in toks):
             in_title.append(kw)
         elif scope == "title_or_description" and title_role and _has_phrase(toks, d):
             in_desc.append(kw)
@@ -103,10 +122,17 @@ def match_keywords(title, description, keywords, scope="title_or_description", e
 
 
 def location_names(loc):
+    """A place's names; a country ('Sweden', 'Danmark') also matches its
+    other name, so 'Sweden' finds 'Lund, Skåne län, Sverige'."""
     if isinstance(loc, str):
-        return [fold(loc)]
-    names = [loc.get("name", "")] + list(loc.get("aliases", []) or [])
-    return [fold(n) for n in names if n]
+        names = [fold(loc)]
+    else:
+        names = [fold(n) for n in [loc.get("name", "")] + list(loc.get("aliases", []) or []) if n]
+    for n in list(names):
+        for alts in COUNTRY_NAMES.values():
+            if n in alts:
+                names += [a for a in alts if a not in names]
+    return names
 
 
 def countries(locations):
