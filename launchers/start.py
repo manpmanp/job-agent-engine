@@ -24,6 +24,7 @@ Other uses:
     launchers/start.py --home DIR          use another job-search folder
     launchers/start.py --run auto          one run without the app (used by the daily schedule)
     launchers/start.py --cli <command...>  any engine command, as with ./run.sh
+    launchers/start.py --page update       open the app on its update (or uninstall) section
 """
 import json
 import os
@@ -168,9 +169,13 @@ def main(argv):
     if argv[:1] == ["--run"]:
         mode = argv[1] if len(argv) > 1 else "auto"
         return cli.main(["--home", choose_home(home), "run", mode])
+    page = []
+    if "--page" in argv:                    # the update and uninstall shortcuts: --page update / --page uninstall
+        i = argv.index("--page")
+        page = ["--page", argv[i + 1]] if i + 1 < len(argv) else []
     home = choose_home(home)
     say(f"Job Agent: your job-search folder is {home}")
-    return cli.main(["--home", home, "app"])
+    return cli.main(["--home", home, "app"] + page)
 
 
 if __name__ == "__main__":

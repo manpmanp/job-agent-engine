@@ -26,6 +26,7 @@ SolidCompression=yes
 WizardStyle=modern
 LicenseFile=..\..\..\LICENSE
 UninstallDisplayName=Job Agent
+CloseApplications=yes
 
 [Tasks]
 Name: "desktopicon"; Description: "Create a desktop icon"; GroupDescription: "Shortcuts:"
@@ -36,8 +37,31 @@ Source: "READ ME FIRST.txt"; DestDir: "{app}"; Flags: ignoreversion isreadme
 
 [Icons]
 Name: "{group}\Job Agent"; Filename: "{app}\JobAgent.exe"
+Name: "{group}\Update Job Agent"; Filename: "{app}\JobAgent.exe"; Parameters: "--page update"
 Name: "{group}\Uninstall Job Agent"; Filename: "{uninstallexe}"
 Name: "{userdesktop}\Job Agent"; Filename: "{app}\JobAgent.exe"; Tasks: desktopicon
 
 [Run]
 Filename: "{app}\JobAgent.exe"; Description: "Start Job Agent now"; Flags: nowait postinstall skipifsilent
+; after an update from the app (a silent install), start the new version
+Filename: "{app}\JobAgent.exe"; Flags: nowait; Check: WizardSilent
+
+[UninstallRun]
+; daily run, settings file and (if you say yes) your job-search folder; the uninstaller removes the program files
+Filename: "{app}\JobAgent.exe"; Parameters: "--cli uninstall --yes --keep-app {code:DataFlag}"; Flags: runhidden waituntilterminated; RunOnceId: "JobAgentCleanup"
+
+[Code]
+var
+  RemoveData: Boolean;
+
+function InitializeUninstall(): Boolean;
+begin
+  RemoveData := SuppressibleMsgBox('Also delete your job-search folder (postings, CVs, letters and documents)?' + #13#10 +
+    'Choose No to keep it.', mbConfirmation, MB_YESNO or MB_DEFBUTTON2, IDNO) = IDYES;
+  Result := True;
+end;
+
+function DataFlag(Param: String): String;
+begin
+  if RemoveData then Result := '--remove-data' else Result := '';
+end;

@@ -9,7 +9,11 @@ Job Agent for Linux
 
 Job Agent opens in your web browser and runs only on your computer.
 Your job search is kept in ~/JobAgent.
-To stop it: Settings > Quit the app.
-Uninstall:  ./install.sh --remove   (your ~/JobAgent folder is kept)
+To stop it: close the Job Agent tab (it stops by itself a few seconds later),
+or click Quit the app at the top of the page.
+Update:     ./update.sh   (or in the app: Settings > Update and uninstall)
+Uninstall:  ./uninstall.sh   (or in the app: Settings > Update and uninstall).
+            It removes the app, its daily run and settings; your ~/JobAgent
+            folder only if you tick it.
 
 Help and source code: https://github.com/manpmanp/job-agent-engine

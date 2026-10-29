@@ -380,13 +380,14 @@ def cmd_cloud(h, args):
 def cmd_app(h, args):
     from .app import serve, find_running
     import webbrowser
+    path = "/" + (f"#{args.page}" if args.page else "")
     port = find_running(args.port, home_root=h.root)
     if port:
-        print(f"Job agent is already running: http://127.0.0.1:{port}/")
+        print(f"Job agent is already running: http://127.0.0.1:{port}{path}")
         if not args.no_browser:
-            webbrowser.open(f"http://127.0.0.1:{port}/")
+            webbrowser.open(f"http://127.0.0.1:{port}{path}")
         return
-    serve(h, port=args.port, open_browser=not args.no_browser, keep_running=args.keep_running)
+    serve(h, port=args.port, open_browser=not args.no_browser, path=path, keep_running=args.keep_running)
 
 
 def cmd_reset(h, args):
@@ -404,6 +405,32 @@ def cmd_reset(h, args):
             return
     res = rs.reset(h, parts)
     print(f"done; the previous files are in {res['backup']}" if res["backup"] else "done; there was nothing to move")
+
+
+def cmd_update(h, args):
+    from . import maintenance as mt
+    if args.check:
+        info = mt.check()
+        print(f"this version: {info['current']}; newest: {info.get('latest') or '?'}"
+              + (f" ({info['error']})" if info.get("error") else "") + ("; an update is available" if info["newer"] else ""))
+        return
+    res = mt.update(h.root, restart=args.restart)
+    print(res["message"])
+
+
+def cmd_uninstall(h, args):
+    from . import maintenance as mt
+    print("Uninstall Job Agent. This removes:")
+    for line in mt.plan(h.root, args.remove_data, args.remove_engine):
+        print(f"  - {line}")
+    if not args.yes:
+        if sys.stdin is None or not sys.stdin.isatty():
+            raise SystemExit("run it in a terminal, or pass --yes")
+        if input("Type 'uninstall' to continue: ").strip().lower() != "uninstall":
+            print("nothing changed")
+            return
+    mt.uninstall(h.root, remove_data=args.remove_data, remove_engine=args.remove_engine, keep_app=args.keep_app)
+    print("Job Agent is uninstalled.")
 
 
 def cmd_open(h, args):
@@ -453,6 +480,13 @@ def main(argv=None):
     x.add_argument("url", nargs="?"); x.add_argument("token", nargs="?")
     x = sp.add_parser("app"); x.add_argument("--port", type=int, default=8765); x.add_argument("--no-browser", action="store_true")
     x.add_argument("--keep-running", action="store_true", help="do not stop when the page is closed")
+    x.add_argument("--page", default="", help="open this part of the app, for example update or uninstall")
+    x = sp.add_parser("update"); x.add_argument("--check", action="store_true", help="only say whether a newer version exists")
+    x.add_argument("--restart", action="store_true", help="start the app again afterwards")
+    x = sp.add_parser("uninstall"); x.add_argument("--remove-data", action="store_true", help="also delete your job-search folder")
+    x.add_argument("--remove-engine", action="store_true", help="source folder: also delete the engine folder")
+    x.add_argument("--keep-app", action="store_true", help="leave the program files (the Windows uninstaller removes them)")
+    x.add_argument("--yes", action="store_true", help="do not ask")
     x = sp.add_parser("reset"); x.add_argument("--parts", help="comma list: settings,keys,profile,postings,documents (default: all)")
     x.add_argument("--yes", action="store_true", help="do not ask")
     sp.add_parser("open")
@@ -480,7 +514,8 @@ def main(argv=None):
     {"init": cmd_init, "status": cmd_status, "plan": cmd_plan, "add-postings": cmd_add_postings,
      "weekly": cmd_weekly, "sync": cmd_sync, "intake": cmd_intake, "tailor": cmd_tailor,
      "checkpoint": cmd_checkpoint, "note": cmd_note, "collect": cmd_collect, "fetch": cmd_fetch, "verify": cmd_verify,
-     "enrich": cmd_enrich, "run": cmd_run, "schedule": cmd_schedule, "open": cmd_open, "form": cmd_form, "app": cmd_app, "cloud": cmd_cloud, "reset": cmd_reset}[args.cmd](h, args)
+     "enrich": cmd_enrich, "run": cmd_run, "schedule": cmd_schedule, "open": cmd_open, "form": cmd_form, "app": cmd_app, "cloud": cmd_cloud, "reset": cmd_reset,
+     "update": cmd_update, "uninstall": cmd_uninstall}[args.cmd](h, args)
 
 
 if __name__ == "__main__":

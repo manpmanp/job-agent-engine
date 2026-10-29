@@ -314,6 +314,18 @@ details.grp > summary { cursor:pointer; font-weight:bold; color:var(--accent); }
     <div id="net-sum" class="small muted" style="margin-top:8px">Loading...</div>
     <details class="info" style="margin-top:8px"><summary>Recent requests</summary><div class="netwrap" id="net-recent"></div></details>
   </div>
+  <div class="card local-only" id="maint">
+    <b>Update and uninstall</b>
+    <div class="row" style="margin-top:8px"><span id="up-state" class="small muted">Version <span class="ver"></span>.</span><span class="spacer"></span>
+      <button class="b" id="up-check">Check for updates</button><button class="b primary" id="up-go" data-job hidden>Update now</button></div>
+    <div id="un-box" hidden style="margin-top:10px">
+      <div class="small">Uninstalling removes:</div><ul class="plain small" id="un-plan"></ul>
+      <div class="switch"><input type="checkbox" id="un-data"><label for="un-data">Also delete my job-search folder (postings, CVs, letters, documents)</label></div>
+      <div class="switch" id="un-engine-row" hidden><input type="checkbox" id="un-engine"><label for="un-engine">Also delete the engine folder</label></div>
+      <div class="row" style="margin-top:8px"><button class="b bad on" id="un-go">Uninstall Job Agent</button><button class="b" id="un-cancel">Cancel</button></div>
+    </div>
+    <div class="row" style="margin-top:10px" id="un-open-row"><button class="b bad" id="un-open">Uninstall...</button></div>
+  </div>
   <div class="card local-only">
     <b>Start over</b>
     <p class="muted small" style="margin:4px 0 0">Resets the app to a fresh start. Nothing is deleted: what you reset is moved to a dated folder under <i>backups</i> in your agent folder, so you can get it back.</p>
@@ -437,6 +449,7 @@ async function refresh() {
   }
   $('#attention').innerHTML = att.join('');
   $('#recent').innerHTML = S.recent.length ? S.recent.map(l => /^=== /.test(l) ? '<b>' + esc(l.replace(/=/g, '').trim()) + '</b>' : esc(l)).join('<br>') : 'Nothing yet. Your searches and syncs will be listed here.';
+  $$('.ver').forEach(e => e.textContent = S.version);
   $('#about').innerHTML = CLOUD ? `Version ${esc(S.version)}, online at ${esc(S.home)}` : `Version ${esc(S.version)}<br>Your agent folder: ${esc(S.home)}`;
   if (CLOUD) { $('#cloud-sch').textContent = 'Runs by itself: ' + S.schedule.text + (S.search_day ? `; on ${S.search_day}s it also checks that postings are still open.` : '.'); $('#cloud-url').textContent = S.home; }
   if (S.job && !S.job.done && !jobTimer) startJob(S.job);
@@ -735,6 +748,44 @@ async function setSchedule(on) {
   catch (e) { toast(e.message); }
 }
 $('#sch').onchange = e => setSchedule(e.target.checked);
+async function checkUpdate() {
+  $('#up-state').textContent = 'Checking...';
+  try { const r = await api('/api/update');
+    $('#up-state').textContent = r.error ? `Could not check: ${r.error}` :
+      r.kind === 'source' ? `This folder: ${r.latest}.` : r.newer ? `Version ${r.latest} is available (you have ${r.current}).` : `You have the newest version (${r.current}).`;
+    $('#up-go').hidden = !r.newer;
+  } catch (e) { $('#up-state').textContent = e.message; }
+}
+$('#up-check').onclick = checkUpdate;
+$('#up-go').onclick = async () => {
+  try { const r = await api('/api/update', {}); startJob(r.job); waitForRestart(); } catch (e) { toast(e.message); }
+};
+function waitForRestart() {
+  // After an update the app stops and the new version opens in a new tab.
+  const t = setInterval(async () => {
+    try { await fetch('/api/ping', { cache: 'no-store' }); }
+    catch (e) { clearInterval(t); clearInterval(jobTimer);
+      document.body.innerHTML = '<main><h1>Job Agent is being updated.</h1><p class="muted">The new version opens in a new tab in a moment. You can close this one.</p></main>'; }
+  }, 1500);
+  setTimeout(() => clearInterval(t), 600000);
+}
+$('#un-open').onclick = async () => {
+  try { const r = await api('/api/uninstall');
+    const show = async () => { const x = await api(`/api/uninstall?data=${$('#un-data').checked ? 1 : 0}&engine=${$('#un-engine').checked ? 1 : 0}`);
+      $('#un-plan').innerHTML = x.plan.map(l => `<li>${esc(l)}</li>`).join(''); };
+    $('#un-data').onchange = show; $('#un-engine').onchange = show; show();
+    $('#un-engine-row').hidden = r.kind !== 'source';
+    if (r.engine) $('#un-engine-row label').textContent = 'Also delete the engine folder ' + r.engine;
+    $('#un-box').hidden = false; $('#un-open-row').hidden = true;
+  } catch (e) { toast(e.message); }
+};
+$('#un-cancel').onclick = () => { $('#un-box').hidden = true; $('#un-open-row').hidden = false; };
+$('#un-go').onclick = async () => {
+  try { const r = await api('/api/uninstall', { remove_data: $('#un-data').checked, remove_engine: $('#un-engine').checked });
+    document.body.innerHTML = `<main><h1>Job Agent is uninstalled.</h1><ul class="plain small">${r.log.map(l => `<li>${esc(l)}</li>`).join('')}</ul>
+      <p class="muted">You can close this tab.</p></main>`;
+  } catch (e) { toast(e.message); }
+};
 $('#rs-open').onclick = async () => {
   try { const r = await api('/api/reset');
     $('#rs-parts').innerHTML = r.parts.map(p => `<div class="switch"><input type="checkbox" id="rs-${p.key}" data-part="${p.key}" checked><label for="rs-${p.key}">${esc(p.label)}</label></div>`).join('');
@@ -918,7 +969,11 @@ if (!CLOUD) {
 }
 
 // ----------------------------------------------------------- start
-refresh().then(() => { loadPostings(); const v = location.hash.slice(1); if (v && $('#v-' + v)) show(v); });
+refresh().then(() => { loadPostings(); const v = location.hash.slice(1);
+  if (v === 'update' || v === 'uninstall') {          // the update and uninstall shortcuts open the app here
+    show('settings'); history.replaceState(null, '', '#settings');
+    setTimeout(() => { $('#maint').scrollIntoView({ block: 'center' }); v === 'update' ? checkUpdate() : $('#un-open').click(); }, 300);
+  } else if (v && $('#v-' + v)) show(v); });
 setInterval(() => { if (!jobTimer && document.visibilityState === 'visible') refresh(); }, 30000);
 </script>
 </body>

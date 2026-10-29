@@ -532,6 +532,76 @@ class TestPresence(unittest.TestCase):
         self.assertTrue(p.should_stop(False, time.time() + P.IDLE + 1))     # ... until it stops beating
 
 
+class TestMaintenance(unittest.TestCase):
+    def setUp(self):
+        from engine import maintenance as mt
+        self.mt = mt
+        self.tmp = tempfile.mkdtemp(prefix="jae_maint_")
+        self.saved = (mt.REPO_DIR, mt.SETTINGS, mt.DEFAULT_HOME, mt._remove_daily_runs, http.transport, http.DELAY)
+        mt.REPO_DIR = os.path.join(self.tmp, "engine")
+        mt.SETTINGS = os.path.join(self.tmp, "settings.json")
+        mt.DEFAULT_HOME = os.path.join(self.tmp, "JobAgent")
+        self.runs_removed = []
+        mt._remove_daily_runs = lambda log: self.runs_removed.append(True)
+        http.DELAY = 0
+        for d in (mt.REPO_DIR + "/.venv", mt.DEFAULT_HOME + "/inputs"):
+            os.makedirs(d)
+        with open(mt.SETTINGS, "w") as f:
+            json.dump({"home": mt.DEFAULT_HOME}, f)
+
+    def tearDown(self):
+        (self.mt.REPO_DIR, self.mt.SETTINGS, self.mt.DEFAULT_HOME, self.mt._remove_daily_runs, http.transport, http.DELAY) = self.saved
+        shutil.rmtree(self.tmp, ignore_errors=True)
+
+    def test_uninstall_keeps_your_folder_unless_asked(self):
+        mt = self.mt
+        self.assertTrue(any("kept: your job-search folder" in l for l in mt.plan(None)))
+        mt.uninstall(None, log=lambda *_: None)
+        self.assertTrue(self.runs_removed)
+        self.assertFalse(os.path.exists(mt.SETTINGS))
+        self.assertFalse(os.path.exists(os.path.join(mt.REPO_DIR, ".venv")))
+        self.assertTrue(os.path.isdir(mt.DEFAULT_HOME))                          # your data stays
+        self.assertTrue(os.path.isdir(mt.REPO_DIR))                              # and the engine folder
+        mt.uninstall(None, remove_data=True, log=lambda *_: None)
+        self.assertFalse(os.path.exists(mt.DEFAULT_HOME))
+
+    def test_update_check_of_a_packaged_app(self):
+        mt = self.mt
+        release = {"tag_name": "v9.9.9", "html_url": "https://github.com/x/releases/v9.9.9",
+                   "assets": [{"name": n, "browser_download_url": "https://example.com/" + n} for n in mt.ASSETS.values()]}
+        http.transport = lambda m, u, hd, d: http.Response(200, json.dumps(release).encode(), None, u, "application/json")
+        from unittest import mock
+        with mock.patch.object(mt, "kind", return_value="app"):
+            info = mt.check()
+        self.assertEqual((info["latest"], info["newer"]), ("9.9.9", True))
+        self.assertTrue(info["download"].endswith(mt.ASSETS[mt.platform_key()]))
+        release["tag_name"] = "v0.0.1"
+        with mock.patch.object(mt, "kind", return_value="app"):
+            self.assertFalse(mt.check()["newer"])
+
+    def test_update_of_a_source_folder_pulls(self):
+        import subprocess
+        mt = self.mt
+        if not shutil.which("git"):
+            self.skipTest("no git")
+        g = lambda *a, cwd=None: subprocess.run(["git", "-c", "user.name=t", "-c", "user.email=t@t"] + list(a), cwd=cwd,
+                                               capture_output=True, text=True, check=True)
+        origin, clone = os.path.join(self.tmp, "origin.git"), os.path.join(self.tmp, "clone")
+        g("init", "-q", "--bare", origin)
+        g("clone", "-q", origin, clone)
+        open(os.path.join(clone, "a.txt"), "w").write("1")
+        g("add", "-A", cwd=clone); g("commit", "-qm", "one", cwd=clone); g("push", "-q", "origin", "HEAD", cwd=clone)
+        shutil.rmtree(mt.REPO_DIR)
+        g("clone", "-q", origin, mt.REPO_DIR)
+        open(os.path.join(clone, "a.txt"), "w").write("2")
+        g("commit", "-qam", "two", cwd=clone); g("push", "-q", "origin", "HEAD", cwd=clone)
+        self.assertTrue(mt.check()["newer"])
+        res = mt.update(None, log=lambda *_: None)
+        self.assertTrue(res["updated"])
+        self.assertEqual(open(os.path.join(mt.REPO_DIR, "a.txt")).read(), "2")
+        self.assertFalse(mt.update(None, log=lambda *_: None)["updated"])
+
+
 class TestWindowsConsole(unittest.TestCase):
     def test_child_programs_start_without_a_window_on_windows(self):
         import subprocess

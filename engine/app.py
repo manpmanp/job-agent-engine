@@ -463,6 +463,14 @@ def _make_handler(home, token, jobs, httpd_ref, presence=None):
                 return self._send(200, self._settings_get())
             if u.path == "/api/employers":
                 return self._send(200, _read_json(home.path("employers"), {"mode": "extend", "employers": []}) or {})
+            if u.path == "/api/update":
+                from . import maintenance as mt
+                return self._send(200, mt.check())
+            if u.path == "/api/uninstall":
+                from . import maintenance as mt
+                flag = lambda k: (q.get(k) or ["0"])[0] == "1"
+                return self._send(200, {"kind": mt.kind(), "plan": mt.plan(home.root, flag("data"), flag("engine")),
+                                        "homes": mt.homes(home.root), "engine": REPO_DIR if mt.kind() == "source" else None})
             if u.path == "/api/listings":
                 data = _read_json(home.path("all_listings"), {}) or {}
                 tracked = {r.get("URL") for r in tr.read_all_rows(home.path("tracker")) if r.get("URL")}
@@ -654,6 +662,27 @@ def _make_handler(home, token, jobs, httpd_ref, presence=None):
                 return self._send(code, res)
             if p == "/api/settings":
                 return self._send(200, self._settings_post(body))
+            if p == "/api/update":
+                from . import maintenance as mt
+
+                def work(log):
+                    res = mt.update(home.root, log=log, restart=True)
+                    log(res["message"])
+                    if res.get("restart"):
+                        log("Job Agent restarts now")
+                        threading.Thread(target=lambda: (time.sleep(1.5), httpd_ref[0].shutdown()), daemon=True).start()
+                    return res
+                job = jobs.run_fn("Update", work)
+                return self._send(200, {"job": job}) if job else busy()
+            if p == "/api/uninstall":
+                from . import maintenance as mt
+                if jobs.busy():
+                    return busy()
+                lines = []
+                mt.uninstall(home.root, remove_data=bool(body.get("remove_data")), remove_engine=bool(body.get("remove_engine")),
+                             log=lines.append)
+                threading.Thread(target=lambda: (time.sleep(1), httpd_ref[0].shutdown()), daemon=True).start()
+                return self._send(200, {"ok": True, "log": lines})
             if p == "/api/reset":
                 from . import reset as rs
                 if jobs.busy():

@@ -12,8 +12,16 @@ Job Agent for macOS
 3. Job Agent opens in your web browser. It runs only on your Mac.
    Your job search is kept in the "JobAgent" folder in your home folder.
 
-To stop it: Settings > Quit the app.
+To stop it: close the Job Agent tab (it stops by itself a few seconds later),
+or click Quit the app at the top of the page.
 To open it again: double-click "Job Agent" (if it is already running,
 your browser is simply pointed at it).
+
+Update:     double-click "Update Job Agent" in this window (or in the app:
+            Settings > Update and uninstall > Check for updates).
+Uninstall:  double-click "Uninstall Job Agent" in this window (or in the
+            app: Settings > Update and uninstall > Uninstall). It removes
+            the app, its daily run and settings; your JobAgent folder only
+            if you tick it.
 
 Help and source code: https://github.com/manpmanp/job-agent-engine

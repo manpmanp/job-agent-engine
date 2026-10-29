@@ -83,7 +83,14 @@ keeps your job search in a **JobAgent** folder in your home folder.
    every day, even when the app is closed.
 
 **Add a posting** reads any job link you found yourself and adds it.
-Close the app with **Settings > Quit the app**.
+Close the app with **Quit the app** in the top bar (closing the app's tab also stops it after a few seconds).
+
+**Update and uninstall:** Settings > Update and uninstall, or the
+shortcuts each package ships ("Update Job Agent" and "Uninstall Job
+Agent" in the macOS disk image and the Windows Start menu; `update.sh`
+and `uninstall.sh` on Linux). An update downloads the newest release from
+GitHub, installs it and opens it again. Uninstalling removes the app, its
+daily run and its settings; your job-search folder only if you tick it.
 
 ### Running it from the code instead
 
@@ -234,6 +241,8 @@ cd job-agent-engine
 ./run.sh --home ~/my_job_agent run weekly # collect, verify, sync, page
 ./run.sh --home ~/my_job_agent fetch <url> --add
 ./run.sh --home ~/my_job_agent schedule install
+./run.sh update                           # git pull (the same as Settings > Update)
+./run.sh uninstall                        # daily runs, settings, .venv; --remove-data, --remove-engine
 ```
 
 `run.sh` installs its Python packages into a private `.venv/` in the

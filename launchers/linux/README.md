@@ -14,4 +14,4 @@ To run it from the code:
    - The first start prepares itself (about a minute) and asks where to
      keep your job search (press Enter for `~/JobAgent`).
 3. The app opens in your browser. Keep the terminal open while you use
-   it; press Ctrl+C, or use **Settings > Quit the app**, to stop.
+   it; press Ctrl+C, or use **Quit the app** in the top bar (closing the app's tab also stops it after a few seconds), to stop.

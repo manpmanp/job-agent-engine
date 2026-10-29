@@ -17,4 +17,4 @@ To run it from the code:
      keep your job search (press Enter for the `JobAgent` folder in your
      user folder).
 3. The app opens in your browser. Keep the black window open while you
-   use it; close it, or use **Settings > Quit the app**, to stop.
+   use it; close it, or use **Quit the app** in the top bar (closing the app's tab also stops it after a few seconds), to stop.

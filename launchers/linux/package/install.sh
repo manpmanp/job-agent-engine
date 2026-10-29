@@ -12,6 +12,8 @@ HERE="$(cd "$(dirname "$0")" && pwd)"
 BIN="$HOME/.local/bin/job-agent"
 DESKTOP="$HOME/.local/share/applications/job-agent.desktop"
 if [ "${1:-}" = "--remove" ]; then
+  # The full uninstall (daily run, settings, optionally your job-search folder) is in the app.
+  if [ -x "$BIN" ]; then exec "$BIN" --cli uninstall; fi
   rm -f "$BIN" "$DESKTOP"
   echo "Job Agent removed. Your job search in ~/JobAgent is kept."
   exit 0

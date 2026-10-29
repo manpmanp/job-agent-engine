@@ -146,6 +146,20 @@ def refresh(home):
 
 
 def install(home):
+    try:
+        return _install(home)
+    except (OSError, subprocess.SubprocessError) as e:   # e.g. no crontab program on this computer
+        return False, f"could not set up the daily run: {e}"
+
+
+def remove(home):
+    try:
+        return _remove(home)
+    except (OSError, subprocess.SubprocessError) as e:
+        return False, f"could not remove the daily run: {e}"
+
+
+def _install(home):
     _status_cache.pop(home.root, None)
     os.makedirs(os.path.dirname(_log(home)), exist_ok=True)
     if sys.platform == "darwin":
@@ -172,7 +186,7 @@ def install(home):
     return True, f"daily run installed ({HOUR:02d}:{MINUTE:02d}), log: {_log(home)}"
 
 
-def remove(home):
+def _remove(home):
     _status_cache.pop(home.root, None)
     if sys.platform == "darwin":
         p = _plist_path(home)

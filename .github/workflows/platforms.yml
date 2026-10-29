@@ -1,0 +1,69 @@
+# Job-search agent engine
+# File:    .github/workflows/platforms.yml
+# Purpose: Runs Job Agent on real macOS, Windows and Linux machines, as the packaged app and from the source folder, and compares what it does side by side.
+# Author:  manpmanp <manp.node@gmail.com>
+# Generated with Claude (Anthropic), under the author's direction and review.
+# License: MIT (see LICENSE)
+# Version: 0.4.5
+# Date:    2026-10-29
+name: platforms
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    tags: ["v*"]
+jobs:
+  unit:
+    strategy:
+      fail-fast: false
+      matrix: { os: [ubuntu-latest, macos-latest, windows-latest] }
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install -r requirements.txt && python -m unittest discover -s tests
+
+  check:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        mode: [app, source]
+    runs-on: ${{ matrix.os }}
+    defaults: { run: { shell: bash } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - name: Build the packaged app
+        if: matrix.mode == 'app'
+        run: pip install pyinstaller -r requirements.txt && pyinstaller --noconfirm launchers/job_agent.spec
+      - name: Run it through the app's API
+        run: |
+          case "${{ matrix.mode }}-${{ runner.os }}" in
+            app-macOS)   CMD='["dist/Job Agent.app/Contents/MacOS/JobAgent"]' ;;
+            app-Windows) CMD='["dist/JobAgent.exe"]' ;;
+            app-Linux)   CMD='["dist/JobAgent"]' ;;
+            source-*)    CMD='["python", "launchers/start.py"]' ;;
+          esac
+          python tests/platform_check.py --mode "${{ matrix.mode }}" --cmd "$CMD" --out "platform-${{ runner.os }}-${{ matrix.mode }}.json"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: { name: "platform-${{ runner.os }}-${{ matrix.mode }}", path: "platform-*.json", if-no-files-found: ignore }
+
+  compare:
+    needs: check
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with: { path: results, merge-multiple: true }
+      - name: Side by side
+        run: |
+          set -o pipefail
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          rc=0; python tests/platform_compare.py results/*.json | tee -a "$GITHUB_STEP_SUMMARY" || rc=$?
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          exit $rc
