@@ -28,9 +28,11 @@ in one place:
 Tests replace `transport` with a function returning canned responses.
 """
 import ipaddress
+import os
 import json
 import re
 import socket
+import ssl
 import time
 import urllib.error
 import urllib.parse
@@ -75,10 +77,42 @@ class Response:
             return None
 
 
+def _ssl_context():
+    """Certificates are checked against the operating system's trust store
+    (macOS Keychain, Windows certificate store, Linux system CAs) through
+    'truststore', the same store your browser uses. This also works on
+    networks that inspect HTTPS with their own certificate (university or
+    company networks, VPNs, antivirus) and in the packaged apps. Fallbacks:
+    certifi's list, then Python's own. SSL_CERT_FILE is honoured as usual."""
+    if os.environ.get("SSL_CERT_FILE"):
+        return ssl.create_default_context(cafile=os.environ["SSL_CERT_FILE"]), "SSL_CERT_FILE"
+    try:
+        import truststore
+        return truststore.SSLContext(ssl.PROTOCOL_TLS_CLIENT), "system trust store"
+    except Exception:
+        pass
+    try:
+        import certifi
+        return ssl.create_default_context(cafile=certifi.where()), "certifi"
+    except Exception:
+        return ssl.create_default_context(), "python default"
+
+
+SSL_CONTEXT, SSL_SOURCE = _ssl_context()
+
+
+def _explain(e):
+    msg = f"{type(e).__name__}: {e}"
+    if "CERTIFICATE_VERIFY_FAILED" in msg:
+        return (msg + " (the site's certificate is not trusted on this computer, checked against "
+                f"{SSL_SOURCE}; if your network inspects HTTPS, its certificate must be trusted by the system)")
+    return msg
+
+
 def _urllib_transport(method, url, headers, data):
     req = urllib.request.Request(url, data=data, headers=headers, method=method)
     try:
-        with urllib.request.urlopen(req, timeout=TIMEOUT) as r:
+        with urllib.request.urlopen(req, timeout=TIMEOUT, context=SSL_CONTEXT) as r:
             body = r.read(MAX_BYTES + 1)
             if len(body) > MAX_BYTES:
                 return Response(0, b"", f"response larger than {MAX_BYTES // 1024 // 1024} MB", r.geturl())
@@ -86,7 +120,7 @@ def _urllib_transport(method, url, headers, data):
     except urllib.error.HTTPError as e:
         return Response(e.code, e.read() if hasattr(e, "read") else b"", None, url)
     except Exception as e:  # network down, DNS, TLS, timeout
-        return Response(0, b"", f"{type(e).__name__}: {e}", url)
+        return Response(0, b"", _explain(e), url)
 
 
 transport = _urllib_transport

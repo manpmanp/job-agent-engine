@@ -83,7 +83,7 @@ def ensure_environment(argv):
     req = open(REQ, "rb").read()
     stale = not os.path.exists(STAMP) or open(STAMP, "rb").read() != req
     if not stale:  # the stamp can be right while packages are missing (a venv made by other tools)
-        stale = subprocess.run([VENV_PY, "-c", "import openpyxl, docx, pypdf"], capture_output=True).returncode != 0
+        stale = subprocess.run([VENV_PY, "-c", "import openpyxl, docx, pypdf, certifi"], capture_output=True).returncode != 0
     if stale:
         say("Installing the packages Job Agent needs...")
         r = subprocess.run([VENV_PY, "-m", "pip", "install", "--disable-pip-version-check", "--quiet", "-r", REQ])

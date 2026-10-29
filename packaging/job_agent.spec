@@ -19,7 +19,7 @@ datas = [(os.path.join(ROOT, d), d) for d in
 datas += [(os.path.join(ROOT, f), ".") for f in ("requirements.txt", "LICENSE", "README.md")]
 
 a = Analysis([os.path.join(ROOT, "start.py")], pathex=[ROOT], datas=datas,
-             hiddenimports=collect_submodules("engine") + ["docx", "openpyxl", "pypdf"],
+             hiddenimports=collect_submodules("engine") + ["docx", "openpyxl", "pypdf", "truststore", "certifi"],
              excludes=["tkinter", "playwright"], noarchive=False)
 pyz = PYZ(a.pure)
 
