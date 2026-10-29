@@ -27,7 +27,7 @@ if sys.platform == "darwin":
     exe = EXE(pyz, a.scripts, [], exclude_binaries=True, name="JobAgent", console=False)
     coll = COLLECT(exe, a.binaries, a.datas, name="JobAgent")
     app = BUNDLE(coll, name="Job Agent.app", bundle_identifier="local.job-agent-engine",
-                 info_plist={"CFBundleShortVersionString": "0.4.3", "LSUIElement": False})
+                 info_plist={"CFBundleShortVersionString": "0.4.4", "LSUIElement": False})
 else:
     exe = EXE(pyz, a.scripts, a.binaries, a.datas, [], name="JobAgent",
               console=(sys.platform != "win32"), onefile=True)

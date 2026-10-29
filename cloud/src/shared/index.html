@@ -33,6 +33,8 @@ header.top { position:sticky; top:0; z-index:5; background:var(--panel); border-
 nav { display:flex; gap:2px; flex-wrap:wrap; }
 nav button { background:none; border:0; padding:8px 11px; border-radius:6px; color:var(--muted); font:inherit; cursor:pointer; }
 nav button.on { background:var(--soft); color:var(--text); font-weight:bold; }
+.acts { display:flex; gap:6px; flex-wrap:wrap; }
+.b.sm { padding:5px 10px; font-size:13px; } a.b { text-decoration:none; display:inline-block; }
 nav .count[hidden] { display:none; }
 nav .count { display:inline-block; min-width:18px; padding:0 5px; margin-left:4px; border-radius:9px; background:var(--accent); color:var(--panel); font-size:11px; line-height:18px; text-align:center; }
 main { max-width:1060px; margin:0 auto; padding:18px 16px 80px; }
@@ -112,6 +114,12 @@ details.grp > summary { cursor:pointer; font-weight:bold; color:var(--accent); }
     <button data-v="sites">Job sites</button>
     <button data-v="settings">Settings</button>
   </nav>
+  <span class="spacer"></span>
+  <div class="acts">
+    <button class="b sm local-only" id="btn-open-home" title="Open the folder with your inputs, tracker and documents">Open my agent folder</button>
+    <a class="b sm cloud-only" href="/logout">Log out</a>
+    <button class="b sm bad local-only" id="btn-quit" title="Stop the app (the daily run still happens)">Quit the app</button>
+  </div>
 </div></header>
 <div class="toast" id="toast"></div>
 
@@ -272,12 +280,6 @@ details.grp > summary { cursor:pointer; font-weight:bold; color:var(--accent); }
   <div class="card">
     <b>About</b>
     <div class="small muted" id="about"></div>
-    <div class="row" style="margin-top:10px">
-      <button class="b local-only" id="btn-open-home">Open my agent folder</button>
-      <a class="b cloud-only" href="/logout" style="text-decoration:none">Log out</a>
-      <span class="spacer"></span>
-      <button class="b bad local-only" id="btn-quit">Quit the app</button>
-    </div>
   </div>
 </section>
 </main>
