@@ -13,6 +13,6 @@ Everything personal is read from an *agent home* folder supplied at run
 time (see engine/home.py and docs/inputs.md). Nothing in this package
 contains or assumes data about a specific candidate.
 """
-__version__ = "0.4.1"
+__version__ = "0.4.2"
 __author__ = "manpmanp"
 __date__ = "2026-10-28"
