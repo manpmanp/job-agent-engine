@@ -380,7 +380,7 @@ def cmd_cloud(h, args):
 def cmd_app(h, args):
     from .app import serve, find_running
     import webbrowser
-    port = find_running(args.port)
+    port = find_running(args.port, home_root=h.root)
     if port:
         print(f"Job agent is already running: http://127.0.0.1:{port}/")
         if not args.no_browser:

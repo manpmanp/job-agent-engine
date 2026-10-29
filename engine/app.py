@@ -641,13 +641,17 @@ def _make_handler(home, token, jobs, httpd_ref):
     return Handler
 
 
-def find_running(port_from=8765, span=20):
-    """Port of an app already running on this machine, or None."""
+def find_running(port_from=8765, span=20, home_root=None):
+    """Port of an app already running on this machine for this agent home
+    (any home when home_root is None), or None. An app for another folder
+    is left alone; the new one takes the next free port."""
     import urllib.request
+    want = os.path.realpath(home_root) if home_root else None
     for p in range(port_from, port_from + span):
         try:
             with urllib.request.urlopen(f"http://127.0.0.1:{p}/api/ping", timeout=0.4) as r:
-                if json.loads(r.read().decode()).get("app") == "job-agent-engine":
+                info = json.loads(r.read().decode())
+                if info.get("app") == "job-agent-engine" and (want is None or os.path.realpath(info.get("home") or "") == want):
                     return p
         except Exception:
             continue
