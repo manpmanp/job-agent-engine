@@ -368,16 +368,22 @@ class TestConventions(unittest.TestCase):
         return {"Title": title, "Employer": "Example Inc", "Location": location, "Category": category,
                 "Seniority Level": seniority or m.seniority(title), "URL": "https://example.com/j/1"}
 
-    def test_market_sector_level(self):
+    def test_market_and_type(self):
         us = self.c.for_row(self.h, self.row("Senior ASIC Design Engineer", "San Diego, CA"))
         se = self.c.for_row(self.h, self.row("ASIC Design Engineer", "Lund, Sweden"))
-        self.assertEqual((us["market"], us["sector"], us["level"], us["page_size"]), ("us", "industry", "senior", "Letter"))
-        self.assertEqual((se["market"], se["level"], se["page_size"]), ("nordic", "mid", "A4"))
+        self.assertEqual((us["market"], us["type"], us["group"], us["page_size"]), ("us", "senior", "industry", "Letter"))
+        self.assertEqual((se["market"], se["type"], se["page_size"]), ("nordic", "mid_senior", "A4"))
         self.assertEqual(self.c.closing(us), "Sincerely,")
         self.assertEqual(self.c.closing(se), "Kind regards,")
         pd = self.c.for_row(self.h, self.row("Postdoc in computer architecture", "Gothenburg, Sweden", "Academia - Postdoc/Researcher"))
-        self.assertEqual((pd["sector"], pd["level"]), ("academia", "mid"))
-        self.assertEqual(self.c.for_row(self.h, self.row("PhD student in hardware design", "Lund, Sweden"))["level"], "junior")
+        self.assertEqual((pd["group"], pd["type"]), ("academia", "postdoc"))
+        types = {t: self.c.type_of(self.row(t, "Lund, Sweden", c), None) for t, c in [
+            ("PhD student in hardware design", ""), ("Assistant professor in computer engineering", ""),
+            ("Biträdande universitetslektor", ""), ("Associate Professor", ""), ("Universitetslektor i elektronik", ""),
+            ("Research engineer", "Academia - Research Engineer/Assistant"), ("Master thesis: FPGA", ""),
+            ("Graduate FPGA Engineer", ""), ("Staff Engineer", "")]}
+        self.assertEqual(list(types.values()), ["phd", "assistant_professor", "assistant_professor", "professor", "lecturer",
+                                                "research_assistant", "internship", "junior", "senior"])
         self.assertEqual(self.c.for_row(self.h, self.row("Graduate FPGA Engineer", "Toronto, ON"))["market"], "canada")
         self.assertEqual(self.c.for_row(self.h, self.row("FPGA Engineer", "Remote"), {})["market"], "international")
         self.assertIn("Market: United States", self.c.as_text(us))
@@ -393,6 +399,42 @@ class TestConventions(unittest.TestCase):
         self.assertEqual(conv["page_size"], "Letter")                     # the rest of the market stays
         self.assertEqual(self.c.style_for(self.h, conv)["page_size"], "Letter")
 
+    def test_postdoc_and_engineer_differ(self):
+        from engine import documents as d
+        pd = self.c.for_row(self.h, self.row("Postdoc in computer architecture", "Lund, Sweden", "Academia - Postdoc/Researcher"))
+        en = self.c.for_row(self.h, self.row("ASIC Design Engineer", "Lund, Sweden"))
+        heads = lambda conv, r: [s["heading"] for s in d.template_specs(r, {}, conv=conv)[0]["sections"]]
+        hp = heads(pd, self.row("Postdoc in computer architecture", "Lund, Sweden"))
+        he = heads(en, self.row("ASIC Design Engineer", "Lund, Sweden"))
+        self.assertLess(hp.index("Education"), hp.index("Publications"))
+        self.assertNotIn("Publications", he)
+        self.assertLess(he.index("Work Experience"), he.index("Education"))
+        self.assertNotEqual(pd["confidence"], en["confidence"] + 10)
+        self.assertIn("Confidence for this position type", self.c.as_text(pd))
+        self.assertIn("Research Profile", self.c.as_text(pd))
+
+    def test_tuning_and_per_posting_choice(self):
+        data = self.c.editor_data(self.h)
+        self.assertEqual(len(data["order"]["academia"]) + len(data["order"]["industry"]), 10)
+        mine = dict(data["types"]["postdoc"])
+        mine["sections"] = [{"heading": "Publications", "length": "full"}, {"heading": "Research Experience", "length": "detailed"},
+                            {"heading": "Hobbies", "length": "off"}]
+        mine["confidence"] = 9
+        res = self.c.save_type(self.h, "postdoc", mine)
+        self.assertEqual(res["tuned"], ["postdoc"])
+        r = self.row("Postdoc in hardware", "Lund, Sweden", "Academia - Postdoc/Researcher")
+        conv = self.c.for_row(self.h, r)
+        self.assertEqual([s["heading"] for s in conv["sections"]][:2], ["Publications", "Research Experience"])
+        self.assertEqual(conv["confidence"], 5)                               # clamped
+        self.assertNotIn("Hobbies", self.c.as_text(conv).split("Left out")[0])
+        self.c.save_type(self.h, "postdoc", None)
+        self.assertEqual(self.c.editor_data(self.h)["tuned"], [])
+        self.c.set_choice(self.h, self.c.posting_key(r), "lecturer", "us")
+        conv = self.c.for_row(self.h, r)
+        self.assertEqual((conv["type"], conv["market"], conv["auto"]["type"], conv["chosen"]["type"]), ("lecturer", "us", "postdoc", True))
+        self.c.set_choice(self.h, self.c.posting_key(r))
+        self.assertEqual(self.c.for_row(self.h, r)["type"], "postdoc")
+
     def test_templates_and_checks(self):
         from engine import documents as d
         us = self.c.for_row(self.h, self.row("FPGA Engineer", "Austin, TX"))
@@ -407,6 +449,7 @@ class TestConventions(unittest.TestCase):
         heads = [s["heading"] for s in d.template_specs(self.row("Postdoc in hardware", "Lund, Sweden"), {}, conv=ac)[0]["sections"]]
         self.assertIn("Publications", heads)
         self.assertIn("Research Experience", heads)
+        self.assertIn("References", heads)                                # academia keeps referees
         spec = {"type": "cv", "mode": "full", "banner": {"name": "Jane Example"},
                 "sections": [{"heading": "Profile", "paragraphs": ["Date of birth: 1990-01-01"]}]}
         self.assertTrue(d.check_spec(spec, self.c.checks_for(self.h, us)))
@@ -594,6 +637,16 @@ class TestApp(unittest.TestCase):
         self.j("/api/settings", {"sources": {"jobtech": False}})              # the tab's own save keeps keys and other settings
         self.assertFalse(self.h.search_config()["sources"]["jobtech"])
         self.j("/api/settings", {"sources": {"jobtech": True}})
+
+    def test_writing_style_api(self):
+        code, w = self.j("/api/writing")
+        self.assertEqual(code, 200)
+        self.assertIn("postdoc", w["types"])
+        _, w = self.j("/api/writing", {"type": "senior", "data": {"confidence": 5, "sections": [{"heading": "Summary", "length": "short"}]}})
+        self.assertIn("senior", w["tuned"])
+        self.assertEqual(self.j("/api/writing", {"type": "nope", "data": {}})[0], 400)
+        self.j("/api/writing", {"type": "senior", "data": None})
+        self.assertEqual(self.j("/api/writing/posting", {"key": "missing||x", "type": "phd"})[0], 404)
 
     def test_template_job(self):
         import time

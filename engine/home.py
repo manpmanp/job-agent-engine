@@ -69,6 +69,7 @@ DEFAULT_PATHS = {
     "tailoring_rules": "inputs/tailoring_rules.md",
     "tailoring_checks": "inputs/tailoring_checks.json",
     "document_conventions": "inputs/document_conventions.json",
+    "document_choices": "state/document_choices.json",
     "characteristics": "inputs/characteristics.md",
     "references": "inputs/references",
     "candidate": "inputs/candidate",

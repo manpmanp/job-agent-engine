@@ -262,12 +262,15 @@ def _make_handler(home, token, jobs, httpd_ref):
             cfg = home.search_config()
             from . import conventions
             cat = conventions.catalogue(home)
+            picks = conventions.choices(home)
 
             def written_for(r):
                 try:
-                    return conventions.summary(conventions.for_row(home, r, cfg, cat))
+                    c = conventions.for_row(home, r, cfg, cat, picks)
+                    return {"summary": conventions.summary(c), "type": c["type"], "market": c["market"],
+                            "auto_type": c["auto"]["type"], "auto_market": c["auto"]["market"]}
                 except Exception:
-                    return ""
+                    return None
             out = []
             for r in tr.read_all_rows(home.path("tracker")):
                 key = f"{r.get('URL') or ''}||{r.get('Title') or ''}"
@@ -416,6 +419,9 @@ def _make_handler(home, token, jobs, httpd_ref):
                 return self._send(200, self._settings_get())
             if u.path == "/api/employers":
                 return self._send(200, _read_json(home.path("employers"), {"mode": "extend", "employers": []}) or {})
+            if u.path == "/api/writing":
+                from . import conventions
+                return self._send(200, conventions.editor_data(home))
             if u.path == "/api/job_sites":
                 return self._send(200, _read_json(os.path.join(DEFAULTS_DIR, "job_sites.json"), {}) or {})
             if u.path == "/api/cloud":
@@ -580,6 +586,20 @@ def _make_handler(home, token, jobs, httpd_ref):
                 return self._send(code, res)
             if p == "/api/settings":
                 return self._send(200, self._settings_post(body))
+            if p == "/api/writing":
+                from . import conventions
+                try:
+                    return self._send(200, conventions.save_type(home, str(body.get("type") or ""), body.get("data")))
+                except (ValueError, TypeError) as e:
+                    return self._send(400, {"error": str(e)})
+            if p == "/api/writing/posting":
+                from . import conventions
+                row = self._row(body.get("key") or "")
+                if row is None:
+                    return self._send(404, {"error": "posting not found"})
+                conventions.set_choice(home, body["key"], body.get("type") or None, body.get("market") or None)
+                c = conventions.for_row(home, row)
+                return self._send(200, {"summary": conventions.summary(c), "type": c["type"], "market": c["market"]})
             if p == "/api/schedule":
                 ok, msg = (sched.install if body.get("on") else sched.remove)(home)
                 on, desc = sched.status(home)

@@ -51,7 +51,8 @@ before the command, or with the `JOB_AGENT_HOME` environment variable
 | `intake sources` / `intake rebuild` | Lists all submissions / rebuilds the profile. |
 | `tailor pending` | Accepted postings without documents, with their keys and the current mode. |
 | `tailor template "<URL>\|\|<Title>"` or `--all-pending` | Template CV and CL for a hypothetical candidate. |
-| `tailor conventions "<URL>\|\|<Title>"` | How this posting's documents are written: market (from its country), sector (industry or academia), level, page size, length, details to leave out, salutation and closing. |
+| `tailor conventions "<URL>\|\|<Title>"` | How this posting's documents are written: market (from its country) and position type (PhD, postdoc, research assistant, assistant professor, professor, lecturer, internship, junior, mid-senior, senior), with page size, length, CV sections in order, confidence, wording, emphasis, details to leave out, salutation and closing. |
+| `tailor choose "<URL>\|\|<Title>" [--type T] [--market M]` | Changes the position type or market of one posting (same as the selects in the Documents tab); without options, back to the suggestion. |
 | `tailor check <spec.json>` | Mechanical checks on a document spec. `--posting "<URL>\|\|<Title>"` adds that market's checks. |
 | `tailor render <spec.json> --posting "<URL>\|\|<Title>"` | Checks and renders a spec to the posting's file name. `--overwrite`, `--force` available. |
 | `tailor jd "<URL>\|\|<Title>" [--text <file>]` | Job-description snapshot (PDF when a converter is available, HTML otherwise). |

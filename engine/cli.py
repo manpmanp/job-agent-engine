@@ -226,6 +226,17 @@ def cmd_tailor(h, args):
         conv = conventions.for_row(h, _row_by_key(h, a[1]))
         print(conventions.as_text(conv))
         return
+    if sub == "choose":
+        # tailor choose "<URL>||<Title>" [--type T] [--market M]   (no options: back to the suggestion)
+        r = _row_by_key(h, a[1])
+        get = lambda o: a[a.index(o) + 1] if o in a else None
+        cat = conventions.catalogue(h)
+        for o, pool in (("--type", cat["types"]), ("--market", cat["markets"])):
+            if get(o) and get(o) not in pool:
+                raise SystemExit(f"unknown {o[2:]} {get(o)!r}; choose one of: {', '.join(pool)}")
+        conventions.set_choice(h, conventions.posting_key(r), get("--type"), get("--market"))
+        print(conventions.summary(conventions.for_row(h, r)))
+        return
     if sub == "check":
         # tailor check <spec.json> [--posting "<URL>||<Title>"]   (with --posting: the market's checks too)
         with open(a[1], "r", encoding="utf-8") as f:

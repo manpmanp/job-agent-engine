@@ -1,5 +1,5 @@
 {
- "_help": "How CVs and cover letters are usually written, by market (country group), sector and level. engine/conventions.py picks the market from the posting's location, the sector from its category and title, and the level from its seniority, then merges market + sector + level (later ones add to or replace earlier ones). Override or extend any part in your own inputs/document_conventions.json. These are common practice, not law, except where a rule says so; when a posting asks for something specific, the posting wins. A market's must_not_contain list is checked like tailoring_checks (a document containing one of them is not rendered).",
+ "_help": "How CVs and cover letters are written: by market (the posting's country) and by position type (six academic, four industry). engine/conventions.py picks both for each posting; you can tune each type in the app's Writing style tab (saved in inputs/document_conventions.json as 'types') and change the type or market of one posting in the Documents tab. A market's must_not_contain list is checked like tailoring_checks. These are common practice, not law; when a posting asks for something specific, the posting wins.",
  "markets": {
   "nordic": {
    "label": "Nordic (Sweden, Norway, Denmark, Finland, Iceland)",
@@ -394,72 +394,6 @@
    "notes": []
   }
  },
- "sectors": {
-  "industry": {
-   "label": "Industry",
-   "cv_kind": "industry CV/resume",
-   "sections": [
-    "Profile",
-    "Work Experience",
-    "Technical Skills",
-    "Education",
-    "Languages"
-   ],
-   "publications": "a short 'Selected publications' (2-4) only if the role is research-oriented; otherwise leave out",
-   "emphasis": "products, systems and results you delivered; tools and methods the posting names; scope and responsibility"
-  },
-  "academia": {
-   "label": "Academia (PhD, postdoc, researcher, lecturer, professor)",
-   "cv_kind": "full academic CV (no page limit)",
-   "sections": [
-    "Profile",
-    "Research Experience / Academic Positions",
-    "Education",
-    "Publications",
-    "Grants and Awards",
-    "Teaching and Supervision",
-    "Talks and Service",
-    "Technical Skills",
-    "Languages",
-    "References"
-   ],
-   "cv_pages": {
-    "junior": "2-3",
-    "mid": "3+",
-    "senior": "no limit"
-   },
-   "publications": "complete list with exact titles, venues and years from the authoritative source, grouped by type (journal, conference, other); mark your own name",
-   "references": "usually two or three referees with title, affiliation and e-mail",
-   "letter": {
-    "pages": "1-2",
-    "focus": "fit with the group's research, your main results, what you plan to do there, and teaching where relevant"
-   },
-   "extras": [
-    "research statement or plan when asked",
-    "teaching statement when asked (US faculty posts)",
-    "publication list as a separate file when asked"
-   ],
-   "emphasis": "research contributions, publications, independence, supervision and teaching, funding",
-   "metrics": "research results (performance, efficiency, citations of the work) are welcome; give one or two per project"
-  }
- },
- "levels": {
-  "junior": {
-   "label": "Junior / graduate / entry",
-   "emphasis": "education, thesis and projects first or near the top; internships and part-time roles count; skills with where they were used",
-   "older_roles": "keep everything relevant"
-  },
-  "mid": {
-   "label": "Experienced / mid-level",
-   "emphasis": "most recent and most relevant roles in detail; education after experience",
-   "older_roles": "shorten roles older than about ten years"
-  },
-  "senior": {
-   "label": "Senior / staff / lead / principal / architect / manager",
-   "emphasis": "scope and ownership: systems or products you were responsible for, technical decisions, leading or mentoring, cross-team work, outcomes; a strong 3-4 line profile",
-   "older_roles": "one line each for early roles; drop very old ones"
-  }
- },
  "country_names": {
   "SE": [
    "sweden",
@@ -721,5 +655,774 @@
    "Queensland",
    "Tasmania"
   ]
+ },
+ "types": {
+  "phd": {
+   "label": "PhD position",
+   "group": "academia",
+   "level": "junior",
+   "cv_pages": "1-2",
+   "confidence": 2,
+   "emphasis": "Preparation and potential: the degree, thesis, relevant courses and grades, methods and tools learned, and a clear interest in this project's topic.",
+   "wording": "Modest and curious. Describe what you did and learned in projects; do not claim expertise. 'I would like to contribute to' rather than 'I will lead'.",
+   "sections": [
+    {
+     "id": "profile",
+     "heading": "Research Interests",
+     "length": "short",
+     "focus": "two or three lines tying your background to the project's topic"
+    },
+    {
+     "id": "education",
+     "heading": "Education",
+     "length": "detailed",
+     "focus": "degree, thesis title and supervisor, relevant courses and grades"
+    },
+    {
+     "id": "projects",
+     "heading": "Research and Thesis Projects",
+     "length": "normal",
+     "focus": "what each project asked, your own part, methods, result"
+    },
+    {
+     "id": "publications",
+     "heading": "Publications",
+     "length": "short",
+     "focus": "only if you have any; exact as published"
+    },
+    {
+     "id": "experience",
+     "heading": "Experience",
+     "length": "short",
+     "focus": "internships, teaching assistant or relevant part-time work"
+    },
+    {
+     "id": "skills",
+     "heading": "Technical Skills",
+     "length": "normal",
+     "focus": "tools and methods the project names, with where you used them"
+    },
+    {
+     "id": "awards",
+     "heading": "Awards and Scholarships",
+     "length": "short",
+     "focus": ""
+    },
+    {
+     "id": "languages",
+     "heading": "Languages",
+     "length": "short",
+     "focus": ""
+    },
+    {
+     "id": "references",
+     "heading": "References",
+     "length": "short",
+     "focus": "two referees, for example the thesis supervisor"
+    }
+   ],
+   "letter": {
+    "pages": "1",
+    "focus": "Why this project and group, which courses or thesis work prepared you for it, what you want to learn, and your research interest."
+   }
+  },
+  "postdoc": {
+   "label": "Postdoc",
+   "group": "academia",
+   "level": "mid",
+   "cv_pages": "2-4",
+   "confidence": 3,
+   "emphasis": "PhD results and their impact, publications, the methods you master, growing independence, and fit with the group's projects.",
+   "wording": "State your own contributions clearly ('I designed', 'I led the tape-out') while crediting co-authors. Neither modest nor inflated.",
+   "sections": [
+    {
+     "id": "profile",
+     "heading": "Research Profile",
+     "length": "short",
+     "focus": "three or four lines: field, main results, what you bring to this group"
+    },
+    {
+     "id": "positions",
+     "heading": "Research Experience",
+     "length": "detailed",
+     "focus": "PhD and research positions: topic, your contributions, results"
+    },
+    {
+     "id": "education",
+     "heading": "Education",
+     "length": "normal",
+     "focus": "PhD: thesis title, supervisor, year; earlier degrees briefly"
+    },
+    {
+     "id": "publications",
+     "heading": "Publications",
+     "length": "full",
+     "focus": "complete list, grouped by journal and conference, your name marked"
+    },
+    {
+     "id": "grants",
+     "heading": "Grants and Awards",
+     "length": "short",
+     "focus": ""
+    },
+    {
+     "id": "teaching",
+     "heading": "Teaching and Supervision",
+     "length": "short",
+     "focus": "courses and supervised students"
+    },
+    {
+     "id": "talks",
+     "heading": "Talks and Conferences",
+     "length": "short",
+     "focus": ""
+    },
+    {
+     "id": "skills",
+     "heading": "Technical Skills",
+     "length": "normal",
+     "focus": "methods and tools relevant to the group's work"
+    },
+    {
+     "id": "service",
+     "heading": "Reviewing and Service",
+     "length": "short",
+     "focus": ""
+    },
+    {
+     "id": "languages",
+     "heading": "Languages",
+     "length": "short",
+     "focus": ""
+    },
+    {
+     "id": "references",
+     "heading": "References",
+     "length": "short",
+     "focus": "two or three referees with title, affiliation and e-mail"
+    }
+   ],
+   "letter": {
+    "pages": "1-2",
+    "focus": "Fit with the group's research, your main PhD results, what you would work on there, and what you would bring."
+   }
+  },
+  "research_assistant": {
+   "label": "Research assistant / engineer (university or research centre)",
+   "group": "academia",
+   "level": "mid",
+   "cv_pages": "1-2",
+   "confidence": 3,
+   "emphasis": "Hands-on skills that support a research group: implementation, lab and measurement work, tools, reliability and documentation.",
+   "wording": "Concrete and practical: what you built, ran, measured or maintained, and for whom.",
+   "sections": [
+    {
+     "id": "profile",
+     "heading": "Profile",
+     "length": "short",
+     "focus": ""
+    },
+    {
+     "id": "experience",
+     "heading": "Experience",
+     "length": "detailed",
+     "focus": "lab, research-engineering and development work; your own part"
+    },
+    {
+     "id": "skills",
+     "heading": "Technical Skills",
+     "length": "detailed",
+     "focus": "tools, languages, lab equipment, with where you used them"
+    },
+    {
+     "id": "projects",
+     "heading": "Projects",
+     "length": "normal",
+     "focus": ""
+    },
+    {
+     "id": "education",
+     "heading": "Education",
+     "length": "normal",
+     "focus": ""
+    },
+    {
+     "id": "publications",
+     "heading": "Publications",
+     "length": "short",
+     "focus": "if any; contributions to papers count"
+    },
+    {
+     "id": "languages",
+     "heading": "Languages",
+     "length": "short",
+     "focus": ""
+    },
+    {
+     "id": "references",
+     "heading": "References",
+     "length": "short",
+     "focus": ""
+    }
+   ],
+   "letter": {
+    "pages": "1",
+    "focus": "Which tasks of the group you can take on from day one, the tools you know, and how you work with researchers."
+   }
+  },
+  "assistant_professor": {
+   "label": "Assistant professor / tenure track",
+   "group": "academia",
+   "level": "senior",
+   "cv_pages": "no limit",
+   "confidence": 4,
+   "emphasis": "An independent research line and plan, funding record or potential, teaching experience and pedagogical training, and supervision.",
+   "wording": "Confident about your research vision, backed by evidence. Reflect on teaching instead of only listing courses.",
+   "sections": [
+    {
+     "id": "profile",
+     "heading": "Research Profile",
+     "length": "normal",
+     "focus": "your research line and where you take it next"
+    },
+    {
+     "id": "positions",
+     "heading": "Academic Positions",
+     "length": "normal",
+     "focus": ""
+    },
+    {
+     "id": "education",
+     "heading": "Education",
+     "length": "short",
+     "focus": ""
+    },
+    {
+     "id": "grants",
+     "heading": "Grants and Funding",
+     "length": "normal",
+     "focus": "funding you received or co-wrote, with amounts and your role"
+    },
+    {
+     "id": "publications",
+     "heading": "Publications",
+     "length": "full",
+     "focus": "complete list, grouped by type, your name marked"
+    },
+    {
+     "id": "supervision",
+     "heading": "Supervision",
+     "length": "normal",
+     "focus": "PhD and master students, your role, outcomes"
+    },
+    {
+     "id": "teaching",
+     "heading": "Teaching Experience",
+     "length": "detailed",
+     "focus": "courses, your role, development work"
+    },
+    {
+     "id": "pedagogy",
+     "heading": "Pedagogical Training",
+     "length": "short",
+     "focus": "university teaching courses (in Sweden: högskolepedagogik)"
+    },
+    {
+     "id": "talks",
+     "heading": "Invited Talks",
+     "length": "short",
+     "focus": ""
+    },
+    {
+     "id": "service",
+     "heading": "Academic Service",
+     "length": "short",
+     "focus": "reviewing, committees, organisation"
+    },
+    {
+     "id": "collaboration",
+     "heading": "Collaborations and Industry Contacts",
+     "length": "short",
+     "focus": ""
+    },
+    {
+     "id": "skills",
+     "heading": "Technical Skills",
+     "length": "short",
+     "focus": ""
+    },
+    {
+     "id": "languages",
+     "heading": "Languages",
+     "length": "short",
+     "focus": ""
+    },
+    {
+     "id": "references",
+     "heading": "References",
+     "length": "short",
+     "focus": ""
+    }
+   ],
+   "letter": {
+    "pages": "2",
+    "focus": "Your research vision and how it fits the department, funding plans, your teaching approach, and supervision."
+   },
+   "extras": [
+    "research statement or plan",
+    "teaching statement or pedagogical portfolio"
+   ]
+  },
+  "professor": {
+   "label": "Associate or full professor",
+   "group": "academia",
+   "level": "senior",
+   "cv_pages": "no limit",
+   "confidence": 4,
+   "emphasis": "Research leadership and programme, funding, international standing, supervision record, and pedagogical and administrative merits.",
+   "wording": "Authoritative and factual: let the record speak. Quantify funding, graduated students and leadership roles.",
+   "sections": [
+    {
+     "id": "profile",
+     "heading": "Summary",
+     "length": "normal",
+     "focus": "research programme, leadership and standing"
+    },
+    {
+     "id": "positions",
+     "heading": "Academic Positions",
+     "length": "normal",
+     "focus": ""
+    },
+    {
+     "id": "leadership",
+     "heading": "Research Leadership",
+     "length": "detailed",
+     "focus": "groups, centres and projects you lead"
+    },
+    {
+     "id": "grants",
+     "heading": "Grants and Funding",
+     "length": "detailed",
+     "focus": "as principal investigator, with amounts"
+    },
+    {
+     "id": "publications",
+     "heading": "Publications",
+     "length": "full",
+     "focus": "selected publications first, then the complete list"
+    },
+    {
+     "id": "supervision",
+     "heading": "Supervision",
+     "length": "normal",
+     "focus": "PhD students graduated and current, postdocs"
+    },
+    {
+     "id": "teaching",
+     "heading": "Teaching and Pedagogical Merits",
+     "length": "normal",
+     "focus": ""
+    },
+    {
+     "id": "service",
+     "heading": "Academic Service and Assignments",
+     "length": "normal",
+     "focus": "boards, evaluation committees, editorships"
+    },
+    {
+     "id": "impact",
+     "heading": "Collaboration and Impact",
+     "length": "short",
+     "focus": "industry, society, patents"
+    },
+    {
+     "id": "talks",
+     "heading": "Keynotes and Invited Talks",
+     "length": "short",
+     "focus": ""
+    },
+    {
+     "id": "education",
+     "heading": "Education",
+     "length": "short",
+     "focus": ""
+    },
+    {
+     "id": "languages",
+     "heading": "Languages",
+     "length": "short",
+     "focus": ""
+    },
+    {
+     "id": "references",
+     "heading": "References",
+     "length": "off",
+     "focus": "usually not listed at this level unless asked"
+    }
+   ],
+   "letter": {
+    "pages": "2-3",
+    "focus": "Your research programme and its future, leadership, funding, and what you would build in the department."
+   },
+   "extras": [
+    "research and teaching statements",
+    "list of selected publications"
+   ]
+  },
+  "lecturer": {
+   "label": "Lecturer (university)",
+   "group": "academia",
+   "level": "mid",
+   "cv_pages": "2-4",
+   "confidence": 3,
+   "emphasis": "Teaching record, course development, pedagogical training and student supervision; research as support for teaching.",
+   "wording": "Reflective and student-centred, with concrete teaching examples (what you changed in a course and why).",
+   "sections": [
+    {
+     "id": "profile",
+     "heading": "Teaching Profile",
+     "length": "short",
+     "focus": ""
+    },
+    {
+     "id": "teaching",
+     "heading": "Teaching Experience",
+     "length": "detailed",
+     "focus": "courses, level, your role, number of students"
+    },
+    {
+     "id": "course_development",
+     "heading": "Course Development",
+     "length": "normal",
+     "focus": "courses or labs you designed or renewed"
+    },
+    {
+     "id": "pedagogy",
+     "heading": "Pedagogical Training",
+     "length": "normal",
+     "focus": ""
+    },
+    {
+     "id": "supervision",
+     "heading": "Supervision",
+     "length": "normal",
+     "focus": "thesis students"
+    },
+    {
+     "id": "positions",
+     "heading": "Academic Positions",
+     "length": "normal",
+     "focus": ""
+    },
+    {
+     "id": "education",
+     "heading": "Education",
+     "length": "normal",
+     "focus": ""
+    },
+    {
+     "id": "publications",
+     "heading": "Publications",
+     "length": "normal",
+     "focus": "selected"
+    },
+    {
+     "id": "service",
+     "heading": "Academic Service",
+     "length": "short",
+     "focus": ""
+    },
+    {
+     "id": "skills",
+     "heading": "Technical Skills",
+     "length": "short",
+     "focus": ""
+    },
+    {
+     "id": "languages",
+     "heading": "Languages",
+     "length": "short",
+     "focus": "teaching languages"
+    },
+    {
+     "id": "references",
+     "heading": "References",
+     "length": "short",
+     "focus": ""
+    }
+   ],
+   "letter": {
+    "pages": "1-2",
+    "focus": "How you teach and why, courses you can give, course development, and how your research supports teaching."
+   },
+   "extras": [
+    "teaching portfolio"
+   ]
+  },
+  "internship": {
+   "label": "Internship or thesis project",
+   "group": "industry",
+   "level": "junior",
+   "cv_pages": "1",
+   "confidence": 2,
+   "emphasis": "Studies, relevant courses and projects, eagerness to learn, and when and how long you are available.",
+   "wording": "Plain and keen: what you learned and built in courses and projects. No inflated titles.",
+   "sections": [
+    {
+     "id": "profile",
+     "heading": "Profile",
+     "length": "short",
+     "focus": "programme, year, and what you want to work on"
+    },
+    {
+     "id": "education",
+     "heading": "Education",
+     "length": "detailed",
+     "focus": "current programme, relevant courses, expected graduation"
+    },
+    {
+     "id": "projects",
+     "heading": "Projects",
+     "length": "detailed",
+     "focus": "course and personal projects with the tools the posting names"
+    },
+    {
+     "id": "experience",
+     "heading": "Experience",
+     "length": "short",
+     "focus": "part-time jobs and student roles"
+    },
+    {
+     "id": "skills",
+     "heading": "Technical Skills",
+     "length": "normal",
+     "focus": ""
+    },
+    {
+     "id": "languages",
+     "heading": "Languages",
+     "length": "short",
+     "focus": ""
+    },
+    {
+     "id": "references",
+     "heading": "References",
+     "length": "short",
+     "focus": ""
+    }
+   ],
+   "letter": {
+    "pages": "under 1",
+    "focus": "Why this company and project, the courses or projects that prepared you, and your available dates."
+   }
+  },
+  "junior": {
+   "label": "Junior / graduate",
+   "group": "industry",
+   "level": "junior",
+   "cv_pages": "",
+   "confidence": 2,
+   "emphasis": "Foundation: degree and thesis, internships, and projects that used the tools named in the posting; how fast you learn.",
+   "wording": "Modest but clear about what you did yourself. Describe tasks and results, not personal qualities.",
+   "sections": [
+    {
+     "id": "profile",
+     "heading": "Profile",
+     "length": "short",
+     "focus": ""
+    },
+    {
+     "id": "education",
+     "heading": "Education",
+     "length": "normal",
+     "focus": "degree and thesis"
+    },
+    {
+     "id": "experience",
+     "heading": "Work Experience",
+     "length": "normal",
+     "focus": "internships and first roles"
+    },
+    {
+     "id": "projects",
+     "heading": "Projects",
+     "length": "normal",
+     "focus": ""
+    },
+    {
+     "id": "skills",
+     "heading": "Technical Skills",
+     "length": "normal",
+     "focus": ""
+    },
+    {
+     "id": "languages",
+     "heading": "Languages",
+     "length": "short",
+     "focus": ""
+    },
+    {
+     "id": "references",
+     "heading": "References",
+     "length": "short",
+     "focus": ""
+    }
+   ],
+   "letter": {
+    "pages": "1",
+    "focus": "Why this employer and team, the experience closest to the posting, and what you want to grow into."
+   }
+  },
+  "mid_senior": {
+   "label": "Experienced / mid-senior",
+   "group": "industry",
+   "level": "mid",
+   "cv_pages": "",
+   "confidence": 3,
+   "emphasis": "Results delivered in recent roles, ownership of blocks or modules, and the tools and flows the posting names.",
+   "wording": "Matter-of-fact and specific: 'designed', 'verified', 'delivered'. Confident without superlatives.",
+   "sections": [
+    {
+     "id": "profile",
+     "heading": "Profile",
+     "length": "normal",
+     "focus": ""
+    },
+    {
+     "id": "experience",
+     "heading": "Work Experience",
+     "length": "detailed",
+     "focus": "recent roles in detail, older roles shorter"
+    },
+    {
+     "id": "skills",
+     "heading": "Technical Skills",
+     "length": "normal",
+     "focus": ""
+    },
+    {
+     "id": "education",
+     "heading": "Education",
+     "length": "short",
+     "focus": ""
+    },
+    {
+     "id": "publications",
+     "heading": "Selected Publications",
+     "length": "off",
+     "focus": "only for research-oriented roles"
+    },
+    {
+     "id": "languages",
+     "heading": "Languages",
+     "length": "short",
+     "focus": ""
+    },
+    {
+     "id": "references",
+     "heading": "References",
+     "length": "short",
+     "focus": ""
+    }
+   ],
+   "letter": {
+    "pages": "1",
+    "focus": "The two or three experiences closest to the posting, your own part in them, and why this team."
+   }
+  },
+  "senior": {
+   "label": "Senior / staff / lead",
+   "group": "industry",
+   "level": "senior",
+   "cv_pages": "",
+   "confidence": 4,
+   "emphasis": "Scope and ownership: systems or products you were responsible for, technical decisions, leading and mentoring, cross-team work, tape-outs or launches.",
+   "wording": "Confident and direct: 'led', 'owned', 'defined', always backed by what happened.",
+   "sections": [
+    {
+     "id": "profile",
+     "heading": "Summary",
+     "length": "normal",
+     "focus": "three or four lines on scope and expertise"
+    },
+    {
+     "id": "experience",
+     "heading": "Professional Experience",
+     "length": "detailed",
+     "focus": "scope, decisions and outcomes; early roles in one line"
+    },
+    {
+     "id": "key_projects",
+     "heading": "Selected Projects",
+     "length": "normal",
+     "focus": "two or three projects that match the posting"
+    },
+    {
+     "id": "skills",
+     "heading": "Technical Expertise",
+     "length": "short",
+     "focus": ""
+    },
+    {
+     "id": "education",
+     "heading": "Education",
+     "length": "short",
+     "focus": ""
+    },
+    {
+     "id": "publications",
+     "heading": "Selected Publications and Patents",
+     "length": "off",
+     "focus": ""
+    },
+    {
+     "id": "languages",
+     "heading": "Languages",
+     "length": "short",
+     "focus": ""
+    },
+    {
+     "id": "references",
+     "heading": "References",
+     "length": "short",
+     "focus": ""
+    }
+   ],
+   "letter": {
+    "pages": "1",
+    "focus": "What you would own and improve in this role, backed by the closest results you led."
+   }
+  }
+ },
+ "type_order": {
+  "academia": [
+   "phd",
+   "postdoc",
+   "research_assistant",
+   "assistant_professor",
+   "professor",
+   "lecturer"
+  ],
+  "industry": [
+   "internship",
+   "junior",
+   "mid_senior",
+   "senior"
+  ]
+ },
+ "confidence": {
+  "1": "very modest: understate; let facts speak quietly",
+  "2": "modest: plain statements, credit others, no claims of expertise",
+  "3": "balanced: clear about your own contributions, no superlatives",
+  "4": "confident: lead with ownership and results",
+  "5": "assertive: strong action verbs, impact first (still only what the material verifies)"
+ },
+ "lengths": {
+  "off": "leave the section out",
+  "short": "brief: one to three lines, or one or two bullets",
+  "normal": "usual: three or four lines or bullets per entry",
+  "detailed": "in depth: five or six bullets for recent entries",
+  "full": "the complete list"
  }
 }

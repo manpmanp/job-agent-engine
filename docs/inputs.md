@@ -57,7 +57,8 @@ A blank value keeps the default.
 | `inputs/tailoring_checks.json` | Mechanical checks: `cv_must_contain`, `cl_must_contain`, `must_not_contain`. `tailor render` refuses a spec that fails them. |
 | `inputs/references/` | Any authoritative files the agent should consult (a publication list, a detailed technical profile). |
 | `inputs/document_style.json` | `font`, `banner_color`, `accent_color`, `secondary_text_color`, `body_text_color`, `page_size` (A4/Letter), `avoid_em_dash`, `cl_closing`. Leave `page_size` and `cl_closing` out to follow each posting's market (Letter and "Sincerely," for the US, A4 and "Kind regards," for Sweden). |
-| `inputs/document_conventions.json` | Your changes to the writing conventions, in the same shape as `engine/defaults/document_conventions.json` (`markets`, `sectors`, `levels`); only what you write replaces the default, for example `{"markets": {"us": {"letter": {"closing": "Best regards,"}}}}`. |
+| `inputs/document_conventions.json` | Your changes to the writing conventions, in the same shape as `engine/defaults/document_conventions.json`: `markets` (countries) and `types` (the ten position types). The app's Writing style tab writes `types` for you (sections in order with heading, length and focus; confidence 1 to 5; emphasis; wording; CV and letter length; letter focus). Only what you write replaces the default, for example `{"markets": {"us": {"letter": {"closing": "Best regards,"}}}}`. |
+| `state/document_choices.json` | The position type or market you chose for single postings in the Documents tab (or with `tailor choose`). |
 
 ## Using an existing folder layout: `agent_home.json`
 

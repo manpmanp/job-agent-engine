@@ -28,10 +28,10 @@
 html, body { margin:0; background:var(--bg); color:var(--text); font:14px/1.45 Arial, Helvetica, sans-serif; }
 a { color:var(--accent-2); }
 header.top { position:sticky; top:0; z-index:5; background:var(--panel); border-bottom:1px solid var(--border); }
-.bar { max-width:1060px; margin:0 auto; padding:10px 16px; display:flex; align-items:center; gap:14px; flex-wrap:wrap; }
+.bar { max-width:1240px; margin:0 auto; padding:10px 16px; display:flex; align-items:center; gap:14px; flex-wrap:wrap; }
 .brand { font-weight:bold; color:var(--accent); font-size:16px; margin-right:6px; }
 nav { display:flex; gap:2px; flex-wrap:wrap; }
-nav button { background:none; border:0; padding:8px 11px; border-radius:6px; color:var(--muted); font:inherit; cursor:pointer; }
+nav button { background:none; border:0; padding:8px 9px; border-radius:6px; color:var(--muted); font:inherit; cursor:pointer; }
 nav button.on { background:var(--soft); color:var(--text); font-weight:bold; }
 .acts { display:flex; gap:6px; flex-wrap:wrap; }
 .b.sm { padding:5px 10px; font-size:13px; } a.b { text-decoration:none; display:inline-block; }
@@ -99,6 +99,12 @@ ul.plain { margin:4px 0 0 18px; padding:0; }
 .site:first-of-type { border-top:0; }
 .site input { margin:0; } .site .nm { font-weight:bold; } .site .nt { flex-basis:100%; padding-left:24px; }
 .site.off .nm { opacity:.55; text-decoration:line-through; }
+textarea.plain { font-family:inherit; font-size:13px; min-height:58px; }
+.secrow { display:grid; grid-template-columns:auto minmax(120px, 1.2fr) 110px minmax(120px, 2fr) auto; gap:6px; align-items:center; margin:6px 0; }
+.secrow .mv { display:flex; gap:2px; } .secrow button.b { padding:4px 8px; }
+.secrow.off input[type=text] { opacity:.5; }
+@media (max-width:640px) { .secrow { grid-template-columns:auto 1fr 96px auto; } .secrow .fc { grid-column:1 / -1; } }
+input[type=range] { width:220px; vertical-align:middle; }
 details.grp > summary { cursor:pointer; font-weight:bold; color:var(--accent); }
 </style>
 </head>
@@ -112,6 +118,7 @@ details.grp > summary { cursor:pointer; font-weight:bold; color:var(--accent); }
     <button data-v="docs">Documents<span class="count" id="c-docs" hidden></span></button>
     <button data-v="setup">Setup</button>
     <button data-v="sites">Job sites</button>
+    <button data-v="style" class="local-only">Writing style</button>
     <button data-v="settings">Settings</button>
   </nav>
   <span class="spacer"></span>
@@ -232,6 +239,14 @@ details.grp > summary { cursor:pointer; font-weight:bold; color:var(--accent); }
   <p class="small muted" id="sites-checked"></p>
 </section>
 
+<!-- WRITING STYLE -->
+<section class="view" id="v-style">
+  <h1>Writing style</h1>
+  <p class="muted" style="margin-top:-6px">Every posting gets a suggested position type and country automatically; the Documents tab shows it and lets you change it for one posting. Here you tune how each type is written. Country rules (page size, personal details, salutation, closing) are added per posting on top.</p>
+  <div class="card"><div id="ty-chips" class="muted small">Loading...</div></div>
+  <div id="ty-edit"></div>
+</section>
+
 <!-- SETTINGS -->
 <section class="view" id="v-settings">
   <h1>Settings</h1>
@@ -313,6 +328,7 @@ function show(v) {
   if (v === 'setup') { if (!$('#form').src) $('#form').src = '/form'; loadEmployers(); }
   if (v === 'settings') loadSettings();
   if (v === 'sites') loadSites();
+  if (v === 'style') loadStyle();
   if (v === 'postings' || v === 'docs') loadPostings();
   history.replaceState(null, '', '#' + v);
 }
@@ -498,7 +514,7 @@ function renderDocs() {
     return `<div class="card">
       <div class="row"><div style="flex:1"><b>${esc(p.title)}</b><div class="muted">${esc(p.employer)}${p.location ? ' &middot; ' + esc(p.location) : ''}${/^\d{4}-/.test(p.deadline || '') ? ' &middot; apply by ' + esc(p.deadline) : ''}</div></div>
         ${p.drafted ? '<span class="tag good">Drafted</span>' : p.docs.length ? '<span class="tag">Templates only</span>' : '<span class="tag warn">No documents yet</span>'}</div>
-      ${p.written_for ? `<div class="small muted" style="margin-top:6px">Written for: ${esc(p.written_for)}</div>` : ''}
+      ${p.written_for ? docStyleRow(p, i) : ''}
       <div class="small" style="margin:8px 0">${docs || '<span class="muted">No files yet.</span>'}</div>
       <div class="row">
         ${full ? `${S.api_key ? `<button class="b primary" data-job onclick="aiDoc(${i})">Write with AI</button>` : ''}
@@ -511,6 +527,25 @@ function renderDocs() {
     </div>`;
   }).join('');
   window._acc = acc;
+}
+function docStyleRow(p, i) {
+  const w = p.written_for;
+  if (!WS) { if (!window._wsLoading) { window._wsLoading = true; loadWS().then(() => renderDocs()).catch(() => {}); } return ''; }
+  const tOpts = [...WS.order.academia, ...WS.order.industry].map(k =>
+    `<option value="${k}" ${w.type === k ? 'selected' : ''}>${esc(WS.types[k].label)}${k === w.auto_type ? ' (suggested)' : ''}</option>`).join('');
+  const mOpts = Object.entries(WS.markets).map(([k, l]) =>
+    `<option value="${k}" ${w.market === k ? 'selected' : ''}>${esc(l)}${k === w.auto_market ? ' (suggested)' : ''}</option>`).join('');
+  return `<div class="row small" style="margin-top:8px">Written as <select style="width:auto;max-width:320px" onchange="docChoice(${i})" id="dt-${i}">${tOpts}</select>
+    for <select style="width:auto;max-width:260px" onchange="docChoice(${i})" id="dm-${i}">${mOpts}</select></div>
+    <div class="small muted" id="ds-${i}" style="margin-top:4px">${esc(w.summary)}</div>`;
+}
+async function docChoice(i) {
+  const p = window._acc[i], t = $('#dt-' + i).value, m = $('#dm-' + i).value;
+  try {
+    const r = await api('/api/writing/posting', { key: p.key, type: t === p.written_for.auto_type ? '' : t, market: m === p.written_for.auto_market ? '' : m });
+    p.written_for.type = r.type; p.written_for.market = r.market; p.written_for.summary = r.summary;
+    $('#ds-' + i).textContent = r.summary; toast('Saved for this posting. Make the documents again to use it.');
+  } catch (e) { toast(e.message); }
 }
 function aiDoc(i) { runJob('/api/documents/ai', { key: window._acc[i].key }); }
 function tmplDoc(i) { runJob('/api/documents/template', { key: window._acc[i].key }); }
@@ -692,6 +727,88 @@ $('#btn-save-sites').onclick = async () => {
   try { await api('/api/search_config', { job_sites }); $('#sites-r').textContent = `Saved: ${job_sites.countries.length} countr${job_sites.countries.length === 1 ? 'y' : 'ies'}, ${custom.length} other site(s).`; }
   catch (e) { toast(e.message); }
 };
+
+// ----------------------------------------------------------- writing style
+let WS = null, CUR = null, EDIT = null;
+async function loadWS() { WS = await api('/api/writing'); return WS; }
+async function loadStyle() {
+  try { await loadWS(); } catch (e) { return toast(e.message); }
+  if (!CUR) CUR = WS.order.academia[1];
+  renderTypeChips(); editType(CUR);
+}
+function renderTypeChips() {
+  const grp = (name, keys) => `<div class="region"><b>${name}</b><div class="chips">` + keys.map(k =>
+    `<span class="chip${k === CUR ? ' on' : ''}" data-ty="${k}">${esc(WS.types[k].label)}${WS.tuned.includes(k) ? ' *' : ''}</span>`).join('') + '</div></div>';
+  $('#ty-chips').classList.remove('muted', 'small');
+  $('#ty-chips').innerHTML = grp('Academic', WS.order.academia) + grp('Industry', WS.order.industry) +
+    '<div class="small muted">* tuned by you</div>';
+  $$('#ty-chips .chip').forEach(c => c.onclick = () => { CUR = c.dataset.ty; renderTypeChips(); editType(CUR); });
+}
+function editType(k) {
+  EDIT = JSON.parse(JSON.stringify(WS.types[k]));
+  EDIT.letter = EDIT.letter || {};
+  renderEditor();
+}
+function renderEditor() {
+  const k = CUR, tuned = WS.tuned.includes(k), lens = Object.keys(WS.lengths);
+  const conf = EDIT.confidence || 3;
+  $('#ty-edit').innerHTML = `<div class="card">
+    <div class="row"><b style="font-size:15px">${esc(EDIT.label)}</b>
+      <span class="tag ${tuned ? 'warn' : 'good'}">${tuned ? 'tuned by you' : 'suggested'}</span><span class="spacer"></span>
+      ${tuned ? '<button class="b" id="ty-reset">Back to the suggestion</button>' : ''}</div>
+    <div class="grid" style="margin-top:4px">
+      <div><label class="f" for="ty-pages">CV length (pages)</label><input type="text" id="ty-pages" value="${esc(EDIT.cv_pages || '')}" placeholder="the country's usual length"></div>
+      <div><label class="f" for="ty-lpages">Cover letter length (pages)</label><input type="text" id="ty-lpages" value="${esc(EDIT.letter.pages || '')}"></div>
+    </div>
+    <label class="f" for="ty-conf">Confidence: <span id="ty-conf-t">${conf} of 5, ${esc(WS.confidence[conf])}</span></label>
+    <span class="small muted">modest</span> <input type="range" min="1" max="5" step="1" id="ty-conf" value="${conf}"> <span class="small muted">assertive</span>
+    <label class="f" for="ty-emph">What to emphasize</label><textarea class="plain" id="ty-emph">${esc(EDIT.emphasis || '')}</textarea>
+    <label class="f" for="ty-word">Wording and titles</label><textarea class="plain" id="ty-word">${esc(EDIT.wording || '')}</textarea>
+    <label class="f" for="ty-lfocus">Cover letter focus</label><textarea class="plain" id="ty-lfocus">${esc(EDIT.letter.focus || '')}</textarea>
+    <h2>CV sections, in order</h2>
+    <div class="small muted">Heading, length (${lens.map(l => `<b>${l}</b>: ${esc(WS.lengths[l])}`).join('; ')}), and what the section should focus on.</div>
+    <div id="ty-secs"></div>
+    <div class="row" style="margin-top:8px"><button class="b" id="ty-add">Add a section</button><span class="spacer"></span>
+      <button class="b primary" id="ty-save">Save ${esc(EDIT.label)}</button></div>
+  </div>`;
+  renderSecs();
+  $('#ty-conf').oninput = e => { const v = +e.target.value; $('#ty-conf-t').textContent = `${v} of 5, ${WS.confidence[v]}`; };
+  $('#ty-add').onclick = () => { readEditor(); EDIT.sections.push({ id: '', heading: 'New section', length: 'normal', focus: '' }); renderSecs(); };
+  $('#ty-save').onclick = saveType;
+  if (tuned) $('#ty-reset').onclick = async () => {
+    try { WS = await api('/api/writing', { type: CUR, data: null }); toast('Back to the suggestion'); renderTypeChips(); editType(CUR); } catch (e) { toast(e.message); } };
+}
+function renderSecs() {
+  const lens = Object.keys(WS.lengths);
+  $('#ty-secs').innerHTML = EDIT.sections.map((s, i) => `<div class="secrow${s.length === 'off' ? ' off' : ''}" data-i="${i}">
+    <span class="mv"><button class="b" title="Move up" data-mv="-1" ${i ? '' : 'disabled'}>&uarr;</button><button class="b" title="Move down" data-mv="1" ${i < EDIT.sections.length - 1 ? '' : 'disabled'}>&darr;</button></span>
+    <input type="text" class="sh" value="${esc(s.heading)}" aria-label="Heading">
+    <select class="sl" aria-label="Length">${lens.map(l => `<option ${s.length === l ? 'selected' : ''}>${l}</option>`).join('')}</select>
+    <input type="text" class="sf fc" value="${esc(s.focus || '')}" placeholder="focus (optional)" aria-label="Focus">
+    <button class="b bad" title="Remove" data-rm>&times;</button></div>`).join('');
+  $$('#ty-secs .secrow').forEach(row => {
+    const i = +row.dataset.i;
+    $$('[data-mv]', row).forEach(b => b.onclick = () => { readEditor(); const j = i + +b.dataset.mv;
+      [EDIT.sections[i], EDIT.sections[j]] = [EDIT.sections[j], EDIT.sections[i]]; renderSecs(); });
+    $('[data-rm]', row).onclick = () => { readEditor(); EDIT.sections.splice(i, 1); renderSecs(); };
+    $('.sl', row).onchange = e => row.classList.toggle('off', e.target.value === 'off');
+  });
+}
+function readEditor() {
+  EDIT.cv_pages = $('#ty-pages').value.trim(); EDIT.letter.pages = $('#ty-lpages').value.trim();
+  EDIT.confidence = +$('#ty-conf').value; EDIT.emphasis = $('#ty-emph').value.trim(); EDIT.wording = $('#ty-word').value.trim();
+  EDIT.letter.focus = $('#ty-lfocus').value.trim();
+  $$('#ty-secs .secrow').forEach(row => { const s = EDIT.sections[+row.dataset.i];
+    s.heading = $('.sh', row).value.trim(); s.length = $('.sl', row).value; s.focus = $('.sf', row).value.trim(); });
+  EDIT.sections = EDIT.sections.filter(s => s.heading);
+}
+async function saveType() {
+  readEditor();
+  const data = { cv_pages: EDIT.cv_pages, confidence: EDIT.confidence, emphasis: EDIT.emphasis, wording: EDIT.wording,
+                 sections: EDIT.sections, letter: { pages: EDIT.letter.pages, focus: EDIT.letter.focus } };
+  try { WS = await api('/api/writing', { type: CUR, data }); toast('Saved. New documents for this type follow it.'); renderTypeChips(); editType(CUR); }
+  catch (e) { toast(e.message); }
+}
 
 // ----------------------------------------------------------- start
 refresh().then(() => { loadPostings(); const v = location.hash.slice(1); if (v && $('#v-' + v)) show(v); });

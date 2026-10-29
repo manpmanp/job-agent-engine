@@ -33,10 +33,16 @@ JD snapshot. Drafts only; nothing is ever sent.
 ## 1. Read how this posting's documents are written
 
 Run `./run.sh tailor conventions "<URL>||<Title>"`. It names the market
-(from the posting's country: a US resume differs from a Swedish CV),
-the sector (industry or academia) and the level (junior, mid, senior),
-and gives page size, length, personal details, tone, metrics, references,
-salutation and closing for that combination. Follow it. The posting wins
+(from the posting's country: a US resume differs from a Swedish CV) and
+the position type (PhD, postdoc, research assistant, assistant professor,
+professor, lecturer, internship, junior, mid-senior or senior; a postdoc
+CV in Lund differs from an ASIC engineer's CV in Lund). It gives page
+size, length, personal details, the country's tone, the type's confidence
+level and wording, what to emphasize, and the CV sections in order with
+their headings, length and focus. Follow it: use those headings in that
+order, leave out sections marked off, and keep each section to its length.
+The candidate may have tuned a type or chosen the type for this posting;
+the output already includes that. The posting wins
 where it asks for something specific, and `tailoring_rules.md` wins over
 both. Its "Never include" list is checked by `tailor check --posting`.
 When this procedure comes inside a prompt from the app, the same block is
@@ -115,9 +121,9 @@ Rules that follow from this:
   research contributions and teaching where the material supports them.
 - Mandatory entries named in `tailoring_rules.md` or
   `tailoring_checks.json` are always present.
-- Follow the conventions from step 1: section order (junior: education
-  near the top; academia: publications, teaching, referees), length per
-  level, how much to quantify, and what personal details to leave out.
+- Follow the conventions from step 1: the section order, headings and
+  lengths of the position type, how much to quantify, the confidence
+  level of the wording, and what personal details to leave out.
 - Keep sections from splitting awkwardly across pages; use
   `page_break_before` on a section only when the rendered PDF shows it is
   needed.

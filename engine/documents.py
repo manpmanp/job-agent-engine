@@ -110,11 +110,68 @@ def saved_description(home, url):
     return ""
 
 
+DEFAULT_SECTIONS = [
+    {"id": "profile", "heading": "Profile", "length": "normal"},
+    {"id": "experience", "heading": "Work Experience", "length": "normal"},
+    {"id": "skills", "heading": "Technical Skills", "length": "normal"},
+    {"id": "education", "heading": "Education", "length": "normal"},
+    {"id": "languages", "heading": "Languages", "length": "short"},
+    {"id": "references", "heading": "References", "length": "short"},
+]
+BULLETS = {"short": 2, "normal": 3, "detailed": 5, "full": 3}
+ENTRY_SECTIONS = {"experience", "positions", "projects", "key_projects", "leadership"}
+
+
+def _template_section(sec, ctx):
+    """One placeholder section, shaped by its id, heading, length and focus."""
+    sid, head, ln, focus = sec.get("id"), sec["heading"], sec.get("length", "normal"), sec.get("focus") or ""
+    profile, kws, title, employer, kw_text = ctx["profile"], ctx["kws"], ctx["title"], ctx["employer"], ctx["kw_text"]
+    n = BULLETS.get(ln, 3)
+    hint = f" Focus: {focus}." if focus else ""
+    if sid == "profile":
+        return {"heading": head, "paragraphs": [profile.get("summary") or
+            f"[{'One or two' if ln == 'short' else 'Two to four'} sentences: your professional identity and what best "
+            f"matches {title} at {employer}. The posting emphasizes: {kw_text}.{hint} Mention only what you have actually done.]"]}
+    if sid in ENTRY_SECTIONS:
+        what = {"experience": "role", "positions": "position", "projects": "project", "key_projects": "project",
+                "leadership": "group, centre or project you lead"}[sid]
+        first = [f"[What you did with {k}: the task, your own contribution, tools, result]" for k in kws[:n]] or \
+                [f"[A {what} detail that matches the posting: what, your own part, tools, result]"] * min(n, 2)
+        entries = [{"title": f"[Most recent {what}]", "dates": "[Start – End or Present]", "org": "[Organisation, city]",
+                    "bullets": first + ([f"[{focus}]"] if focus else [])}]
+        if ln != "short":
+            entries.append({"title": f"[Previous {what}]", "dates": "[Start – End]", "org": "[Organisation, city]",
+                            "bullets": [f"[Experience with {k}, if you have it: what, where, your own part]" for k in kws[n:n + 2]] or
+                                       [f"[A second relevant {what}, described the same way]"]})
+        return {"heading": head, "entries": entries}
+    if sid == "skills":
+        rows = [[k, "[Your level, and where you used it]"] for k in kws[:max(n * 2, 3)]]
+        return {"heading": head, "table": rows or [["[Skill area]", "[Tools, languages or methods, and where you used them]"]]}
+    if sid == "education":
+        edu = profile.get("education") or []
+        return {"heading": head, "entries": _entries_from_profile(edu, "education") if edu else
+                [{"title": "[Degree, subject]", "dates": "[Start – End]", "org": "[Institution, city]",
+                  "paragraphs": [f"[{focus or 'Thesis or specialization, if relevant to the posting'}]"]}]}
+    if sid == "languages":
+        langs = profile.get("languages") or []
+        return {"heading": head, "table": [[l.get("language", ""), l.get("level", "")] for l in langs] if langs else
+                [["[Language]", "[Level: native / fluent / professional / basic]"]]}
+    if sid == "references":
+        return {"heading": head, "paragraphs": [profile.get("references") or
+                (f"[{focus}]" if focus else "References available upon request.")]}
+    if sid == "publications" and ln == "full":
+        return {"heading": head, "paragraphs": [
+            "[Every publication exactly as published: authors (your name marked), title, venue, year. "
+            "Group journal and conference papers; take them from your authoritative list.]"]}
+    count = {"short": "one or two", "normal": "three or four", "detailed": "five or six"}.get(ln, "the")
+    return {"heading": head, "bullets": [f"[{head}: {count} items{': ' + focus if focus else ''}. Leave the section out if you have none.]"]}
+
+
 def template_specs(row, profile=None, style=None, description=None, vocabulary=None, conv=None):
     """CV and CL specs for a hypothetical candidate, built from the posting.
     Uses only profile fields that exist; everything else is a placeholder.
-    conv (engine/conventions.py) adapts sections, order, salutation, date
-    and references to the market, sector and level."""
+    With conv (engine/conventions.py) the sections, their order, headings and
+    length follow the position type, and the letter follows the market."""
     profile = profile or {}
     style = style or {}
     ident = profile.get("identity") or {}
@@ -126,38 +183,16 @@ def template_specs(row, profile=None, style=None, description=None, vocabulary=N
     banner = {"name": name, "title": title,
               "subtitle": ident.get("headline") or "[Your highest degree or main qualification]",
               "contact": _contact_line(ident)}
-
-    exp_bullets = [f"[What you did with {k}: the task, your own contribution, tools used, and the result]" for k in kws[:4]] or \
-                  ["[A responsibility from this role that matches a requirement in the posting: what you did, your own part, tools, result]"]
-    exp_bullets_2 = [f"[Experience with {k}, if you have it: what, where, your own part]" for k in kws[4:7]] or \
-                    ["[A second relevant responsibility or project, described the same way]"]
-
-    sections = [
-        {"heading": "Profile", "paragraphs": [profile.get("summary") or
-            f"[Two or three sentences: your professional identity and the experience that best matches {title} "
-            f"at {employer}. The posting emphasizes: {kw_text}. Mention only what you have actually done.]"]},
-        {"heading": "Work Experience", "entries": [
-            {"title": "[Most recent job title]", "dates": "[Start – End or Present]", "org": "[Employer, city]", "bullets": exp_bullets},
-            {"title": "[Previous job title]", "dates": "[Start – End]", "org": "[Employer, city]", "bullets": exp_bullets_2},
-        ]},
-        {"heading": "Technical Skills", "table": [[k, "[Your level, and where you used it]"] for k in kws] or
-            [["[Skill area]", "[Tools, languages or methods, and where you used them]"]]},
-    ]
-    edu = profile.get("education") or []
-    sections.append({"heading": "Education", "entries": _entries_from_profile(edu, "education") if edu else
-                     [{"title": "[Degree, subject]", "dates": "[Start – End]", "org": "[Institution, city]",
-                       "paragraphs": ["[Thesis or specialization, if relevant to the posting]"]}]})
-    langs = profile.get("languages") or []
-    sections.append({"heading": "Languages", "table": [[l.get("language", ""), l.get("level", "")] for l in langs] if langs else
-                     [["[Language]", "[Level: native / fluent / professional / basic]"]]})
-    sections.append({"heading": "References", "paragraphs": [profile.get("references") or "References available upon request."]})
-    note = TEMPLATE_NOTE
-    if conv:
-        sections = _apply_conventions(sections, conv, profile)
-        note += " Written for: " + _conv_line(conv) + "."
+    ctx = {"profile": profile, "kws": kws, "title": title, "employer": employer, "kw_text": kw_text}
+    plan = (conv or {}).get("sections") or DEFAULT_SECTIONS
+    if conv and str(conv.get("references") or "").lower().startswith("omit") and conv.get("group") != "academia":
+        plan = [s for s in plan if s.get("id") != "references"]
+    sections = [_template_section(s, ctx) for s in plan if s.get("length") != "off"]
+    note = TEMPLATE_NOTE + (" Written for: " + _conv_line(conv) + "." if conv else "")
     cv = {"type": "cv", "mode": "template", "template_note": note, "banner": banner, "sections": sections}
 
     top = ", ".join(kws[:3]) if kws else "[the two or three most important requirements]"
+    focus = ((conv or {}).get("letter") or {}).get("focus")
     cl = {"type": "cl", "mode": "template", "template_note": note,
           "banner": {"name": name, "title": title, "subtitle": "", "contact": banner["contact"]},
           "date": _letter_date(conv),
@@ -170,7 +205,8 @@ def template_specs(row, profile=None, style=None, description=None, vocabulary=N
               f"personally did, the context (scale, tools, constraints) and the outcome.]",
               "[How you work: one or two real situations that show your working style in a way that matters for this role. "
               "Describe the situation rather than listing adjectives.]",
-              f"[Motivation: why this specific role at {employer}, tied to the substance of the work described in the posting.]",
+              f"[Motivation: why this specific role at {employer}, tied to the substance of the work described in the posting."
+              + (f" For this kind of position: {focus}" if focus else "") + "]",
               "[Close: what you would contribute, in concrete terms, and that you would welcome a conversation.]",
           ],
           "closing": style.get("cl_closing") or "Kind regards,",
@@ -180,7 +216,7 @@ def template_specs(row, profile=None, style=None, description=None, vocabulary=N
 
 def _conv_line(conv):
     l = conv.get("labels") or {}
-    return f"{l.get('market', conv.get('market'))}, {conv.get('sector')}, {conv.get('level')} level (CV {conv.get('cv_pages') or '?'} page(s))"
+    return f"{l.get('market', conv.get('market'))}, {l.get('type', conv.get('type'))} (CV {conv.get('cv_pages') or '?'} page(s))"
 
 
 def _salutation(conv):
@@ -196,32 +232,6 @@ def _letter_date(conv, today=None):
     if market and market != "nordic":
         return f"{d.day} {d:%B} {d.year}"
     return d.isoformat()
-
-
-def _apply_conventions(sections, conv, profile):
-    by = {s["heading"]: s for s in sections}
-    if conv.get("sector") == "academia":
-        exp = by.get("Work Experience")
-        if exp:
-            exp["heading"] = "Research Experience"
-        i = sections.index(by["Education"]) + 1
-        if not profile.get("publications"):
-            sections.insert(i, {"heading": "Publications", "paragraphs": [
-                "[Every publication exactly as published: authors (your name marked), title, venue, year. "
-                "Group journal and conference papers; take them from your authoritative list.]"]})
-            i += 1
-        sections.insert(i, {"heading": "Teaching and Supervision", "paragraphs": [
-            "[Courses you taught or assisted, and students you supervised, with years. Leave out if none.]"]})
-        if not profile.get("references"):
-            by["References"]["paragraphs"] = ["[Two or three referees: name, title, affiliation, e-mail.]"]
-    elif str(conv.get("references") or "").lower().startswith("omit"):
-        sections = [s for s in sections if s["heading"] != "References"]
-    if conv.get("level") == "junior":
-        exp = next(s for s in sections if s["heading"] in ("Work Experience", "Research Experience"))
-        edu = by["Education"]
-        sections.remove(edu)
-        sections.insert(sections.index(exp), edu)
-    return sections
 
 
 # --------------------------------------------------------------------- checks
