@@ -50,8 +50,9 @@ fi
 # "release" (maintainers): publishes the version in engine/__init__.py.
 # Brings this folder up to date with GitHub, then tags that version on the
 # newest commit and pushes the tag; GitHub then builds the three packages
-# and attaches them to the release. If the tag already exists on an older
-# commit (tagged before pulling), it asks before moving it.
+# and attaches them to the release. If that version is already released,
+# it offers the next patch version (0.4.4 -> 0.4.5) instead, so one version
+# number always means one build.
 if [ "${1:-}" = "release" ]; then
   cd "$ENGINE_DIR"
   BRANCH="$(git rev-parse --abbrev-ref HEAD)"
@@ -66,15 +67,24 @@ if [ "${1:-}" = "release" ]; then
     echo "$TAG is already released from the newest commit ($(git log -1 --format='%h %s' | cut -c1-70))"; exit 0
   fi
   if [ -n "$REMOTE_SHA" ]; then
-    echo "$TAG exists on an older commit: $(git log -1 --format='%h %s' "$REMOTE_SHA" 2>/dev/null | cut -c1-70)"
-    echo "newest commit:                 $(git log -1 --format='%h %s' | cut -c1-70)"
-    read -r -p "Move $TAG to the newest commit and rebuild its packages? [y/N] " OK
+    # A published version is never rebuilt under the same number: the next
+    # patch version is set in the three places that carry it, committed and tagged.
+    NEXT="$(echo "$VERSION" | awk -F. '{printf "%d.%d.%d", $1, $2, $3 + 1}')"
+    echo "$TAG is already released (from $(git log -1 --format='%h' "$REMOTE_SHA" 2>/dev/null || echo 'an older commit'))."
+    echo "newest commit: $(git log -1 --format='%h %s' | cut -c1-70)"
+    read -r -p "Release it as v$NEXT? [y/N] " OK
     [ "$OK" = "y" ] || [ "$OK" = "Y" ] || { echo "nothing changed"; exit 0; }
-    git tag -f "$TAG" >/dev/null && git push --quiet --force origin "refs/tags/$TAG"
-  else
-    git tag -d "$TAG" >/dev/null 2>&1 || true
-    git tag "$TAG" && git push --quiet origin "refs/tags/$TAG"
+    sed -i.bak "s/^__version__ = \"$VERSION\"/__version__ = \"$NEXT\"/" engine/__init__.py
+    sed -i.bak "s/\"CFBundleShortVersionString\": \"$VERSION\"/\"CFBundleShortVersionString\": \"$NEXT\"/" launchers/job_agent.spec
+    sed -i.bak "s/#define AppVersion \"$VERSION\"/#define AppVersion \"$NEXT\"/" launchers/windows/package/jobagent.iss
+    rm -f engine/__init__.py.bak launchers/job_agent.spec.bak launchers/windows/package/jobagent.iss.bak
+    git add engine/__init__.py launchers/job_agent.spec launchers/windows/package/jobagent.iss
+    git commit --quiet -m "Version $NEXT"
+    git push --quiet origin main || { echo "could not push the version commit" >&2; exit 1; }
+    VERSION="$NEXT"; TAG="v$NEXT"
   fi
+  git tag -d "$TAG" >/dev/null 2>&1 || true
+  git tag "$TAG" && git push --quiet origin "refs/tags/$TAG"
   URL="$(git remote get-url origin | sed -e 's#^git@github.com:#https://github.com/#' -e 's#\.git$##')"
   echo "$TAG pushed. The packages are built in a few minutes: $URL/actions"
   echo "then download them from $URL/releases/tag/$TAG"
