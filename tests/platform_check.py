@@ -92,7 +92,10 @@ def main():
     cmd = json.loads(a.cmd)
 
     home = os.path.join(tempfile.mkdtemp(prefix="jae-platform-"), "home")
-    shutil.copytree(os.path.join(ROOT, "docs", "demo", "home"), home)
+    demo = os.path.join(ROOT, "docs", "demo", "home")
+    if not os.path.isdir(demo):                # the fictional demo folder is built, not stored
+        subprocess.run([sys.executable, "-m", "engine.cli", "demo"], cwd=ROOT, check=True, capture_output=True)
+    shutil.copytree(demo, home)
     log = open(os.path.join(os.path.dirname(home), "app.log"), "w")
     port = free_port()
     proc = subprocess.Popen(cmd + ["--home", home, "--cli", "app", "--no-browser", "--port", str(port)],

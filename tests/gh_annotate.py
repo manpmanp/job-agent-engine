@@ -13,6 +13,9 @@ try:
         text = f.read()
 except OSError as e:
     text = f"(no log: {e})"
-text = text[-limit:]
+i = text.find("\n======")                     # unittest: keep the failures, not the run's chatter
+if i >= 0:
+    text = text[i:]
+text = text[:limit] if i >= 0 else text[-limit:]
 esc = text.replace("%", "%25").replace("\r", "").replace("\n", "%0A")
 print(f"::{level} title={title}::{esc}")

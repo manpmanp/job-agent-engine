@@ -41,9 +41,10 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with: { python-version: "3.12" }
+      - run: pip install -r requirements.txt      # for building the demo folder the check uses
       - name: Build the packaged app
         if: matrix.mode == 'app'
-        run: pip install pyinstaller -r requirements.txt && pyinstaller --noconfirm launchers/job_agent.spec
+        run: pip install pyinstaller && pyinstaller --noconfirm launchers/job_agent.spec
       - name: Run it through the app's API
         run: |
           case "${{ matrix.mode }}-${{ runner.os }}" in
