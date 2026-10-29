@@ -184,6 +184,25 @@ details.more > summary { cursor:pointer; }
   .acts .lbl { display:none; }
   .hero { padding:20px 18px; } .hero h1 { font-size:20px; }
 }
+
+/* ---------- the Jobs screen: search bar, list head, trust strip ---------- */
+.searchbar { padding:14px; border-radius:14px; background:linear-gradient(135deg, #1B3A5C 0%, #2E74B5 100%); border:0; color:#fff;
+             box-shadow:0 10px 30px rgba(27,58,92,.18); }
+.sb { display:grid; grid-template-columns:1fr 1fr auto; gap:10px; align-items:end; }
+.sbf { display:flex; flex-direction:column; gap:4px; font-size:12px; font-weight:bold; letter-spacing:.03em; color:rgba(255,255,255,.85); }
+.sbf input { background:#fff; color:#1c232b; border:0; padding:11px 12px; font-size:15px; border-radius:9px; }
+.searchbar .b.primary { background:#fff; color:#1B3A5C; border-color:#fff; padding:11px 20px; font-size:15px; }
+.sb-meta { display:flex; gap:14px; flex-wrap:wrap; align-items:center; margin-top:10px; color:rgba(255,255,255,.85); }
+.sb-meta a { color:#fff; }
+.sb-meta .mini { display:inline-flex; align-items:center; gap:5px; cursor:pointer; }
+.sb-meta .mini input { width:15px; height:15px; margin:0; }
+.listhead { display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin:16px 0 10px; }
+.chip b { font-weight:normal; opacity:.85; }
+.welcome { border-left:4px solid var(--accent-2); }
+.trust { display:flex; gap:16px; flex-wrap:wrap; align-items:center; margin:18px 0 8px; padding:10px 14px; border-radius:10px;
+         background:var(--soft); font-size:12px; color:var(--muted); }
+.trust > span { display:inline-flex; align-items:center; gap:6px; } .trust .ic { width:15px; height:15px; color:var(--accent-2); }
+@media (max-width:760px) { .sb { grid-template-columns:1fr; } .searchbar .b.primary { justify-content:center; } }
 </style>
 </head>
 <body>
@@ -213,10 +232,8 @@ details.more > summary { cursor:pointer; }
 <header class="top"><div class="bar">
   <span class="brand"><svg class="ic logo"><use href="#i-logo"/></svg>Job Agent</span>
   <nav id="nav">
-    <button data-v="home" class="on"><svg class="ic"><use href="#i-home"/></svg><span>Home</span></button>
-    <button data-v="postings"><svg class="ic"><use href="#i-jobs"/></svg><span>Jobs</span><span class="count" id="c-undecided" hidden></span></button>
-    <button data-v="docs"><svg class="ic"><use href="#i-doc"/></svg><span>Documents</span><span class="count" id="c-docs" hidden></span></button>
-    <button data-v="setup"><svg class="ic"><use href="#i-setup"/></svg><span>Setup</span></button>
+    <button data-v="postings" class="on"><svg class="ic"><use href="#i-jobs"/></svg><span>Jobs</span><span class="count" id="c-undecided" hidden></span></button>
+    <button data-v="setup"><svg class="ic"><use href="#i-doc"/></svg><span>My CV and profile</span></button>
     <button data-v="settings"><svg class="ic"><use href="#i-gear"/></svg><span>Settings</span></button>
   </nav>
   <span class="spacer"></span>
@@ -229,24 +246,58 @@ details.more > summary { cursor:pointer; }
 <div class="toast" id="toast"></div>
 
 <main>
-<!-- HOME -->
-<section class="view on" id="v-home">
-  <div class="hero">
-    <div>
-      <h1>Your job search, on your own computer</h1>
-      <p>Job Agent finds postings that fit you. You decide on each one, it drafts the documents, and you apply yourself.</p>
-      <div class="row">
-        <button class="b primary big" id="btn-search"><svg class="ic"><use href="#i-search"/></svg>Search now</button>
-        <button class="b big ghost" id="btn-verify" title="Check that tracked postings are still open">Check postings</button>
-      </div>
-      <div class="small hero-note" id="search-desc"></div>
+<!-- JOBS: the one screen for everyday use -->
+<section class="view on" id="v-postings">
+  <div class="searchbar card">
+    <div class="sb">
+      <label class="sbf"><span>What</span><input type="text" id="sb-what" placeholder="job titles or skills, separated by commas" autocomplete="off"></label>
+      <label class="sbf"><span>Where</span><input type="text" id="sb-where" placeholder="towns, regions or countries, separated by commas" autocomplete="off"></label>
+      <button class="b primary big" id="btn-search"><svg class="ic"><use href="#i-search"/></svg>Search</button>
+    </div>
+    <div class="sb-meta small">
+      <span id="search-desc"></span>
+      <label class="mini local-only"><input type="checkbox" id="sch2"> every morning by itself</label>
+      <a href="#" onclick="show('settings','sites');return false">job sites</a>
+      <a href="#" id="btn-verify" title="Check that the jobs in your list are still open">check that jobs are still open</a>
     </div>
   </div>
   <div id="home-setup"></div>
-  <div class="grid stats" id="stats"></div>
   <div id="attention"></div>
 
-  <h2>How it works</h2>
+  <div class="listhead">
+    <div class="chips" id="filters" style="margin:0">
+      <span class="chip on" data-f="undecided">To decide <b id="n-undecided"></b></span>
+      <span class="chip" data-f="accepted">Accepted and documents <b id="n-accepted"></b></span>
+      <span class="chip" data-f="rejected">Rejected</span>
+      <span class="chip local-only" data-f="unmatched" title="Every other job the last search saw on each site">Not matched <b id="c-unmatched" hidden></b></span>
+      <span class="chip" data-f="expired">Expired</span>
+      <span class="chip" data-f="all">All</span>
+    </div>
+    <span class="spacer"></span>
+    <input type="search" id="q" placeholder="Filter the list..." style="max-width:220px">
+    <button class="b sm" id="add-toggle"><svg class="ic"><use href="#i-plus"/></svg>Add a job link</button>
+  </div>
+  <div class="card" id="v-add" hidden>
+    <p class="muted" style="margin-top:0">Paste the link of a job posting you found anywhere. The app reads the page, keeps the full text for your documents, and adds it to your jobs.</p>
+    <label class="f" for="add-url">Link to the posting</label>
+    <input type="url" id="add-url" placeholder="https://...">
+    <div class="grid" style="margin-top:4px">
+      <div><label class="f" for="add-emp">Employer <span class="muted small">(if the page does not say)</span></label><input type="text" id="add-emp"></div>
+      <div><label class="f" for="add-title">Job title <span class="muted small">(if the page does not say)</span></label><input type="text" id="add-title"></div>
+    </div>
+    <div class="row" style="margin-top:12px"><button class="b primary" id="btn-add">Read and add</button></div>
+  </div>
+  <div id="plist"></div>
+
+  <div class="trust">
+    <span><svg class="ic"><use href="#i-shield"/></svg>Nothing is sent without you</span>
+    <span><svg class="ic"><use href="#i-lock"/></svg><span class="local-only">Your data stays on this computer</span><span class="cloud-only">CVs and documents stay on your computer</span></span>
+    <span class="local-only"><svg class="ic"><use href="#i-globe"/></svg><a href="#" onclick="show('settings','network');return false">See what goes over the internet</a></span>
+    <span><svg class="ic"><use href="#i-clock"/></svg><span id="bg-short"></span></span>
+    <span class="spacer"></span>
+    <a href="#" id="info-toggle">How it works and your privacy</a>
+  </div>
+  <div id="info" hidden>
   <div class="card flow-card">
     <ol class="flow">
       <li class="step" onclick="show('setup','sites')"><span class="bub"><svg class="ic"><use href="#i-globe"/></svg></span><b>Job sites</b><span>the countries, sites and employers you chose</span></li>
@@ -262,7 +313,7 @@ details.more > summary { cursor:pointer; }
     </div>
   </div>
 
-  <h2>Safe by design</h2>
+    <div style="height:12px"></div>
   <div class="grid promises">
     <div class="card promise"><span class="bub"><svg class="ic"><use href="#i-shield"/></svg></span>
       <b>Nothing is sent without you</b>
@@ -280,95 +331,17 @@ details.more > summary { cursor:pointer; }
       <p id="pr-bg">Only what you switched on.</p></div>
   </div>
 
-  <h2>Recent activity</h2>
-  <div class="card"><div id="recent" class="small muted">Nothing yet.</div></div>
-</section>
-
-<!-- JOBS -->
-<section class="view" id="v-postings">
-  <div class="head"><h1>Jobs</h1>
-    <button class="b sm" id="add-toggle"><svg class="ic"><use href="#i-plus"/></svg>Add a job you found</button></div>
-  <div class="card" id="v-add" hidden>
-    <p class="muted" style="margin-top:0">Paste the link of a job posting you found anywhere. The app reads the page, keeps the full text for your documents, and adds it to your jobs.</p>
-    <label class="f" for="add-url">Link to the posting</label>
-    <input type="url" id="add-url" placeholder="https://...">
-    <div class="grid" style="margin-top:4px">
-      <div><label class="f" for="add-emp">Employer <span class="muted small">(if the page does not say)</span></label><input type="text" id="add-emp"></div>
-      <div><label class="f" for="add-title">Job title <span class="muted small">(if the page does not say)</span></label><input type="text" id="add-title"></div>
-    </div>
-    <div class="row" style="margin-top:12px"><button class="b primary" id="btn-add">Read and add</button></div>
+    <h2>Recent activity</h2>
+    <div class="card"><div id="recent" class="small muted">Nothing yet.</div></div>
   </div>
-  <div class="row" style="margin-bottom:10px">
-    <div class="chips" id="filters" style="margin:0">
-      <span class="chip on" data-f="undecided">To decide</span>
-      <span class="chip" data-f="accepted">Accepted</span>
-      <span class="chip" data-f="rejected">Rejected</span>
-      <span class="chip" data-f="expired">Expired</span>
-      <span class="chip" data-f="all">All</span>
-      <span class="chip local-only" data-f="unmatched" title="Every other job the last search saw on each site">Not matched <span id="c-unmatched" hidden></span></span>
-    </div>
-    <span class="spacer"></span>
-    <input type="search" id="q" placeholder="Filter by title, employer, place..." style="max-width:280px">
-  </div>
-  <div id="plist"></div>
 </section>
 
-<!-- DOCUMENTS -->
-<section class="view" id="v-docs">
-  <div class="head"><h1>Documents</h1>
-    <button class="b sm local-only" id="btn-open-out"><svg class="ic"><use href="#i-folder"/></svg>Open the documents folder</button></div>
-  <p class="muted lead">CVs and cover letters for the jobs you accepted. They are drafts on your computer; nothing is ever sent. How they are written is in Settings &gt; Writing style.</p>
-  <div class="card cloud-only"><b>Documents are made on your computer.</b>
-    <div class="muted small">Your CV never comes online. Open the Job Agent app on your computer and connect it to this page (Settings &gt; Online search); your accepted jobs appear there under Documents.</div></div>
-  <div id="dlist"></div>
-</section>
-
-<!-- SETUP -->
+<!-- MY CV AND PROFILE -->
 <section class="view" id="v-setup">
-  <h1>Setup</h1>
-  <p class="muted lead">What you are looking for. The first two are all a search needs; the rest is optional.</p>
-  <div class="subnav" data-tab="setup">
-    <button data-s="search"><b>1</b> What to search</button>
-    <button data-s="sites"><b>2</b> Countries and job sites</button>
-    <button data-s="employers">Employers to watch <i>optional</i></button>
-    <button data-s="cv" class="local-only">Your CV <i>optional</i></button>
-  </div>
-
-  <div class="sub" id="s-setup-search">
-    <p class="muted small"><span class="local-only">Your search words, places and profile.</span><span class="cloud-only">Your search words and places.</span> Save at the bottom of the form.</p>
-    <iframe class="form" id="form" title="Search setup and profile"></iframe>
-  </div>
-
-  <div class="sub" id="s-setup-sites">
-    <p class="muted small" style="margin-top:0">Choose the countries you look for work in. Each country shows its credible job sites: the public employment service and the main private boards, checked against official sources.</p>
-    <h2 style="margin-top:4px">Countries</h2>
-    <div class="card"><div id="countries" class="muted small">Loading...</div></div>
-    <h2>Sites to check</h2>
-    <p class="muted small" style="margin-top:-4px">Untick a site you do not want to use. Sites marked "open yourself" have no automatic search: open them from here, or let your agent read them (read only, nothing is ever applied for or sent).</p>
-    <div id="site-list"></div>
-    <details class="card more">
-      <summary><b>More</b>: sources searched automatically, and your own sites</summary>
-      <div style="margin-top:10px"><b>Searched automatically</b>
-        <div class="muted small">These run on every search. Services that need a key get it in Settings &gt; AI and services.</div>
-        <div id="src"></div>
-        <div class="row" style="margin-top:8px"><button class="b primary" id="btn-save-src">Save</button><span id="src-r" class="small muted"></span></div></div>
-      <div style="margin-top:16px"><b>Other sites</b>
-        <div class="muted small">One per line: a name, a vertical bar, and the address.</div>
-        <textarea id="custom-sites" placeholder="Example board | https://jobs.example.com" style="min-height:80px;margin-top:8px"></textarea></div>
-    </details>
-    <div class="row"><button class="b primary" id="btn-save-sites">Save job sites</button><span id="sites-r" class="small muted"></span></div>
-    <p class="small muted" id="sites-checked"></p>
-  </div>
-
-  <div class="sub" id="s-setup-employers">
-    <div class="card">
-      <p class="muted small" style="margin-top:0">Companies whose careers pages are checked on every search. One per line: the employer's name, a vertical bar, and its careers page. Pages on Greenhouse, Lever, Ashby, Workday or SmartRecruiters are read through their job boards; other pages for job links.</p>
-      <textarea id="emps" placeholder="Example AB | https://example.com/careers" style="min-height:140px"></textarea>
-      <div class="row" style="margin-top:8px"><button class="b primary" id="btn-emps">Save employers</button><span id="emps-r" class="small muted"></span></div>
-    </div>
-  </div>
-
-  <div class="sub local-only" id="s-setup-cv">
+  <h1>My CV and profile</h1>
+  <p class="muted lead">Optional. With your CV the documents use your own wording; without it they are templates with placeholders.</p>
+  <div id="profile-attn"></div>
+  <div class="local-only">
     <div class="card">
       <div class="drop" id="drop">Drop a CV or cover letter here (PDF, Word, text), or click to choose a file.
         <div class="small" style="margin-top:6px">It stays on your computer. With it, documents use your own wording instead of placeholders.</div></div>
@@ -380,25 +353,59 @@ details.more > summary { cursor:pointer; }
       <div id="up-result" class="small" style="margin-top:8px"></div>
     </div>
   </div>
+  <h2>Search details and profile</h2>
+  <p class="muted small" style="margin-top:-4px">The words and places from the Jobs screen, plus everything you may want to refine (commute, seniority, categories, your profile). Save at the bottom of the form.</p>
+  <iframe class="form" id="form" title="Search details and profile"></iframe>
 </section>
 
 <!-- SETTINGS -->
 <section class="view" id="v-settings">
   <h1>Settings</h1>
+  <p class="muted lead">Everything here is optional. The app works with the defaults.</p>
   <div class="settings-wrap">
     <div class="subnav side" data-tab="settings">
-      <span class="grp">Basics</span>
+      <span class="grp">Search</span>
       <button data-s="daily">Daily search</button>
-      <span class="grp">Fine-tuning</span>
+      <button data-s="sites">Countries and job sites</button>
+      <button data-s="employers">Employers to watch</button>
+      <span class="grp">Documents</span>
       <button data-s="style" class="local-only">Writing style</button>
       <button data-s="ai">AI and services</button>
+      <span class="grp local-only">Connections and privacy</span>
       <button data-s="online" class="local-only">Online search</button>
-      <span class="grp local-only">Privacy</span>
       <button data-s="network" class="local-only">Network activity</button>
       <span class="grp">Maintenance</span>
       <button data-s="maint">Update and uninstall</button>
     </div>
     <div class="settings-body">
+  <div class="sub" id="s-settings-sites">
+    <p class="muted small" style="margin-top:0">Choose the countries you look for work in. Each country shows its credible job sites: the public employment service and the main private boards, checked against official sources.</p>
+    <h2 style="margin-top:4px">Countries</h2>
+    <div class="card"><div id="countries" class="muted small">Loading...</div></div>
+    <h2>Sites to check</h2>
+    <p class="muted small" style="margin-top:-4px">Untick a site you do not want to use. Sites marked "open yourself" have no automatic search: open them from here, or let your agent read them (read only, nothing is ever applied for or sent).</p>
+    <div id="site-list"></div>
+    <details class="card more">
+      <summary><b>More</b>: sources searched automatically, and your own sites</summary>
+      <div style="margin-top:10px"><b>Searched automatically</b>
+        <div class="muted small">These run on every search. Services that need a key get it in AI and services (left).</div>
+        <div id="src"></div>
+        <div class="row" style="margin-top:8px"><button class="b primary" id="btn-save-src">Save</button><span id="src-r" class="small muted"></span></div></div>
+      <div style="margin-top:16px"><b>Other sites</b>
+        <div class="muted small">One per line: a name, a vertical bar, and the address.</div>
+        <textarea id="custom-sites" placeholder="Example board | https://jobs.example.com" style="min-height:80px;margin-top:8px"></textarea></div>
+    </details>
+    <div class="row"><button class="b primary" id="btn-save-sites">Save job sites</button><span id="sites-r" class="small muted"></span></div>
+    <p class="small muted" id="sites-checked"></p>
+  </div>
+
+  <div class="sub" id="s-settings-employers">
+    <div class="card">
+      <p class="muted small" style="margin-top:0">Companies whose careers pages are checked on every search. One per line: the employer's name, a vertical bar, and its careers page. Pages on Greenhouse, Lever, Ashby, Workday or SmartRecruiters are read through their job boards; other pages for job links.</p>
+      <textarea id="emps" placeholder="Example AB | https://example.com/careers" style="min-height:140px"></textarea>
+      <div class="row" style="margin-top:8px"><button class="b primary" id="btn-emps">Save employers</button><span id="emps-r" class="small muted"></span></div>
+    </div>
+  </div>
 
   <div class="sub" id="s-settings-daily">
     <div class="card cloud-only">
@@ -422,7 +429,7 @@ details.more > summary { cursor:pointer; }
   </div>
 
   <div class="sub local-only" id="s-settings-style">
-    <p class="muted small" style="margin-top:0">Every job gets a suggested position type and country automatically; the Documents tab shows it and lets you change it for one job. Here you tune how each type is written. Country rules (page size, personal details, salutation, closing) are added per job on top.</p>
+    <p class="muted small" style="margin-top:0">Every job gets a suggested position type and country automatically; the Accepted and documents list on the Jobs screen shows it and lets you change it for one job. Here you tune how each type is written. Country rules (page size, personal details, salutation, closing) are added per job on top.</p>
     <div class="card"><div id="ty-chips" class="muted small">Loading...</div></div>
     <div id="ty-edit"></div>
   </div>
@@ -535,21 +542,26 @@ function toast(msg) { const t = $('#toast'); t.textContent = msg; t.classList.ad
 function fileUrl(rel) { return '/file?p=' + encodeURIComponent(rel) + '&t=' + encodeURIComponent(API.token); }
 
 // ----------------------------------------------------------- navigation
-// Five tabs. Setup and Settings have sections (sub-navigation); older links
-// (#sites, #style, #add, #jobs) still lead to the same place.
-const ALIAS = { sites: ['setup', 'sites'], style: ['settings', 'style'], add: ['postings', null], jobs: ['postings', null] };
-const FIRST = { setup: 'search', settings: 'daily' };
+// Three tabs: Jobs (everyday work), My CV and profile, Settings (sections).
+// Older links (#home, #docs, #sites, #style, #add, #setup/sites, ...) still
+// lead to the same place.
+const ALIAS = { home: ['postings'], jobs: ['postings'], add: ['postings'], docs: ['postings'],
+                sites: ['settings', 'sites'], style: ['settings', 'style'], employers: ['settings', 'employers'] };
+const FIRST = { settings: 'daily' };
 const LAST_SUB = {};
 function show(v, sub) {
   if (v === 'add') $('#v-add').hidden = false;
+  if (v === 'docs') filter = 'accepted';
+  if (v === 'setup' && (sub === 'sites' || sub === 'employers')) { v = 'settings'; }
   if (ALIAS[v]) { sub = sub || ALIAS[v][1]; v = ALIAS[v][0]; }
-  if (!$('#v-' + v)) v = 'home';
+  if (!$('#v-' + v) || !$('#v-' + v).matches('section')) v = 'postings';
   $$('#nav button').forEach(b => b.classList.toggle('on', b.dataset.v === v));
   $$('section.view').forEach(s => s.classList.toggle('on', s.id === 'v-' + v));
   if (v === 'settings') loadSettings();
-  if (v === 'postings' || v === 'docs') loadPostings();
+  if (v === 'postings') loadPostings();
+  if (v === 'setup' && !$('#form').src) $('#form').src = '/form';
   if (FIRST[v]) showSub(v, sub || LAST_SUB[v] || FIRST[v]);
-  else history.replaceState(null, '', '#' + v);
+  else history.replaceState(null, '', '#' + (v === 'postings' ? 'jobs' : v));
   window.scrollTo(0, 0);
 }
 function showSub(tab, s) {
@@ -559,16 +571,20 @@ function showSub(tab, s) {
   $$(`#v-${tab} .sub`).forEach(x => x.classList.toggle('on', x.id === `s-${tab}-${s}`));
   LAST_SUB[tab] = s;
   history.replaceState(null, '', `#${tab}/${s}`);
-  if (tab === 'setup' && s === 'search' && !$('#form').src) $('#form').src = '/form';
-  if (tab === 'setup' && s === 'sites') loadSites();
-  if (tab === 'setup' && s === 'employers') loadEmployers();
-  if (tab === 'settings' && s === 'style') loadStyle();
-  if (tab === 'settings' && s === 'network') loadNet();
+  if (s === 'sites') loadSites();
+  if (s === 'employers') loadEmployers();
+  if (s === 'style') loadStyle();
+  if (s === 'network') loadNet();
 }
 $$('#nav button').forEach(b => b.onclick = () => show(b.dataset.v));
 $$('.subnav button').forEach(b => b.onclick = () => showSub(b.closest('.subnav').dataset.tab, b.dataset.s));
 $('#add-toggle').onclick = () => { const a = $('#v-add'); a.hidden = !a.hidden; if (!a.hidden) $('#add-url').focus(); };
-function runSearchFromFlow() { capOn('search') ? runJob('/api/run', { mode: 'weekly' }) : show('setup', 'search'); }
+function infoOpen(open) {
+  $('#info').hidden = !open; $('#info-toggle').textContent = open ? 'Hide how it works' : 'How it works and your privacy';
+  try { localStorage.setItem('ja-info', open ? '1' : '0'); } catch (e) { }
+}
+$('#info-toggle').onclick = e => { e.preventDefault(); infoOpen($('#info').hidden); };
+function runSearchFromFlow() { capOn('search') ? runJob('/api/run', { mode: 'weekly' }) : $('#sb-what').focus(); }
 
 // ----------------------------------------------------------- jobs
 function startJob(j) { if (!j) return; lastJob = j.id; renderJob(j); clearInterval(jobTimer); jobTimer = setInterval(pollJob, 900); }
@@ -599,19 +615,13 @@ async function refresh() {
   try { S = await api('/api/status'); } catch (e) { toast('The app lost contact with the engine. Start it again.'); return; }
   const c = S.counts;
   const cu = $('#c-undecided'); cu.hidden = !c.undecided; cu.textContent = c.undecided;
-  const cd = $('#c-docs'); cd.hidden = !c.accepted_waiting; cd.textContent = c.accepted_waiting;
   $('#search-desc').textContent = capOn('search')
     ? `${S.capabilities.search.why}. Full search on ${S.search_day}s${S.schedule.on ? ', automatically every morning' : ''}.`
     : 'Not set up yet.';
-  $('#btn-search').disabled = !capOn('search');
   $('#home-setup').innerHTML = capOn('search') ? '' :
-    `<div class="card attn"><b>Start here:</b> tell the agent what to search for.
-     <div class="row" style="margin-top:10px"><button class="b primary" onclick="show('setup','search')">Set up my search</button></div></div>`;
-  $('#stats').innerHTML = [
-    ['undecided', 'jobs to decide on', 'postings', 'i-filter'], ['accepted_waiting', 'accepted, waiting for documents', 'docs', 'i-doc'],
-    ['active', 'open jobs tracked', 'postings', 'i-jobs'], ['rejected', 'rejected', 'postings', 'i-check'],
-  ].map(([k, l, v, ic]) => `<div class="card stat" onclick="${k==='rejected' ? "filter='rejected';" : ''}show('${v}')">
-      <span class="si"><svg class="ic"><use href="#${ic}"/></svg></span><div><div class="n">${c[k]}</div><div class="l">${l}</div></div></div>`).join('');
+    `<div class="card welcome"><b>Welcome.</b> Type the jobs you look for and where, then press <b>Search</b>.
+       Nothing is ever sent or applied for without you; read how below.</div>`;
+  if (!capOn('search')) infoOpen(true);
   $('#fl-new').textContent = c.undecided;
   $('#fl-search').textContent = S.schedule.on ? 'every morning by itself, or now' : 'when you press Search now';
   if (!CLOUD) $('#pr-where').textContent = ` (${S.home})`;
@@ -621,9 +631,11 @@ async function refresh() {
         ? S.schedule.text.replace(/^runs /, '') + ', even when the app is closed' : 'off (Settings > Daily search)'}.`
       + (S.cloud && S.cloud.connected ? ' Your online Job Agent searches on Cloudflare; this app fetches from it while it is open.' : '')
       + ' Nothing else.';
-  const att = [];
+  $('#bg-short').textContent = CLOUD ? 'Searches on your Cloudflare account' : (S.schedule.on ? 'Runs only while open, plus a daily search' : 'Runs only while this tab is open');
+  if (!CLOUD) $('#sch2').checked = !!S.schedule.on;
+  const att = [], prof = [];
   if (S.awaiting_extraction.length) {
-    att.push(`<div class="card attn"><b>Your uploaded documents are not in your profile yet.</b>
+    prof.push(`<div class="card attn"><b>Your uploaded documents are not in your profile yet.</b>
       <div class="muted small">They are used as they are; reading them into your profile lets the app fill templates and score postings.</div>
       ${S.awaiting_extraction.map(e => `<div class="row" style="margin-top:8px"><span>${esc(e.file)}</span><span class="spacer"></span>
         ${S.api_key ? `<button class="b" data-job onclick="runJob('/api/profile/ai',{id:'${esc(e.id)}'})">Read with AI</button>` : ''}
@@ -632,7 +644,7 @@ async function refresh() {
       <div id="pp-box"></div></div>`);
   }
   if (S.open_conflicts.length) {
-    att.push(`<div class="card attn"><b>Your profile has values that differ between sources.</b> Pick which to keep.
+    prof.push(`<div class="card attn"><b>Your profile has values that differ between sources.</b> Pick which to keep.
       ${S.open_conflicts.map(cf => `<div style="margin-top:10px"><div class="small"><b>${esc(cf.field)}</b></div>
         <div class="row small"><span class="muted">earlier:</span> ${esc(short(cf.previous.value))}
           <span class="spacer"></span><button class="b" onclick="resolve(${cf.n},'keep-previous')">Keep this</button></div>
@@ -642,12 +654,13 @@ async function refresh() {
   if (!CLOUD && S.cloud && S.cloud.connected && S.cloud.error) {
     att.push(`<div class="card attn"><b>Could not fetch from your online Job Agent.</b><div class="muted small">${esc(S.cloud.error)}</div></div>`);
   }
-  if (capOn('search') && !S.schedule.on) {
-    att.push(`<div class="card"><div class="row"><div><b>Search automatically every morning?</b>
-      <div class="muted small">So new postings are waiting for you without opening the app.</div></div><span class="spacer"></span>
-      <button class="b" onclick="setSchedule(true)">Turn on</button></div></div>`);
+  if (prof.length) {     // profile questions live on the profile tab; here only a short pointer
+    att.push(`<div class="card attn row"><span><b>Your profile has ${prof.length === 2 ? 'two things' : 'one thing'} to look at.</b>
+      <span class="muted small">It only affects the documents.</span></span><span class="spacer"></span>
+      <button class="b sm" onclick="show('setup')">Open My CV and profile</button></div>`);
   }
   $('#attention').innerHTML = att.join('');
+  $('#profile-attn').innerHTML = prof.join('');
   $('#recent').innerHTML = S.recent.length ? S.recent.map(l => /^=== /.test(l) ? '<b>' + esc(l.replace(/=/g, '').trim()) + '</b>' : esc(l)).join('<br>') : 'Nothing yet. Your searches and syncs will be listed here.';
   $$('.ver').forEach(e => e.textContent = S.version);
   $('#about').innerHTML = CLOUD ? `Version ${esc(S.version)}, online at ${esc(S.home)}` : `Version ${esc(S.version)}<br>Your agent folder: ${esc(S.home)}`;
@@ -656,8 +669,30 @@ async function refresh() {
 }
 function short(v) { const s = typeof v === 'string' ? v : JSON.stringify(v); return s.length > 140 ? s.slice(0, 140) + '...' : s; }
 async function resolve(n, choice) { try { await api('/api/conflicts/resolve', { n, choice }); refresh(); } catch (e) { toast(e.message); } }
-$('#btn-search').onclick = () => runJob('/api/run', { mode: 'weekly' });
-$('#btn-verify').onclick = () => runJob('/api/verify');
+// The search bar: the words and places are saved when they changed, then the search runs.
+let SB = { what: '', where: '', cfg: null };
+async function loadSearchBar() {
+  try { const cfg = await api('/api/search_config'); SB.cfg = cfg;
+    SB.what = (cfg.keywords || []).join(', ');
+    SB.where = (cfg.locations || []).map(l => typeof l === 'string' ? l : l.name).filter(Boolean).join(', ');
+    if (document.activeElement !== $('#sb-what')) $('#sb-what').value = SB.what;
+    if (document.activeElement !== $('#sb-where')) $('#sb-where').value = SB.where;
+  } catch (e) { }
+}
+const splitList = s => s.split(/[,;\n]/).map(x => x.trim()).filter(Boolean);
+$('#btn-search').onclick = async () => {
+  const what = splitList($('#sb-what').value), where = splitList($('#sb-where').value);
+  if (!what.length || !where.length) { toast('Type at least one job and one place'); (what.length ? $('#sb-where') : $('#sb-what')).focus(); return; }
+  if (what.join(', ') !== SB.what || where.join(', ') !== SB.where) {
+    const old = {}; ((SB.cfg && SB.cfg.locations) || []).forEach(l => { if (l && typeof l === 'object') old[String(l.name).toLowerCase()] = l; });
+    const locations = where.map((n, i) => Object.assign({}, old[n.toLowerCase()] || {}, { name: n, priority: i + 1 }));
+    try { await api('/api/search_config', { keywords: what, locations }); await loadSearchBar(); await refresh(); } catch (e) { return toast(e.message); }
+  }
+  runJob('/api/run', { mode: 'weekly' });
+};
+[$('#sb-what'), $('#sb-where')].forEach(x => x.onkeydown = e => { if (e.key === 'Enter') $('#btn-search').click(); });
+$('#btn-verify').onclick = e => { e.preventDefault(); runJob('/api/verify'); };
+$('#sch2').onchange = e => setSchedule(e.target.checked);
 
 // ----------------------------------------------------------- postings
 async function loadPostings() {
@@ -704,14 +739,19 @@ function addUnmatched(i) { const x = window._unm[i]; runJob('/api/fetch', { url:
 function renderPostings() {
   $$('#filters .chip').forEach(c => c.classList.toggle('on', c.dataset.f === filter));
   const q = $('#q').value.toLowerCase().trim();
+  const nUnd = P.postings.filter(p => !decisionOf(p) && p.bucket !== 'expired').length;
+  const nAcc = P.postings.filter(p => decisionOf(p) === 'accepted' && p.bucket !== 'expired').length;
+  $('#n-undecided').textContent = nUnd ? '(' + nUnd + ')' : ''; $('#n-accepted').textContent = nAcc ? '(' + nAcc + ')' : '';
   if (filter === 'unmatched') return renderUnmatched(q);
+  if (filter === 'accepted') return renderDocs($('#plist'), q);
   const newest = P.postings.reduce((m, p) => p.found > m ? p.found : m, '');
   const list = P.postings.filter(inFilter)
     .filter(p => !q || [p.title, p.employer, p.location, p.category].join(' ').toLowerCase().includes(q))
     .sort((a, b) => (b.found || '').localeCompare(a.found || '') || (a.deadline || 'z').localeCompare(b.deadline || 'z'));
   if (!list.length) {
     $('#plist').innerHTML = `<div class="card empty">${filter === 'undecided' ? 'Nothing to decide on right now.' : 'No postings here.'}
-      ${capOn('search') ? '<div style="margin-top:10px"><button class="b primary" onclick="runJob(\'/api/run\',{mode:\'weekly\'})" data-job>Search now</button></div>' : ''}</div>`;
+      ${capOn('search') ? '<div style="margin-top:10px"><button class="b primary" onclick="$(\'#btn-search\').click()" data-job>Search now</button></div>' : ''}
+      ${LST && LST.listings.length ? `<div class="small" style="margin-top:8px">${LST.listings.length} other job(s) were found but did not fit your words or places: <a href="#" onclick="filter='unmatched';renderPostings();return false">see them</a></div>` : ''}</div>`;
     return;
   }
   $('#plist').innerHTML = list.map((p, i) => {
@@ -774,16 +814,20 @@ $('#btn-add').onclick = () => {
 };
 
 // ----------------------------------------------------------- documents
-function renderDocs() {
-  const acc = P.postings.filter(p => decisionOf(p) === 'accepted');
-  if (!acc.length) { $('#dlist').innerHTML = '<div class="card empty">Accept a posting first; its documents are made here.</div>'; return; }
+function renderDocs(el, q) {
+  el = el || $('#plist'); q = q ?? $('#q').value.toLowerCase().trim();
+  if (filter !== 'accepted' && el === $('#plist')) return;
+  const acc = P.postings.filter(p => decisionOf(p) === 'accepted')
+    .filter(p => !q || [p.title, p.employer, p.location].join(' ').toLowerCase().includes(q));
+  if (!acc.length) { el.innerHTML = '<div class="card empty">Accept a job first; its CV and cover letter are made here.</div>'; return; }
   if (CLOUD) {
-    $('#dlist').innerHTML = acc.map(p => `<div class="card"><b>${esc(p.title)}</b><div class="muted">${esc(p.employer)}${p.location ? ' &middot; ' + esc(p.location) : ''}</div>
+    el.innerHTML = `<p class="muted small">Documents are made by the Job Agent app on your computer (Settings &gt; Online search there); your CV never comes online.</p>` + acc.map(p => `<div class="card"><b>${esc(p.title)}</b><div class="muted">${esc(p.employer)}${p.location ? ' &middot; ' + esc(p.location) : ''}</div>
       <div class="small" style="margin-top:6px">${p.drafted ? '<span class="tag good">Documents made on your computer</span>' : '<span class="tag">Waiting for your computer</span>'}</div></div>`).join('');
     return;
   }
   const full = capOn('tailoring_full');
-  $('#dlist').innerHTML = acc.map((p, i) => {
+  el.innerHTML = `<div class="row small muted" style="margin-bottom:8px">Drafts of your CV and cover letter, on your computer; nothing is ever sent.
+      <span class="spacer"></span><button class="b sm" onclick="api('/api/open',{rel:'output'}).catch(e=>toast(e.message))"><svg class="ic"><use href="#i-folder"/></svg>Open the documents folder</button></div>` + acc.map((p, i) => {
     const docs = p.docs.map(d => `<a href="${fileUrl(d.rel)}" target="_blank">${esc(d.name)}</a>`).join('<br>');
     return `<div class="card">
       <div class="row"><div style="flex:1"><b>${esc(p.title)}</b><div class="muted">${esc(p.employer)}${p.location ? ' &middot; ' + esc(p.location) : ''}${/^\d{4}-/.test(p.deadline || '') ? ' &middot; apply by ' + esc(p.deadline) : ''}</div></div>
@@ -855,7 +899,6 @@ function pasteProfile(id) {
 async function useProfile(id) {
   try { await api('/api/profile/answer', { id, answer: $('#pp-ans').value }); toast('Profile updated'); refresh(); } catch (e) { toast(e.message); }
 }
-$('#btn-open-out').onclick = () => api('/api/open', { rel: 'output' }).catch(e => toast(e.message));
 $('#btn-open-home').onclick = () => api('/api/open', { rel: '.' }).catch(e => toast(e.message));
 
 // ----------------------------------------------------------- setup: upload
@@ -999,7 +1042,7 @@ $('#rs-go').onclick = async () => {
   try { const r = await api('/api/reset', { parts });
     $('#rs-box').hidden = true; $('#rs-open-row').hidden = false;
     $('#rs-r').innerHTML = r.backup_rel ? `Done. The previous files are in <b>${esc(r.backup_rel)}</b> in your agent folder.` : 'Done; there was nothing to move.';
-    SITES = null; WS = null; await refresh(); loadPostings(); loadSettings();
+    SITES = null; WS = null; await refresh(); loadPostings(); loadSettings(); loadSearchBar();
     try { if ($('#form').getAttribute('src')) $('#form').contentWindow.location.reload(); } catch (e) { }
   } catch (e) { toast(e.message); }
 };
@@ -1173,7 +1216,10 @@ refresh().then(() => { loadPostings(); const [v, sub] = location.hash.slice(1).s
   if (v === 'update' || v === 'uninstall') {          // the update and uninstall shortcuts open the app here
     show('settings', 'maint');
     setTimeout(() => { $('#maint').scrollIntoView({ block: 'center' }); v === 'update' ? checkUpdate() : $('#un-open').click(); }, 300);
-  } else if (v) show(v, sub); });
+  } else show(v || 'postings', sub);
+  loadSearchBar();
+  let keep = null; try { keep = localStorage.getItem('ja-info'); } catch (e) { }
+  if (keep === '1') infoOpen(true); });
 setInterval(() => { if (!jobTimer && document.visibilityState === 'visible') refresh(); }, 30000);
 </script>
 </body>

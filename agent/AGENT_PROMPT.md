@@ -155,7 +155,7 @@ must show every employer checked, or each gap explained in the notes.
 - **Web search**: public employment services, job boards and university
   vacancy pages for the configured locations, plus `extra_sites`.
 - **Chosen job sites**: `search_config.job_sites` lists the countries the
-  user picked in the app (Setup > Countries and job sites). For each, check the sites in
+  user picked in the app (Settings > Countries and job sites). For each, check the sites in
   `engine/defaults/job_sites.json` that are not built in, minus the
   addresses in `job_sites.skip`, plus `job_sites.custom`. Read only, as
   everywhere. If `job_sites` is missing, use the countries of the

@@ -62,21 +62,20 @@ other software to install. Downloads are on the
 Job Agent opens in your web browser. It runs only on your computer and
 keeps your job search in a **JobAgent** folder in your home folder.
 
-The app has five tabs. **Home** shows what to do next, how the app works,
-and what it does with your data. **Jobs**, **Documents** and **Setup** are
-the everyday work. **Settings** holds everything you may want to tune
-later (writing style, AI, online search, network activity, update and
-uninstall); you never need it to get started.
+Everything everyday happens on one screen, **Jobs**: type what you look
+for and where, press **Search**, and decide on each job. **My CV and
+profile** is optional (with your CV the documents use your own words).
+**Settings** holds what you may want to tune later; you never need it to
+get started.
 
-1. **Setup:** (1) what to search for (job titles or skills) and where
-   (towns, regions or countries), and (2) the countries and job sites to
-   use. Optionally list employers to watch and drop in your CV.
-2. **Home > Search now.** New jobs appear under **Jobs**.
-3. **Jobs:** **Accept** the ones you want; **Reject** the others with a
-   reason (future searches learn from it).
-4. **Documents:** for each accepted posting, make a **template** (your
-   details plus the posting's keywords, experience left as placeholders),
-   or, if you added your CV, a **tailored draft**:
+1. **Jobs:** type the jobs you look for (titles or skills, separated by
+   commas) and where (towns, regions or countries), then **Search**.
+2. **Accept** the jobs you want; **Reject** the others with a reason
+   (future searches learn from it). Jobs that were found but did not fit
+   your words or places are under **Not matched**.
+3. **Accepted and documents** (same screen): for each accepted job, make a
+   **template** (your details plus the job's keywords, experience left as
+   placeholders), or, if you added your CV, a **tailored draft**:
    - **Copy for Claude** copies everything to your clipboard. Paste it
      into any Claude chat, then paste the answer back with **Paste
      Claude's answer**. No key needed.
@@ -85,11 +84,11 @@ uninstall); you never need it to get started.
 
    Drafts are Word files in your folder. Nothing is ever sent or applied
    for you.
-5. **Settings > Daily search > Run every morning:** the search then runs
-   by itself every day, even when the app is closed.
+4. **Every morning by itself** (the box under the search bar): the search
+   then runs by itself every day, even when the app is closed.
 
-**Jobs > Add a job you found** reads any job link you found yourself and adds it.
-Close the app with **Quit the app** in the top bar (closing the app's tab also stops it after a few seconds).
+**Add a job link** (on the Jobs screen) reads any job link you found yourself and adds it.
+Close the app with **Quit the app** in the top bar, or just close its tab.
 
 **Update and uninstall:** Settings > Update and uninstall, or the
 shortcuts each package ships ("Update Job Agent" and "Uninstall Job
@@ -214,7 +213,7 @@ share one tracker.
 | Every morning | engine (scheduled) | `run auto`: on your search day collect → verify → sync → weekly page; other days sync and templates |
 | Search day, optional | agent | LinkedIn, Indeed, web search, judgement on new rows, tailored documents |
 | Any time | you | open the app, Accept or Reject postings, make documents |
-| Any time | you | add or change your CV or profile on the app's Setup page |
+| Any time | you | add or change your CV or profile on the app's My CV and profile tab |
 
 ---
 

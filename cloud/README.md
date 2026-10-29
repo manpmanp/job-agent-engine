@@ -42,7 +42,7 @@ data is on your account, and nothing goes to the author of this project.
    - JSearch / Adzuna: optional; leave them as they are to skip.
 3. Deploy. Cloudflare creates the Worker and its database. Open the
    address it shows (`https://job-agent.<your-name>.workers.dev`), log in,
-   and fill in **Setup** (what to search for, where, which employers).
+   type what to search for and where at the top of the Jobs screen (employers to watch: Settings).
 
 The search then runs every day after 06:00 UTC (change `RUN_HOUR_UTC` in
 the Worker's settings), and on your search day it also checks that

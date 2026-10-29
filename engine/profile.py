@@ -24,7 +24,7 @@ Two ways to provide candidate data, both ending in the same profile.json:
    tailoring.
 
 2. A blank form (engine/templates/inputs/candidate/profile_form.json, or
-   the app's Setup page, which writes the same format):
+   the app's My CV and profile tab, which writes the same format):
        ./run.sh intake form my_profile.json
 
 Single fields can be set directly:

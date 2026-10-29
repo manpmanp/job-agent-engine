@@ -20,7 +20,7 @@ For one tracker row this module resolves:
             category and seniority
 
 Both are suggestions: state/document_choices.json holds what you chose for
-a posting in the Documents tab. The market gives page size, personal
+a posting in the app (Jobs > Accepted and documents). The market gives page size, personal
 details, tone of the country, salutation and closing; the type gives the
 sections (order, headings, length, focus), confidence, wording, emphasis
 and letter focus. Your tuned types (Settings > Writing style) live in

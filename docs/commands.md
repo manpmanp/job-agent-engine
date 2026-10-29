@@ -22,8 +22,8 @@ before the command, or with the `JOB_AGENT_HOME` environment variable
 | Command | What it does |
 |---|---|
 | *(none)* | `./run.sh` on its own creates the agent home if needed and does today's run (`run auto`). |
-| `--setup` (or `setup`) | Installs the Python packages into `.venv/` in the engine folder (nothing system-wide; `run.sh` also does this by itself whenever they are missing), creates the agent home, and opens the app on its Setup page. Add `--browser` to also install Playwright's headless Chromium (about 100 MB, once) for posting pages built in the browser, `--remove-browser` to remove it. |
-| `form [--port N] [--no-browser]` | Opens the app on its Setup page (search setup and profile). |
+| `--setup` (or `setup`) | Installs the Python packages into `.venv/` in the engine folder (nothing system-wide; `run.sh` also does this by itself whenever they are missing), creates the agent home, and opens the app. Add `--browser` to also install Playwright's headless Chromium (about 100 MB, once) for posting pages built in the browser, `--remove-browser` to remove it. |
+| `form [--port N] [--no-browser]` | Opens the app on its My CV and profile tab (search details and profile). |
 | `test` | Runs the offline test suite. |
 | `clean` | Removes what the engine no longer uses or rebuilds on demand: Node modules from versions before 0.4, Python caches, Finder's `.DS_Store` files, and folders left empty after the 0.4.2 reorganisation. Never touches `.venv` or any agent home. |
 | `reset [--parts settings,keys,profile,postings,documents] [--yes]` | Start over: moves the chosen parts (default all) into `backups/<date_time>/` in the agent home and recreates them blank; `settings` also turns the daily run off. Nothing is deleted. Same as Settings > Update and uninstall > Start over in the app. |
@@ -56,7 +56,7 @@ before the command, or with the `JOB_AGENT_HOME` environment variable
 | `tailor pending` | Accepted postings without documents, with their keys and the current mode. |
 | `tailor template "<URL>\|\|<Title>"` or `--all-pending` | Template CV and CL for a hypothetical candidate. |
 | `tailor conventions "<URL>\|\|<Title>"` | How this posting's documents are written: market (from its country) and position type (PhD, postdoc, research assistant, assistant professor, professor, lecturer, internship, junior, mid-senior, senior), with page size, length, CV sections in order, confidence, wording, emphasis, details to leave out, salutation and closing. |
-| `tailor choose "<URL>\|\|<Title>" [--type T] [--market M]` | Changes the position type or market of one posting (same as the selects in the Documents tab); without options, back to the suggestion. |
+| `tailor choose "<URL>\|\|<Title>" [--type T] [--market M]` | Changes the position type or market of one posting (same as the selects under Jobs > Accepted and documents); without options, back to the suggestion. |
 | `tailor check <spec.json>` | Mechanical checks on a document spec. `--posting "<URL>\|\|<Title>"` adds that market's checks. |
 | `tailor render <spec.json> --posting "<URL>\|\|<Title>"` | Checks and renders a spec to the posting's file name. `--overwrite`, `--force` available. |
 | `tailor jd "<URL>\|\|<Title>" [--text <file>]` | Job-description snapshot (PDF when a converter is available, HTML otherwise). |
