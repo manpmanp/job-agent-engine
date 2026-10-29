@@ -527,6 +527,17 @@ class TestApp(unittest.TestCase):
         self.assertTrue(self.h.search_config()["sources"].get("jobtech", True))
         self.j("/api/settings", {"secrets": {"anthropic_api_key": "__clear__"}, "sources": {"jsearch": False}})
 
+    def test_job_sites(self):
+        code, cat = self.j("/api/job_sites")
+        self.assertEqual(code, 200)
+        self.assertIn("SE", cat["countries"])
+        sel = {"countries": ["DK", "SE"], "skip": ["https://www.jobindex.dk"], "custom": [{"name": "X", "url": "https://x.example"}]}
+        self.j("/api/search_config", {"job_sites": sel})
+        self.assertEqual(self.h.search_config()["job_sites"], sel)
+        self.j("/api/settings", {"sources": {"jobtech": False}})              # the tab's own save keeps keys and other settings
+        self.assertFalse(self.h.search_config()["sources"]["jobtech"])
+        self.j("/api/settings", {"sources": {"jobtech": True}})
+
     def test_template_job(self):
         import time
         key = "https://example.com/j/1||FPGA Engineer"
@@ -662,6 +673,7 @@ class TestCloudCopies(unittest.TestCase):
         """cloud/src/shared/ must match the originals (run: cd cloud && npm run sync)."""
         root = os.path.dirname(HERE)
         for src, dst in (("engine/web/app.html", "index.html"), ("engine/web/form.html", "candidate_form.html"),
-                         ("engine/defaults/search_defaults.json", "search_defaults.json"), ("engine/defaults/skill_vocabulary.json", "skill_vocabulary.json")):
+                         ("engine/defaults/search_defaults.json", "search_defaults.json"), ("engine/defaults/skill_vocabulary.json", "skill_vocabulary.json"),
+                         ("engine/defaults/job_sites.json", "job_sites.json")):
             with open(os.path.join(root, src), "rb") as a, open(os.path.join(root, "cloud", "src", "shared", dst), "rb") as b:
                 self.assertEqual(a.read(), b.read(), f"{dst} is out of date: cd cloud && npm run sync")

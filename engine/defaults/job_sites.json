@@ -1,5 +1,5 @@
 {
- "_help": "Job sites by country, checked against official or primary sources (see 'sources'). 'access' says how the engine can use each site. Used by the app's Job sites tab. Add your own sites in search_config.job_sites.",
+ "_help": "Job sites by country, checked against official or primary sources (see 'sources'). 'access' says how the engine can use each site. Used by the app's Job sites tab. Your choice of countries and sites is saved in search_config.job_sites.",
  "checked": "2026-10-29",
  "access_types": {
   "built_in": "Searched automatically by the engine (some need a free key in Settings).",
@@ -27,7 +27,8 @@
      "url": "https://arbetsformedlingen.se/platsbanken",
      "kind": "public",
      "access": "built_in",
-     "note": "Searched automatically through the free JobTech API."
+     "note": "Searched automatically through the free JobTech API.",
+     "source": "jobtech"
     },
     {
      "name": "Øresunddirekt (Sweden-Denmark commuting)",
@@ -992,28 +993,32 @@
    "url": "https://rapidapi.com",
    "kind": "aggregator",
    "access": "built_in",
-   "note": "Built in; needs your RapidAPI key. Most countries."
+   "note": "Built in; needs your RapidAPI key. Most countries.",
+   "source": "jsearch"
   },
   {
    "name": "Adzuna",
    "url": "https://developer.adzuna.com",
    "kind": "aggregator",
    "access": "built_in",
-   "note": "Built in; needs a free key. AT AU BE BR CA CH DE ES FR GB IN IT MX NL NZ PL SG US ZA (not the Nordics)."
+   "note": "Built in; needs a free key. AT AU BE BR CA CH DE ES FR GB IN IT MX NL NZ PL SG US ZA (not the Nordics).",
+   "source": "adzuna"
   },
   {
    "name": "Hacker News \"Who is hiring?\"",
    "url": "https://news.ycombinator.com",
    "kind": "aggregator",
    "access": "built_in",
-   "note": "Built in. Startups, often remote."
+   "note": "Built in. Startups, often remote.",
+   "source": "hn_who_is_hiring"
   },
   {
    "name": "Y Combinator startup jobs",
    "url": "https://www.ycombinator.com/jobs",
    "kind": "aggregator",
    "access": "built_in",
-   "note": "Built in."
+   "note": "Built in.",
+   "source": "yc_jobs"
   },
   {
    "name": "Jooble",

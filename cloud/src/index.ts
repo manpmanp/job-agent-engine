@@ -13,6 +13,7 @@
 // accepted postings and makes the documents locally.
 import APP_HTML from "./shared/index.html";
 import FORM_HTML from "./shared/candidate_form.html";
+import JOB_SITES from "./shared/job_sites.json";
 import * as P from "./pipeline";
 import { seniorityBucket } from "./match";
 
@@ -233,6 +234,7 @@ async function api(req: Request, env: Env, ctx: ExecutionContext, url: URL): Pro
     return json({ secrets: { jsearch_api_key: !!k.jsearch, adzuna_app_id: !!k.adzuna_id, adzuna_app_key: !!k.adzuna_key, anthropic_api_key: false },
                   jsearch_host: k.jsearch_host, sources: cfg.sources ?? {}, enrichment: {}, documents: {} });
   }
+  if (p === "/api/job_sites") return json(JOB_SITES);
   if (p === "/api/info") {
     const cfg = await P.searchConfig(db);
     return json({ home: url.origin, intake: {}, sources: [], search_ready: !!(cfg.keywords?.length && cfg.locations?.length), tailoring: "template" });

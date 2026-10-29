@@ -32,6 +32,7 @@ creates blank versions. Keys beginning with `_` are help text and ignored.
 | `skill_terms` | no | Extra terms to pick out for the skills summary (search keywords and profile skills are always used). |
 | `category_rules` | no | `{"<category>": ["term", ...]}`: first rule whose term appears in title or description sets the category. |
 | `enrichment` | no | Optional AI review: `enabled`, `model` (default `claude-haiku-5-5`), `send_profile` (default false: the profile is not sent), `max_per_run`. Needs `ANTHROPIC_API_KEY` or `inputs/secrets.json` `{"anthropic_api_key": "..."}`. |
+| `job_sites` | no | Set in the app's Job sites tab: `countries` (ISO codes, for example `["SE", "DK"]`; default: the countries of your locations), `skip` (addresses of listed sites you do not want), `custom` (your own sites, `{"name", "url"}`). The catalogue is `engine/defaults/job_sites.json` (readable: `docs/job_sites.md`); sites without a built-in search are for you or your agent to read. |
 | `credible_sources` | no | Sources that count as confirmation that a posting is live. |
 | `employer_presets` | no | Names of files in `engine/defaults/employer_presets/`. |
 | `rejection_reasons` | no | The checkbox list on the weekly page. |

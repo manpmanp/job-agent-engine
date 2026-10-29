@@ -77,6 +77,13 @@ describe("online Job Agent", () => {
     token = saved;
   });
 
+  it("serves the job sites catalogue and keeps the choice", async () => {
+    const cat = await (await req("/api/job_sites")).json<any>();
+    expect(Object.keys(cat.countries)).toContain("SE");
+    await req("/api/search_config", { json: { job_sites: { countries: ["SE"], skip: [], custom: [] } } });
+    expect((await (await req("/api/search_config")).json<any>()).job_sites.countries).toEqual(["SE"]);
+  });
+
   it("searches like the local engine", async () => {
     await req("/api/search_config", { json: {
       keywords: ["FPGA engineer", "ASIC design engineer", "embedded hardware engineer", "ASIC verification engineer"],

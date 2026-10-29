@@ -1,0 +1,1141 @@
+{
+ "_help": "Job sites by country, checked against official or primary sources (see 'sources'). 'access' says how the engine can use each site. Used by the app's Job sites tab. Your choice of countries and sites is saved in search_config.job_sites.",
+ "checked": "2026-10-29",
+ "access_types": {
+  "built_in": "Searched automatically by the engine (some need a free key in Settings).",
+  "api_key": "Has an official API that needs a free key; not built in yet.",
+  "api_open": "Has an official API without a key; not built in yet.",
+  "browse": "No automatic search: opened by you or by an agent, read only."
+ },
+ "regions": [
+  "Nordic",
+  "Western Europe",
+  "British Isles",
+  "Southern Europe",
+  "Central and Eastern Europe",
+  "Baltics",
+  "North America",
+  "Oceania"
+ ],
+ "countries": {
+  "SE": {
+   "name": "Sweden",
+   "region": "Nordic",
+   "sites": [
+    {
+     "name": "Platsbanken (Arbetsförmedlingen)",
+     "url": "https://arbetsformedlingen.se/platsbanken",
+     "kind": "public",
+     "access": "built_in",
+     "note": "Searched automatically through the free JobTech API.",
+     "source": "jobtech"
+    },
+    {
+     "name": "Øresunddirekt (Sweden-Denmark commuting)",
+     "url": "https://www.oresunddirekt.se",
+     "kind": "public",
+     "access": "browse",
+     "note": "Guide, not a job board."
+    }
+   ],
+   "sources": [
+    "https://jobtechdev.se",
+    "https://eures.europa.eu/living-and-working/living-and-working-conditions-europe/living-and-working-conditions-sweden_en"
+   ]
+  },
+  "NO": {
+   "name": "Norway",
+   "region": "Nordic",
+   "sites": [
+    {
+     "name": "arbeidsplassen.no (NAV)",
+     "url": "https://arbeidsplassen.nav.no",
+     "kind": "public",
+     "access": "api_open",
+     "note": "NAV job feed API (pam-stilling-feed.nav.no) with a free public token; no server-side filter. Not yet built in."
+    },
+    {
+     "name": "FINN jobb",
+     "url": "https://www.finn.no/job",
+     "kind": "private",
+     "access": "browse",
+     "note": "The largest private board; not in the NAV feed."
+    }
+   ],
+   "sources": [
+    "https://pam-stilling-feed.nav.no",
+    "https://eures.europa.eu/living-and-working/living-and-working-conditions-europe/living-and-working-conditions-norway_en"
+   ]
+  },
+  "DK": {
+   "name": "Denmark",
+   "region": "Nordic",
+   "sites": [
+    {
+     "name": "Jobnet",
+     "url": "https://jobnet.dk",
+     "kind": "public",
+     "access": "browse"
+    },
+    {
+     "name": "Jobindex",
+     "url": "https://www.jobindex.dk",
+     "kind": "private",
+     "access": "browse",
+     "note": "Denmark's largest job site."
+    },
+    {
+     "name": "Work in Denmark",
+     "url": "https://www.workindenmark.dk",
+     "kind": "public",
+     "access": "browse",
+     "note": "Public service for international candidates."
+    }
+   ],
+   "sources": [
+    "https://eures.europa.eu/living-and-working/living-and-working-conditions-europe/living-and-working-conditions-denmark_en",
+    "https://www.workindenmark.dk"
+   ]
+  },
+  "FI": {
+   "name": "Finland",
+   "region": "Nordic",
+   "sites": [
+    {
+     "name": "Työmarkkinatori (Job Market Finland)",
+     "url": "https://tyomarkkinatori.fi",
+     "kind": "public",
+     "access": "browse"
+    },
+    {
+     "name": "Duunitori",
+     "url": "https://duunitori.fi",
+     "kind": "private",
+     "access": "browse"
+    },
+    {
+     "name": "Oikotie Työpaikat",
+     "url": "https://tyopaikat.oikotie.fi",
+     "kind": "private",
+     "access": "browse"
+    }
+   ],
+   "sources": [
+    "https://eures.europa.eu/living-and-working/living-and-working-conditions-europe/living-and-working-conditions-finland_en"
+   ]
+  },
+  "IS": {
+   "name": "Iceland",
+   "region": "Nordic",
+   "sites": [
+    {
+     "name": "Vinnumálastofnun / EURES Iceland",
+     "url": "https://work.iceland.is",
+     "kind": "public",
+     "access": "browse"
+    },
+    {
+     "name": "Alfreð",
+     "url": "https://alfred.is",
+     "kind": "private",
+     "access": "browse"
+    }
+   ],
+   "sources": [
+    "https://eures.europa.eu/living-and-working/living-and-working-conditions-europe/living-and-working-conditions-iceland_en"
+   ]
+  },
+  "DE": {
+   "name": "Germany",
+   "region": "Western Europe",
+   "sites": [
+    {
+     "name": "Jobsuche (Bundesagentur für Arbeit)",
+     "url": "https://www.arbeitsagentur.de/jobsuche",
+     "kind": "public",
+     "access": "browse",
+     "note": "An unofficial API exists, but its terms restrict reuse, so it is not used."
+    },
+    {
+     "name": "StepStone",
+     "url": "https://www.stepstone.de",
+     "kind": "private",
+     "access": "browse",
+     "note": "The largest private board."
+    },
+    {
+     "name": "Arbeitnow",
+     "url": "https://www.arbeitnow.com",
+     "kind": "aggregator",
+     "access": "api_open",
+     "note": "Free job-board API, no key (mostly Germany and remote). Not yet built in."
+    }
+   ],
+   "sources": [
+    "https://eures.europa.eu/living-and-working/living-and-working-conditions-europe/living-and-working-conditions-germany_en",
+    "https://www.arbeitnow.com/api/job-board-api"
+   ]
+  },
+  "AT": {
+   "name": "Austria",
+   "region": "Western Europe",
+   "sites": [
+    {
+     "name": "AMS alle jobs",
+     "url": "https://www.ams.at",
+     "kind": "public",
+     "access": "browse"
+    },
+    {
+     "name": "karriere.at",
+     "url": "https://www.karriere.at",
+     "kind": "private",
+     "access": "browse"
+    }
+   ],
+   "sources": [
+    "https://eures.europa.eu/living-and-working/living-and-working-conditions-europe/living-and-working-conditions-austria_en"
+   ]
+  },
+  "CH": {
+   "name": "Switzerland",
+   "region": "Western Europe",
+   "sites": [
+    {
+     "name": "Job-Room (SECO)",
+     "url": "https://www.job-room.ch",
+     "kind": "public",
+     "access": "browse"
+    },
+    {
+     "name": "jobs.ch",
+     "url": "https://www.jobs.ch",
+     "kind": "private",
+     "access": "browse"
+    },
+    {
+     "name": "jobup.ch",
+     "url": "https://www.jobup.ch",
+     "kind": "private",
+     "access": "browse",
+     "note": "French-speaking Switzerland."
+    }
+   ],
+   "sources": [
+    "https://eures.europa.eu/living-and-working/living-and-working-conditions-europe/living-and-working-conditions-switzerland_en"
+   ]
+  },
+  "LI": {
+   "name": "Liechtenstein",
+   "region": "Western Europe",
+   "sites": [
+    {
+     "name": "AMS FL (Labour Market Service)",
+     "url": "https://www.amsfl.li",
+     "kind": "public",
+     "access": "browse"
+    }
+   ],
+   "sources": [
+    "https://www.integration.li/en/work/work"
+   ]
+  },
+  "NL": {
+   "name": "Netherlands",
+   "region": "Western Europe",
+   "sites": [
+    {
+     "name": "werk.nl (UWV)",
+     "url": "https://www.werk.nl",
+     "kind": "public",
+     "access": "browse"
+    },
+    {
+     "name": "Nationale Vacaturebank",
+     "url": "https://www.nationalevacaturebank.nl",
+     "kind": "private",
+     "access": "browse"
+    }
+   ],
+   "sources": [
+    "https://eures.europa.eu/living-and-working/living-and-working-conditions-europe/living-and-working-conditions-netherlands_en"
+   ]
+  },
+  "BE": {
+   "name": "Belgium",
+   "region": "Western Europe",
+   "sites": [
+    {
+     "name": "VDAB (Flanders)",
+     "url": "https://www.vdab.be",
+     "kind": "public",
+     "access": "browse"
+    },
+    {
+     "name": "Le Forem (Wallonia)",
+     "url": "https://www.leforem.be",
+     "kind": "public",
+     "access": "browse"
+    },
+    {
+     "name": "Actiris (Brussels)",
+     "url": "https://www.actiris.brussels",
+     "kind": "public",
+     "access": "browse"
+    }
+   ],
+   "sources": [
+    "https://eures.europa.eu/living-and-working/living-and-working-conditions-europe/living-and-working-conditions-belgium_en"
+   ]
+  },
+  "LU": {
+   "name": "Luxembourg",
+   "region": "Western Europe",
+   "sites": [
+    {
+     "name": "ADEM",
+     "url": "https://adem.public.lu",
+     "kind": "public",
+     "access": "browse"
+    },
+    {
+     "name": "Moovijob",
+     "url": "https://www.moovijob.com",
+     "kind": "private",
+     "access": "browse"
+    },
+    {
+     "name": "jobs.lu",
+     "url": "https://www.jobs.lu",
+     "kind": "private",
+     "access": "browse"
+    }
+   ],
+   "sources": [
+    "https://eures.europa.eu/living-and-working/living-and-working-conditions-europe/living-and-working-conditions-luxembourg_en"
+   ]
+  },
+  "FR": {
+   "name": "France",
+   "region": "Western Europe",
+   "sites": [
+    {
+     "name": "France Travail",
+     "url": "https://www.francetravail.fr",
+     "kind": "public",
+     "access": "browse",
+     "note": "The public offers API was withdrawn; browse only."
+    },
+    {
+     "name": "APEC (managers and engineers)",
+     "url": "https://www.apec.fr",
+     "kind": "private",
+     "access": "browse"
+    },
+    {
+     "name": "Welcome to the Jungle",
+     "url": "https://www.welcometothejungle.com/fr",
+     "kind": "private",
+     "access": "browse"
+    },
+    {
+     "name": "HelloWork",
+     "url": "https://www.hellowork.com",
+     "kind": "private",
+     "access": "browse"
+    }
+   ],
+   "sources": [
+    "https://eures.europa.eu/living-and-working/living-and-working-conditions-europe/living-and-working-conditions-france_en",
+    "https://www.data.gouv.fr"
+   ]
+  },
+  "GB": {
+   "name": "United Kingdom",
+   "region": "British Isles",
+   "sites": [
+    {
+     "name": "Find a job (DWP)",
+     "url": "https://findajob.dwp.gov.uk",
+     "kind": "public",
+     "access": "browse"
+    },
+    {
+     "name": "Reed",
+     "url": "https://www.reed.co.uk",
+     "kind": "private",
+     "access": "api_key",
+     "note": "Free API key (reed.co.uk/developers). Not yet built in."
+    },
+    {
+     "name": "Totaljobs",
+     "url": "https://www.totaljobs.com",
+     "kind": "private",
+     "access": "browse"
+    },
+    {
+     "name": "CV-Library",
+     "url": "https://www.cv-library.co.uk",
+     "kind": "private",
+     "access": "browse"
+    }
+   ],
+   "sources": [
+    "https://eures.europa.eu/living-and-working/living-and-working-conditions-europe/living-and-working-conditions-united-kingdom_en",
+    "https://www.reed.co.uk/developers"
+   ]
+  },
+  "IE": {
+   "name": "Ireland",
+   "region": "British Isles",
+   "sites": [
+    {
+     "name": "JobsIreland",
+     "url": "https://jobsireland.ie",
+     "kind": "public",
+     "access": "browse"
+    },
+    {
+     "name": "IrishJobs",
+     "url": "https://www.irishjobs.ie",
+     "kind": "private",
+     "access": "browse"
+    },
+    {
+     "name": "Jobs.ie",
+     "url": "https://www.jobs.ie",
+     "kind": "private",
+     "access": "browse"
+    }
+   ],
+   "sources": [
+    "https://eures.europa.eu/living-and-working/living-and-working-conditions-europe/living-and-working-conditions-ireland_en"
+   ]
+  },
+  "ES": {
+   "name": "Spain",
+   "region": "Southern Europe",
+   "sites": [
+    {
+     "name": "Empléate / Sistema Nacional de Empleo",
+     "url": "https://www.sistemanacionalempleo.es",
+     "kind": "public",
+     "access": "browse"
+    },
+    {
+     "name": "InfoJobs",
+     "url": "https://www.infojobs.net",
+     "kind": "private",
+     "access": "browse"
+    },
+    {
+     "name": "Tecnoempleo (IT and tech)",
+     "url": "https://www.tecnoempleo.com",
+     "kind": "private",
+     "access": "browse"
+    }
+   ],
+   "sources": [
+    "https://eures.europa.eu/living-and-working/living-and-working-conditions-europe/living-and-working-conditions-spain_en"
+   ]
+  },
+  "IT": {
+   "name": "Italy",
+   "region": "Southern Europe",
+   "sites": [
+    {
+     "name": "ClicLavoro",
+     "url": "https://www.cliclavoro.gov.it",
+     "kind": "public",
+     "access": "browse"
+    },
+    {
+     "name": "InfoJobs Italia",
+     "url": "https://www.infojobs.it",
+     "kind": "private",
+     "access": "browse"
+    }
+   ],
+   "sources": [
+    "https://eures.europa.eu/living-and-working/living-and-working-conditions-europe/living-and-working-conditions-italy_en"
+   ]
+  },
+  "PT": {
+   "name": "Portugal",
+   "region": "Southern Europe",
+   "sites": [
+    {
+     "name": "IEFP Online",
+     "url": "https://www.iefp.pt",
+     "kind": "public",
+     "access": "browse"
+    },
+    {
+     "name": "Net-Empregos",
+     "url": "https://www.net-empregos.com",
+     "kind": "private",
+     "access": "browse"
+    },
+    {
+     "name": "ITJobs (IT)",
+     "url": "https://www.itjobs.pt",
+     "kind": "private",
+     "access": "browse"
+    }
+   ],
+   "sources": [
+    "https://eures.europa.eu/living-and-working/living-and-working-conditions-europe/living-and-working-conditions-portugal_en"
+   ]
+  },
+  "GR": {
+   "name": "Greece",
+   "region": "Southern Europe",
+   "sites": [
+    {
+     "name": "DYPA",
+     "url": "https://www.dypa.gov.gr",
+     "kind": "public",
+     "access": "browse"
+    },
+    {
+     "name": "Kariera.gr",
+     "url": "https://www.kariera.gr",
+     "kind": "private",
+     "access": "browse"
+    },
+    {
+     "name": "Skywalker.gr",
+     "url": "https://www.skywalker.gr",
+     "kind": "private",
+     "access": "browse"
+    }
+   ],
+   "sources": [
+    "https://eures.europa.eu/living-and-working/living-and-working-conditions-europe/living-and-working-conditions-greece_en"
+   ]
+  },
+  "CY": {
+   "name": "Cyprus",
+   "region": "Southern Europe",
+   "sites": [
+    {
+     "name": "PES Cyprus",
+     "url": "https://www.pescps.dl.mlsi.gov.cy",
+     "kind": "public",
+     "access": "browse"
+    },
+    {
+     "name": "Ergodotisi",
+     "url": "https://www.ergodotisi.com",
+     "kind": "private",
+     "access": "browse"
+    }
+   ],
+   "sources": [
+    "https://eures.europa.eu/living-and-working/living-and-working-conditions-europe/living-and-working-conditions-cyprus_en"
+   ]
+  },
+  "MT": {
+   "name": "Malta",
+   "region": "Southern Europe",
+   "sites": [
+    {
+     "name": "Jobsplus",
+     "url": "https://jobsplus.gov.mt",
+     "kind": "public",
+     "access": "browse"
+    }
+   ],
+   "sources": [
+    "https://eures.europa.eu/living-and-working/living-and-working-conditions-europe/living-and-working-conditions-malta_en"
+   ]
+  },
+  "PL": {
+   "name": "Poland",
+   "region": "Central and Eastern Europe",
+   "sites": [
+    {
+     "name": "Centralna Baza Ofert Pracy",
+     "url": "https://oferty.praca.gov.pl",
+     "kind": "public",
+     "access": "browse"
+    },
+    {
+     "name": "Pracuj.pl",
+     "url": "https://www.pracuj.pl",
+     "kind": "private",
+     "access": "browse"
+    },
+    {
+     "name": "Just Join IT (IT)",
+     "url": "https://justjoin.it",
+     "kind": "private",
+     "access": "browse"
+    }
+   ],
+   "sources": [
+    "https://eures.europa.eu/living-and-working/living-and-working-conditions-europe/living-and-working-conditions-poland_en"
+   ]
+  },
+  "CZ": {
+   "name": "Czechia",
+   "region": "Central and Eastern Europe",
+   "sites": [
+    {
+     "name": "Úřad práce ČR",
+     "url": "https://www.uradprace.cz",
+     "kind": "public",
+     "access": "browse"
+    },
+    {
+     "name": "Jobs.cz",
+     "url": "https://www.jobs.cz",
+     "kind": "private",
+     "access": "browse"
+    }
+   ],
+   "sources": [
+    "https://eures.europa.eu/living-and-working/living-and-working-conditions-europe/living-and-working-conditions-czechia_en"
+   ]
+  },
+  "SK": {
+   "name": "Slovakia",
+   "region": "Central and Eastern Europe",
+   "sites": [
+    {
+     "name": "ISTP",
+     "url": "https://www.istp.sk",
+     "kind": "public",
+     "access": "browse"
+    },
+    {
+     "name": "Profesia",
+     "url": "https://www.profesia.sk",
+     "kind": "private",
+     "access": "browse"
+    }
+   ],
+   "sources": [
+    "https://eures.europa.eu/living-and-working/living-and-working-conditions-europe/living-and-working-conditions-slovakia_en"
+   ]
+  },
+  "HU": {
+   "name": "Hungary",
+   "region": "Central and Eastern Europe",
+   "sites": [
+    {
+     "name": "Virtual Labour Market Portal (NFSZ)",
+     "url": "https://vmp.munka.hu",
+     "kind": "public",
+     "access": "browse"
+    },
+    {
+     "name": "Profession.hu",
+     "url": "https://www.profession.hu",
+     "kind": "private",
+     "access": "browse"
+    }
+   ],
+   "sources": [
+    "https://eures.europa.eu/living-and-working/living-and-working-conditions-europe/living-and-working-conditions-hungary_en"
+   ]
+  },
+  "SI": {
+   "name": "Slovenia",
+   "region": "Central and Eastern Europe",
+   "sites": [
+    {
+     "name": "Employment Service of Slovenia (ZRSZ)",
+     "url": "https://www.ess.gov.si",
+     "kind": "public",
+     "access": "browse"
+    },
+    {
+     "name": "MojeDelo",
+     "url": "https://www.mojedelo.com",
+     "kind": "private",
+     "access": "browse"
+    }
+   ],
+   "sources": [
+    "https://eures.europa.eu/living-and-working/living-and-working-conditions-europe/living-and-working-conditions-slovenia_en"
+   ]
+  },
+  "HR": {
+   "name": "Croatia",
+   "region": "Central and Eastern Europe",
+   "sites": [
+    {
+     "name": "HZZ job portal",
+     "url": "https://burzarada.hzz.hr",
+     "kind": "public",
+     "access": "browse"
+    },
+    {
+     "name": "MojPosao",
+     "url": "https://www.moj-posao.net",
+     "kind": "private",
+     "access": "browse"
+    },
+    {
+     "name": "Posao.hr",
+     "url": "https://www.posao.hr",
+     "kind": "private",
+     "access": "browse"
+    }
+   ],
+   "sources": [
+    "https://eures.europa.eu/living-and-working/living-and-working-conditions-europe/living-and-working-conditions-croatia_en"
+   ]
+  },
+  "RO": {
+   "name": "Romania",
+   "region": "Central and Eastern Europe",
+   "sites": [
+    {
+     "name": "ANOFM",
+     "url": "https://www.anofm.ro",
+     "kind": "public",
+     "access": "browse"
+    },
+    {
+     "name": "eJobs",
+     "url": "https://www.ejobs.ro",
+     "kind": "private",
+     "access": "browse"
+    },
+    {
+     "name": "BestJobs",
+     "url": "https://www.bestjobs.eu",
+     "kind": "private",
+     "access": "browse"
+    },
+    {
+     "name": "Hipo",
+     "url": "https://www.hipo.ro",
+     "kind": "private",
+     "access": "browse"
+    }
+   ],
+   "sources": [
+    "https://eures.europa.eu/living-and-working/living-and-working-conditions-europe/living-and-working-conditions-romania_en"
+   ]
+  },
+  "BG": {
+   "name": "Bulgaria",
+   "region": "Central and Eastern Europe",
+   "sites": [
+    {
+     "name": "Employment Agency",
+     "url": "https://www.az.government.bg",
+     "kind": "public",
+     "access": "browse"
+    },
+    {
+     "name": "jobs.bg",
+     "url": "https://www.jobs.bg",
+     "kind": "private",
+     "access": "browse"
+    },
+    {
+     "name": "zaplata.bg",
+     "url": "https://www.zaplata.bg",
+     "kind": "private",
+     "access": "browse"
+    },
+    {
+     "name": "karieri.bg",
+     "url": "https://www.karieri.bg",
+     "kind": "private",
+     "access": "browse"
+    }
+   ],
+   "sources": [
+    "https://eures.europa.eu/living-and-working/living-and-working-conditions-europe/living-and-working-conditions-bulgaria_en"
+   ]
+  },
+  "EE": {
+   "name": "Estonia",
+   "region": "Baltics",
+   "sites": [
+    {
+     "name": "Töötukassa job offers",
+     "url": "https://www.tootukassa.ee/toopakkumised",
+     "kind": "public",
+     "access": "browse"
+    },
+    {
+     "name": "CV Keskus",
+     "url": "https://www.cvkeskus.ee",
+     "kind": "private",
+     "access": "browse"
+    },
+    {
+     "name": "CV Online",
+     "url": "https://www.cv.ee",
+     "kind": "private",
+     "access": "browse"
+    }
+   ],
+   "sources": [
+    "https://eures.europa.eu/living-and-working/living-and-working-conditions-europe/living-and-working-conditions-estonia_en"
+   ]
+  },
+  "LV": {
+   "name": "Latvia",
+   "region": "Baltics",
+   "sites": [
+    {
+     "name": "NVA (State Employment Agency)",
+     "url": "https://www.nva.gov.lv",
+     "kind": "public",
+     "access": "browse"
+    },
+    {
+     "name": "CV Online",
+     "url": "https://www.cv.lv",
+     "kind": "private",
+     "access": "browse"
+    },
+    {
+     "name": "CV Market",
+     "url": "https://www.cvmarket.lv",
+     "kind": "private",
+     "access": "browse"
+    }
+   ],
+   "sources": [
+    "https://eures.europa.eu/living-and-working/living-and-working-conditions-europe/living-and-working-conditions-latvia_en"
+   ]
+  },
+  "LT": {
+   "name": "Lithuania",
+   "region": "Baltics",
+   "sites": [
+    {
+     "name": "Užimtumo tarnyba",
+     "url": "https://uzt.lt",
+     "kind": "public",
+     "access": "browse"
+    },
+    {
+     "name": "CV Online",
+     "url": "https://www.cvonline.lt",
+     "kind": "private",
+     "access": "browse"
+    },
+    {
+     "name": "CVbankas",
+     "url": "https://www.cvbankas.lt",
+     "kind": "private",
+     "access": "browse"
+    },
+    {
+     "name": "CV.lt",
+     "url": "https://www.cv.lt",
+     "kind": "private",
+     "access": "browse"
+    }
+   ],
+   "sources": [
+    "https://eures.europa.eu/living-and-working/living-and-working-conditions-europe/living-and-working-conditions-lithuania_en"
+   ]
+  },
+  "US": {
+   "name": "United States",
+   "region": "North America",
+   "sites": [
+    {
+     "name": "USAJOBS (federal jobs)",
+     "url": "https://www.usajobs.gov",
+     "kind": "government",
+     "access": "api_key",
+     "note": "Free API key by e-mail at developer.usajobs.gov. Not yet built in."
+    },
+    {
+     "name": "CareerOneStop (US Department of Labor)",
+     "url": "https://www.careeronestop.org",
+     "kind": "public",
+     "access": "api_key",
+     "note": "Free API key on request. Not yet built in."
+    },
+    {
+     "name": "Indeed",
+     "url": "https://www.indeed.com",
+     "kind": "private",
+     "access": "browse"
+    },
+    {
+     "name": "LinkedIn Jobs",
+     "url": "https://www.linkedin.com/jobs",
+     "kind": "private",
+     "access": "browse",
+     "note": "Read only: never apply, connect or message."
+    },
+    {
+     "name": "Dice (tech)",
+     "url": "https://www.dice.com",
+     "kind": "private",
+     "access": "browse"
+    },
+    {
+     "name": "ZipRecruiter",
+     "url": "https://www.ziprecruiter.com",
+     "kind": "private",
+     "access": "browse"
+    },
+    {
+     "name": "Glassdoor",
+     "url": "https://www.glassdoor.com",
+     "kind": "private",
+     "access": "browse"
+    }
+   ],
+   "sources": [
+    "https://developer.usajobs.gov",
+    "https://www.careeronestop.org/Developers"
+   ]
+  },
+  "CA": {
+   "name": "Canada",
+   "region": "North America",
+   "sites": [
+    {
+     "name": "Job Bank (Government of Canada)",
+     "url": "https://www.jobbank.gc.ca",
+     "kind": "public",
+     "access": "browse",
+     "note": "Open data is only a monthly file, not live postings."
+    },
+    {
+     "name": "Government of Canada jobs",
+     "url": "https://www.canada.ca/en/services/jobs/opportunities/government.html",
+     "kind": "government",
+     "access": "browse"
+    },
+    {
+     "name": "Indeed Canada",
+     "url": "https://ca.indeed.com",
+     "kind": "private",
+     "access": "browse"
+    },
+    {
+     "name": "Eluta",
+     "url": "https://www.eluta.ca",
+     "kind": "aggregator",
+     "access": "browse",
+     "note": "Lists jobs from employers' own sites."
+    },
+    {
+     "name": "TalentEgg (students and graduates)",
+     "url": "https://talentegg.ca",
+     "kind": "private",
+     "access": "browse"
+    }
+   ],
+   "sources": [
+    "https://www.cs.ubc.ca/students/undergrad/careers/finding-career-opportunities/helpful-job-postings-sites"
+   ]
+  },
+  "AU": {
+   "name": "Australia",
+   "region": "Oceania",
+   "sites": [
+    {
+     "name": "Workforce Australia",
+     "url": "https://www.workforceaustralia.gov.au",
+     "kind": "public",
+     "access": "browse"
+    },
+    {
+     "name": "APSjobs (federal public service)",
+     "url": "https://www.apsjobs.gov.au",
+     "kind": "government",
+     "access": "browse"
+    },
+    {
+     "name": "SEEK",
+     "url": "https://www.seek.com.au",
+     "kind": "private",
+     "access": "browse",
+     "note": "Australia's largest job site."
+    },
+    {
+     "name": "Jora",
+     "url": "https://au.jora.com",
+     "kind": "aggregator",
+     "access": "browse"
+    },
+    {
+     "name": "Indeed Australia",
+     "url": "https://au.indeed.com",
+     "kind": "private",
+     "access": "browse"
+    }
+   ],
+   "sources": [
+    "https://www.servicesaustralia.gov.au/looking-for-work-and-job-hunting",
+    "https://www.veteransemployment.gov.au/where-find-aps-jobs",
+    "https://apm.net.au/job-seekers/resources/best-job-sites-in-australia-to-find-employment"
+   ]
+  }
+ },
+ "international": [
+  {
+   "name": "EURES (all EU/EEA countries and Switzerland)",
+   "url": "https://eures.europa.eu",
+   "kind": "public",
+   "access": "browse",
+   "note": "The EU's job mobility portal; collects public employment service vacancies."
+  },
+  {
+   "name": "JSearch (Google for Jobs)",
+   "url": "https://rapidapi.com",
+   "kind": "aggregator",
+   "access": "built_in",
+   "note": "Built in; needs your RapidAPI key. Most countries.",
+   "source": "jsearch"
+  },
+  {
+   "name": "Adzuna",
+   "url": "https://developer.adzuna.com",
+   "kind": "aggregator",
+   "access": "built_in",
+   "note": "Built in; needs a free key. AT AU BE BR CA CH DE ES FR GB IN IT MX NL NZ PL SG US ZA (not the Nordics).",
+   "source": "adzuna"
+  },
+  {
+   "name": "Hacker News \"Who is hiring?\"",
+   "url": "https://news.ycombinator.com",
+   "kind": "aggregator",
+   "access": "built_in",
+   "note": "Built in. Startups, often remote.",
+   "source": "hn_who_is_hiring"
+  },
+  {
+   "name": "Y Combinator startup jobs",
+   "url": "https://www.ycombinator.com/jobs",
+   "kind": "aggregator",
+   "access": "built_in",
+   "note": "Built in.",
+   "source": "yc_jobs"
+  },
+  {
+   "name": "Jooble",
+   "url": "https://jooble.org/api/about",
+   "kind": "aggregator",
+   "access": "api_key",
+   "note": "Free API key on request, 60+ countries. Not yet built in."
+  },
+  {
+   "name": "Careerjet",
+   "url": "https://www.careerjet.com/partners",
+   "kind": "aggregator",
+   "access": "api_key",
+   "note": "Partner API (affiliate ID). Not yet built in."
+  },
+  {
+   "name": "Remotive (remote jobs)",
+   "url": "https://remotive.com/api/remote-jobs",
+   "kind": "aggregator",
+   "access": "api_open",
+   "note": "No key; at most 4 requests a day, attribution required. Not yet built in."
+  },
+  {
+   "name": "LinkedIn Jobs",
+   "url": "https://www.linkedin.com/jobs",
+   "kind": "private",
+   "access": "browse",
+   "note": "Read only: never apply, connect or message."
+  },
+  {
+   "name": "Indeed",
+   "url": "https://www.indeed.com/worldwide",
+   "kind": "private",
+   "access": "browse",
+   "note": "Country sites for most countries listed here."
+  }
+ ],
+ "academic": {
+  "sites": [
+   {
+    "name": "EURAXESS (Europe, research jobs)",
+    "url": "https://euraxess.ec.europa.eu",
+    "kind": "academic",
+    "access": "browse"
+   },
+   {
+    "name": "AcademicPositions (mostly Europe)",
+    "url": "https://academicpositions.com",
+    "kind": "academic",
+    "access": "browse"
+   },
+   {
+    "name": "jobs.ac.uk (UK, some international)",
+    "url": "https://www.jobs.ac.uk",
+    "kind": "academic",
+    "access": "browse"
+   },
+   {
+    "name": "Times Higher Education Jobs",
+    "url": "https://www.timeshighereducation.com",
+    "kind": "academic",
+    "access": "browse"
+   },
+   {
+    "name": "Nature Careers (science)",
+    "url": "https://www.nature.com/naturecareers",
+    "kind": "academic",
+    "access": "browse"
+   },
+   {
+    "name": "HigherEdJobs (US)",
+    "url": "https://www.higheredjobs.com",
+    "kind": "academic",
+    "access": "browse"
+   },
+   {
+    "name": "Euroscience Jobs (Europe)",
+    "url": "https://www.eurosciencejobs.com",
+    "kind": "academic",
+    "access": "browse"
+   },
+   {
+    "name": "academics.com (Germany, Austria, Switzerland)",
+    "url": "https://www.academics.com",
+    "kind": "academic",
+    "access": "browse"
+   },
+   {
+    "name": "ABG (France, PhD holders)",
+    "url": "https://www.abg.asso.fr/en/candidatOffres",
+    "kind": "academic",
+    "access": "browse"
+   },
+   {
+    "name": "jobRxiv (science)",
+    "url": "https://jobrxiv.org",
+    "kind": "academic",
+    "access": "browse"
+   }
+  ],
+  "sources": [
+   "https://www.ox.ac.uk/careers/who-we-support/researchers/getting-a-job/finding-vacancies-for-researchers"
+  ]
+ },
+ "excluded": [
+  {
+   "name": "Monster / CareerBuilder",
+   "reason": "CareerBuilder + Monster filed for bankruptcy in 2025 and sold its businesses.",
+   "source": "https://www.staffingindustry.com/news/global-daily-news/careerbuilder-monster-selling-businesses-filing-for-bankruptcy"
+  },
+  {
+   "name": "Workopolis (Canada)",
+   "reason": "Wound down by its owner (Indeed)."
+  },
+  {
+   "name": "Blocket Jobb (Sweden)",
+   "reason": "Could not be confirmed as active; Swedish postings are covered by Platsbanken."
+  }
+ ]
+}

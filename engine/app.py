@@ -39,7 +39,7 @@ from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler
 from urllib.parse import urlsplit, parse_qs
 
 from . import __version__, decisions, documents, tracker as tr, schedule as sched
-from .home import REPO_DIR, WEB_DIR, _strip_help
+from .home import REPO_DIR, WEB_DIR, DEFAULTS_DIR, _strip_help
 from .profile import Intake
 
 APP_HTML = os.path.join(WEB_DIR, "app.html")
@@ -408,6 +408,8 @@ def _make_handler(home, token, jobs, httpd_ref):
                 return self._send(200, self._settings_get())
             if u.path == "/api/employers":
                 return self._send(200, _read_json(home.path("employers"), {"mode": "extend", "employers": []}) or {})
+            if u.path == "/api/job_sites":
+                return self._send(200, _read_json(os.path.join(DEFAULTS_DIR, "job_sites.json"), {}) or {})
             if u.path == "/api/cloud":
                 from . import cloud_sync
                 return self._send(200, cloud_sync.settings(home))

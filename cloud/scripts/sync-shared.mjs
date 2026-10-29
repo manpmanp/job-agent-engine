@@ -7,7 +7,8 @@ import { copyFileSync, mkdirSync } from "node:fs";
 const root = new URL("../../", import.meta.url), out = new URL("../src/shared/", import.meta.url);
 mkdirSync(out, { recursive: true });
 for (const [from, to] of [["engine/web/app.html", "index.html"], ["engine/web/form.html", "candidate_form.html"],
-                          ["engine/defaults/search_defaults.json", "search_defaults.json"], ["engine/defaults/skill_vocabulary.json", "skill_vocabulary.json"]]) {
+                          ["engine/defaults/search_defaults.json", "search_defaults.json"], ["engine/defaults/skill_vocabulary.json", "skill_vocabulary.json"],
+                          ["engine/defaults/job_sites.json", "job_sites.json"]]) {
   copyFileSync(new URL(from, root), new URL(to, out));
   console.log(`copied ${from}`);
 }

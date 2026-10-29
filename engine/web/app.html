@@ -91,6 +91,13 @@ iframe.form { width:100%; height:78vh; border:1px solid var(--border); border-ra
 body.cloud .local-only { display:none !important; }
 body:not(.cloud) .cloud-only { display:none !important; }
 ul.plain { margin:4px 0 0 18px; padding:0; }
+.region { margin:0 0 12px; } .region b { display:block; font-size:13px; margin-bottom:6px; }
+.region .chips { margin:0; }
+.site { display:flex; gap:8px; align-items:baseline; padding:6px 0; border-top:1px solid var(--border); flex-wrap:wrap; }
+.site:first-of-type { border-top:0; }
+.site input { margin:0; } .site .nm { font-weight:bold; } .site .nt { flex-basis:100%; padding-left:24px; }
+.site.off .nm { opacity:.55; text-decoration:line-through; }
+details.grp > summary { cursor:pointer; font-weight:bold; color:var(--accent); }
 </style>
 </head>
 <body>
@@ -102,6 +109,7 @@ ul.plain { margin:4px 0 0 18px; padding:0; }
     <button data-v="add">Add a posting</button>
     <button data-v="docs">Documents<span class="count" id="c-docs" hidden></span></button>
     <button data-v="setup">Setup</button>
+    <button data-v="sites">Job sites</button>
     <button data-v="settings">Settings</button>
   </nav>
 </div></header>
@@ -192,6 +200,30 @@ ul.plain { margin:4px 0 0 18px; padding:0; }
   </div>
 </section>
 
+<!-- JOB SITES -->
+<section class="view" id="v-sites">
+  <h1>Job sites</h1>
+  <p class="muted" style="margin-top:-6px">Choose the countries you look for work in. Each country shows its credible job sites: the public employment service and the main private boards, checked against official sources.</p>
+  <div class="card">
+    <b>Searched automatically</b>
+    <div class="muted small">These run on every search. Services that need a key get it in Settings.</div>
+    <div id="src"></div>
+    <div class="row" style="margin-top:8px"><button class="b primary" id="btn-save-src">Save</button><span id="src-r" class="small muted"></span></div>
+  </div>
+  <h2>Countries</h2>
+  <div class="card"><div id="countries" class="muted small">Loading...</div></div>
+  <h2>Sites to check</h2>
+  <p class="muted small" style="margin-top:-4px">Untick a site you do not want to use. Sites marked "open yourself" have no automatic search: open them from here, or let your agent read them (read only, nothing is ever applied for or sent).</p>
+  <div id="site-list"></div>
+  <div class="card">
+    <b>Other sites</b>
+    <div class="muted small">One per line: a name, a vertical bar, and the address.</div>
+    <textarea id="custom-sites" placeholder="Example board | https://jobs.example.com" style="min-height:80px;margin-top:8px"></textarea>
+  </div>
+  <div class="row"><button class="b primary" id="btn-save-sites">Save job sites</button><span id="sites-r" class="small muted"></span></div>
+  <p class="small muted" id="sites-checked"></p>
+</section>
+
 <!-- SETTINGS -->
 <section class="view" id="v-settings">
   <h1>Settings</h1>
@@ -218,10 +250,6 @@ ul.plain { margin:4px 0 0 18px; padding:0; }
     <b>Run every morning</b>
     <div class="switch"><input type="checkbox" id="sch"><label for="sch" id="sch-text">off</label></div>
     <div class="muted small">Searches on your search day and refreshes on the other days, even when this window is closed. Your computer must be on (a Mac catches up after waking).</div>
-  </div>
-  <div class="card">
-    <b>Where to search</b>
-    <div id="src"></div>
   </div>
   <div class="card">
     <div class="local-only">
@@ -282,6 +310,7 @@ function show(v) {
   $$('section.view').forEach(s => s.classList.toggle('on', s.id === 'v-' + v));
   if (v === 'setup') { if (!$('#form').src) $('#form').src = '/form'; loadEmployers(); }
   if (v === 'settings') loadSettings();
+  if (v === 'sites') loadSites();
   if (v === 'postings' || v === 'docs') loadPostings();
   history.replaceState(null, '', '#' + v);
 }
@@ -543,8 +572,8 @@ const SOURCES = [
   ['jobtech', 'Arbetsformedlingen (Platsbanken, Sweden)', true],
   ['employer_sites', 'Careers pages of your employer list', true],
   ['confirm_leads', 'Open job links found on careers pages and read them', true],
-  ['jsearch', 'JSearch: Google for Jobs (needs a key below)', false],
-  ['adzuna', 'Adzuna (needs a key below; not Sweden or Denmark)', false],
+  ['jsearch', 'JSearch: Google for Jobs (needs a key in Settings)', false],
+  ['adzuna', 'Adzuna (needs a key in Settings; not Sweden or Denmark)', false],
   ['hn_who_is_hiring', 'Hacker News "Who is hiring?" (startups)', false],
   ['yc_jobs', 'Y Combinator startups\' job posts', false],
 ];
@@ -571,7 +600,6 @@ $('#btn-cloud-off').onclick = async () => { try { await api('/api/cloud', { url:
 async function loadSettings() {
   loadCloud();
   try { SET = await api('/api/settings'); } catch (e) { return toast(e.message); }
-  $('#src').innerHTML = SOURCES.map(([k, l, def]) => `<div class="switch"><input type="checkbox" id="s-${k}" ${(SET.sources[k] ?? def) ? 'checked' : ''}><label for="s-${k}">${esc(l)}</label></div>`).join('');
   $('#enr').checked = !!SET.enrichment.enabled; $('#enr-prof').checked = !!SET.enrichment.send_profile;
   for (const [id, k] of [['k-anthropic', 'anthropic_api_key'], ['k-jsearch', 'jsearch_api_key'], ['k-adzuna-id', 'adzuna_app_id'], ['k-adzuna', 'adzuna_app_key']]) {
     $('#' + id + '-s').textContent = SET.secrets[k] ? '(saved; leave empty to keep)' : ''; $('#' + id).value = '';
@@ -580,10 +608,9 @@ async function loadSettings() {
   $('#sch').checked = st.on; $('#sch-text').textContent = st.on ? st.text : 'off';
 }
 $('#btn-save-set').onclick = async () => {
-  const sources = {}; SOURCES.forEach(([k]) => sources[k] = $('#s-' + k).checked);
   const secretsIn = { anthropic_api_key: $('#k-anthropic').value, jsearch_api_key: $('#k-jsearch').value,
                       adzuna_app_id: $('#k-adzuna-id').value, adzuna_app_key: $('#k-adzuna').value };
-  try { await api('/api/settings', { sources, secrets: secretsIn, enrichment: { enabled: $('#enr').checked, send_profile: $('#enr-prof').checked } });
+  try { await api('/api/settings', { secrets: secretsIn, enrichment: { enabled: $('#enr').checked, send_profile: $('#enr-prof').checked } });
         toast('Saved'); loadSettings(); refresh(); } catch (e) { toast(e.message); }
 };
 async function setSchedule(on) {
@@ -592,6 +619,76 @@ async function setSchedule(on) {
 }
 $('#sch').onchange = e => setSchedule(e.target.checked);
 $('#btn-quit').onclick = async () => { await api('/api/quit', {}).catch(() => {}); document.body.innerHTML = '<main><h1>Job Agent has stopped.</h1><p class="muted">Start it again with the Job Agent launcher. You can close this tab.</p></main>'; };
+
+// ----------------------------------------------------------- job sites
+const ACCESS_TAG = { built_in: ['good', 'searched automatically'], api_key: ['', 'open yourself (has an API, not built in yet)'],
+                     api_open: ['', 'open yourself (has an API, not built in yet)'], browse: ['', 'open yourself'] };
+let SITES = null, PICK = { countries: new Set(), skip: new Set() };
+function countriesFromLocations(cfg) {
+  return [...new Set((cfg.locations || []).map(l => String((l && l.country) || '').toUpperCase().replace(/^UK$/, 'GB')).filter(Boolean))];
+}
+async function loadSites() {
+  try {
+    const [cat, cfg, set] = await Promise.all([SITES ? Promise.resolve(SITES) : api('/api/job_sites'), api('/api/search_config'), api('/api/settings')]);
+    SITES = cat; SET = set;
+    const js = cfg.job_sites || {};
+    PICK.countries = new Set(Array.isArray(js.countries) ? js.countries : countriesFromLocations(cfg));
+    PICK.skip = new Set(js.skip || []);
+    $('#custom-sites').value = (js.custom || []).map(s => s.name + ' | ' + s.url).join('\n');
+  } catch (e) { return toast(e.message); }
+  $('#src').innerHTML = SOURCES.map(([k, l, def]) => `<div class="switch"><input type="checkbox" id="s-${k}" ${(SET.sources[k] ?? def) ? 'checked' : ''}><label for="s-${k}">${esc(l)}</label></div>`).join('');
+  $('#sites-checked').textContent = `Sites checked on ${SITES.checked}. Sources for every country are listed in docs/job_sites.md.`;
+  renderCountries(); renderSites();
+}
+function renderCountries() {
+  const byRegion = {};
+  for (const [code, c] of Object.entries(SITES.countries)) (byRegion[c.region] = byRegion[c.region] || []).push([code, c]);
+  $('#countries').classList.remove('muted', 'small');
+  $('#countries').innerHTML = SITES.regions.filter(r => byRegion[r]).map(r => `<div class="region"><b>${esc(r)}</b><div class="chips">` +
+    byRegion[r].sort((a, b) => a[1].name.localeCompare(b[1].name)).map(([code, c]) =>
+      `<span class="chip${PICK.countries.has(code) ? ' on' : ''}" data-cc="${code}">${esc(c.name)}</span>`).join('') + '</div></div>').join('');
+  $$('#countries .chip').forEach(ch => ch.onclick = () => {
+    const cc = ch.dataset.cc; PICK.countries.has(cc) ? PICK.countries.delete(cc) : PICK.countries.add(cc);
+    ch.classList.toggle('on'); renderSites();
+  });
+}
+function siteRow(s) {
+  const [cls, label] = ACCESS_TAG[s.access] || ['', s.access];
+  if (s.access === 'built_in') {
+    const on = s.source ? (SET.sources[s.source] ?? (SOURCES.find(x => x[0] === s.source) || [])[2]) : true;
+    return `<div class="site"><span style="width:13px"></span><a class="nm" href="${esc(s.url)}" target="_blank" rel="noopener noreferrer">${esc(s.name)}</a>
+      <span class="tag ${on ? 'good' : 'warn'}">${on ? label : 'automatic search is off (see above)'}</span>
+      ${s.note ? `<span class="nt small muted">${esc(s.note)}</span>` : ''}</div>`;
+  }
+  const off = PICK.skip.has(s.url);
+  return `<div class="site${off ? ' off' : ''}"><input type="checkbox" data-url="${esc(s.url)}" ${off ? '' : 'checked'}>
+    <a class="nm" href="${esc(s.url)}" target="_blank" rel="noopener noreferrer">${esc(s.name)}</a>
+    <span class="tag">${esc(s.kind)}</span><span class="tag ${cls}">${esc(label)}</span>
+    ${s.note ? `<span class="nt small muted">${esc(s.note)}</span>` : ''}</div>`;
+}
+function renderSites() {
+  const chosen = Object.entries(SITES.countries).filter(([cc]) => PICK.countries.has(cc)).sort((a, b) => a[1].name.localeCompare(b[1].name));
+  const blocks = chosen.map(([cc, c]) => `<div class="card"><b>${esc(c.name)}</b>${c.sites.map(siteRow).join('')}</div>`);
+  if (!chosen.length) blocks.push('<div class="card empty">Choose one or more countries above.</div>');
+  blocks.push(`<div class="card"><details class="grp"${chosen.length ? '' : ' open'}><summary>International and multi-country</summary>${SITES.international.map(siteRow).join('')}</details></div>`);
+  blocks.push(`<div class="card"><details class="grp"><summary>Academic and research</summary>${SITES.academic.sites.map(siteRow).join('')}</details></div>`);
+  $('#site-list').innerHTML = blocks.join('');
+  $$('#site-list input[data-url]').forEach(cb => cb.onchange = () => {
+    cb.checked ? PICK.skip.delete(cb.dataset.url) : PICK.skip.add(cb.dataset.url);
+    cb.closest('.site').classList.toggle('off', !cb.checked);
+  });
+}
+$('#btn-save-src').onclick = async () => {
+  const sources = {}; SOURCES.forEach(([k]) => sources[k] = $('#s-' + k).checked);
+  try { SET = await api('/api/settings', { sources }); $('#src-r').textContent = 'Saved.'; renderSites(); refresh(); } catch (e) { toast(e.message); }
+};
+$('#btn-save-sites').onclick = async () => {
+  const custom = $('#custom-sites').value.split('\n').map(l => l.split('|').map(s => s.trim())).filter(p => p[0] && /^https?:\/\//.test(p[1] || ''))
+    .map(([name, url]) => ({ name: name.slice(0, 120), url: url.slice(0, 500) }));
+  const job_sites = { countries: [...PICK.countries].sort(), skip: [...PICK.skip].sort(), custom };
+  try { await api('/api/search_config', { job_sites }); $('#sites-r').textContent = `Saved: ${job_sites.countries.length} countr${job_sites.countries.length === 1 ? 'y' : 'ies'}, ${custom.length} other site(s).`; }
+  catch (e) { toast(e.message); }
+};
 
 // ----------------------------------------------------------- start
 refresh().then(() => { loadPostings(); const v = location.hash.slice(1); if (v && $('#v-' + v)) show(v); });
