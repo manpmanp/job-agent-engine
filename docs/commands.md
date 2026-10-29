@@ -26,6 +26,7 @@ before the command, or with the `JOB_AGENT_HOME` environment variable
 | `form [--port N] [--no-browser]` | Opens the app on its Setup page (search setup and profile). |
 | `test` | Runs the offline test suite. |
 | `clean` | Removes what the engine no longer uses or rebuilds on demand: Node modules from versions before 0.4, Python caches, Finder's `.DS_Store` files, and folders left empty after the 0.4.2 reorganisation. Never touches `.venv` or any agent home. |
+| `release` | For maintainers: updates this folder from GitHub, then tags the version in `engine/__init__.py` on the newest commit and pushes it, so GitHub builds and attaches the three packages. If that tag already sits on an older commit, it asks before moving it. |
 | `init` | Creates a new agent home with blank inputs and empty state files, and lists what it created. Every other command does the same silently when something is missing (including `output/` and the weekly page). Never overwrites existing files. |
 | `status` | Lists every feature as on or off, why, and what would switch it on. |
 | `plan` | Prints the search plan from the search config, employer list and rejection history. |

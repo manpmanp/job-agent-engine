@@ -10,7 +10,7 @@
 #
 # Single entry point for the job-search agent engine.
 #   ./run.sh [--home DIR] <command> [args]
-# Commands: --setup [--browser] (install + open the app), app, clean, form, fetch, test, init, status, plan, collect, verify, enrich, run,
+# Commands: --setup [--browser] (install + open the app), app, clean, release, form, fetch, test, init, status, plan, collect, verify, enrich, run,
 #           schedule, open, add-postings, weekly, sync, intake, tailor, checkpoint,
 #           note, demo. See docs/commands.md.
 set -euo pipefail
@@ -44,6 +44,40 @@ if [ "${1:-}" = "clean" ] || { [ "${1:-}" = "--home" ] && [ "${3:-}" = "clean" ]
   done
   echo "cleaned: old Node modules, Python caches, .DS_Store files and empty old folders"
   [ -d my_agent ] && echo "kept my_agent/ (an agent home; delete it yourself if you do not use it)"
+  exit 0
+fi
+
+# "release" (maintainers): publishes the version in engine/__init__.py.
+# Brings this folder up to date with GitHub, then tags that version on the
+# newest commit and pushes the tag; GitHub then builds the three packages
+# and attaches them to the release. If the tag already exists on an older
+# commit (tagged before pulling), it asks before moving it.
+if [ "${1:-}" = "release" ]; then
+  cd "$ENGINE_DIR"
+  BRANCH="$(git rev-parse --abbrev-ref HEAD)"
+  [ "$BRANCH" = "main" ] || { echo "switch to main first (now on $BRANCH)" >&2; exit 1; }
+  git diff --quiet && git diff --cached --quiet || { echo "you have uncommitted changes; commit or discard them first" >&2; exit 1; }
+  git fetch --quiet origin main --tags --force
+  git pull --quiet --ff-only origin main || { echo "could not update from GitHub (local commits?)" >&2; exit 1; }
+  VERSION="$(sed -n 's/^__version__ = "\(.*\)"/\1/p' engine/__init__.py)"
+  TAG="v$VERSION"; HEAD_SHA="$(git rev-parse HEAD)"
+  REMOTE_SHA="$(git ls-remote --tags origin "refs/tags/$TAG" | cut -f1)"
+  if [ "$REMOTE_SHA" = "$HEAD_SHA" ]; then
+    echo "$TAG is already released from the newest commit ($(git log -1 --format='%h %s' | cut -c1-70))"; exit 0
+  fi
+  if [ -n "$REMOTE_SHA" ]; then
+    echo "$TAG exists on an older commit: $(git log -1 --format='%h %s' "$REMOTE_SHA" 2>/dev/null | cut -c1-70)"
+    echo "newest commit:                 $(git log -1 --format='%h %s' | cut -c1-70)"
+    read -r -p "Move $TAG to the newest commit and rebuild its packages? [y/N] " OK
+    [ "$OK" = "y" ] || [ "$OK" = "Y" ] || { echo "nothing changed"; exit 0; }
+    git tag -f "$TAG" >/dev/null && git push --quiet --force origin "refs/tags/$TAG"
+  else
+    git tag -d "$TAG" >/dev/null 2>&1 || true
+    git tag "$TAG" && git push --quiet origin "refs/tags/$TAG"
+  fi
+  URL="$(git remote get-url origin | sed -e 's#^git@github.com:#https://github.com/#' -e 's#\.git$##')"
+  echo "$TAG pushed. The packages are built in a few minutes: $URL/actions"
+  echo "then download them from $URL/releases/tag/$TAG"
   exit 0
 fi
 
