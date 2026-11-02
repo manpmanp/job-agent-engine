@@ -27,7 +27,7 @@ switched on and off, and are also in the files below):
 [How it works](engine/web/demo/job-agent-demo-1-how-it-works.mp4) (1:21),
 [Let it run by itself](engine/web/demo/job-agent-demo-2-daily-search.mp4) (0:53): the daily
 search and what your computer needs, and
-[Help from Claude](engine/web/demo/job-agent-demo-3-help-from-claude.mp4) (1:16): tailored
+[Help from Claude](engine/web/demo/job-agent-demo-3-help-from-claude.mp4) (1:12): tailored
 drafts with your own API key or by copy and paste, and
 [Get a Claude API key](engine/web/demo/job-agent-demo-4-get-an-api-key.mp4) (0:43). The app's
 first page plays all four.
