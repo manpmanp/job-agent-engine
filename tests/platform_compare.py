@@ -12,7 +12,7 @@
 import json
 import sys
 
-SYSTEM_SPECIFIC = {"system", "mode"}
+SYSTEM_SPECIFIC = {"system", "mode", "info"}
 
 
 def flat(d, prefix=""):
