@@ -289,7 +289,8 @@ def _make_handler(home, token, jobs, httpd_ref, presence=None):
             if m and (m.group(1) or m.group(2)):    # browsers (Safari above all) fetch video in pieces
                 if m.group(1):
                     start = int(m.group(1))
-                    end = min(int(m.group(2)), size - 1) if m.group(2) else size - 1
+                    # an open-ended request gets at most 1 MB, so no connection stays busy with a film nobody watches
+                    end = min(int(m.group(2)), size - 1) if m.group(2) else min(size - 1, start + (1 << 20) - 1)
                 else:
                     start = max(0, size - int(m.group(2)))
                 if start > end or start >= size:
