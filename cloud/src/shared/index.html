@@ -318,6 +318,14 @@ button.b.no:hover { border-color:var(--stop); }
 .g-steps li.now::before { background:var(--accent-2); color:#fff; }
 @media (max-width:860px) { .g-steps { grid-template-columns:1fr 1fr; } }
 @media (max-width:480px) { .g-steps { grid-template-columns:1fr; } }
+
+.g-trust { display:grid; grid-template-columns:repeat(4, 1fr); gap:10px; margin-top:12px; padding-top:12px; border-top:1px solid var(--border); }
+.g-trust > div { display:flex; gap:8px; align-items:flex-start; }
+.g-trust .ic { width:18px; height:18px; color:var(--go); margin-top:1px; }
+.g-trust p { margin:0; font-size:12.5px; color:var(--muted); } .g-trust b { display:block; color:var(--text); font-size:13px; }
+.g-more { margin-top:12px; }
+@media (max-width:860px) { .g-trust { grid-template-columns:1fr 1fr; } }
+@media (max-width:480px) { .g-trust { grid-template-columns:1fr; } }
 </style>
 </head>
 <body>
@@ -391,6 +399,14 @@ button.b.no:hover { border-color:var(--stop); }
       <li data-g="3"><b>Documents</b><span>Under Accepted, make a CV and cover letter: a template, or a draft with your CV added.</span></li>
       <li data-g="4"><b>Apply</b><span>Open the drafts, edit them, and send them yourself. Nothing is ever sent for you.</span></li>
     </ol>
+    <div class="g-trust">
+      <div><svg class="ic"><use href="#i-shield"/></svg><p><b>Nothing is sent without you</b>It never applies, submits or e-mails anything.</p></div>
+      <div><svg class="ic"><use href="#i-lock"/></svg><p><b>Your data stays with you</b><span class="local-only">Your CV, profile and documents are files on this computer.</span><span class="cloud-only">CVs and documents stay on your computer.</span></p></div>
+      <div><svg class="ic"><use href="#i-globe"/></svg><p><b>What goes online</b>Only your search words and places, to the job sites; AI only when you click it.
+        <a href="#" class="local-only" onclick="show('settings','network');return false">See every request</a></p></div>
+      <div><svg class="ic"><use href="#i-clock"/></svg><p><b>What runs in the background</b><span id="g-bg">Only what you switched on.</span></p></div>
+    </div>
+    <div class="g-more"><button class="b sm" id="g-more"><svg class="ic"><use href="#i-spark"/></svg>How it works, step by step</button></div>
   </div>
   <div id="home-setup"></div>
   <div id="attention"></div>
@@ -716,11 +732,13 @@ $$('.subnav button').forEach(b => b.onclick = () => showSub(b.closest('.subnav')
 $('#add-toggle').onclick = () => { const a = $('#v-add'); a.hidden = !a.hidden; if (!a.hidden) $('#add-url').focus(); };
 function infoOpen(open) {
   $('#info').hidden = !open; $('#info-toggle').textContent = open ? 'Hide how it works' : 'How it works and your privacy';
+  $('.trust').hidden = !open && !$('#guide').hidden;
   try { localStorage.setItem('ja-info', open ? '1' : '0'); } catch (e) { }
 }
 $('#info-toggle').onclick = e => { e.preventDefault(); infoOpen($('#info').hidden); };
-function guideShow(on) { $('#guide').hidden = !on; $('#guide-link').hidden = on; try { localStorage.setItem('ja-guide', on ? '1' : '0'); } catch (e) { } }
+function guideShow(on) { $('#guide').hidden = !on; $('#guide-link').hidden = on; $('.trust').hidden = on && $('#info').hidden; try { localStorage.setItem('ja-guide', on ? '1' : '0'); } catch (e) { } }
 $('#guide-hide').onclick = () => guideShow(false);
+$('#g-more').onclick = () => { infoOpen(true); $('#info').scrollIntoView({ behavior: 'smooth', block: 'start' }); };
 $('#guide-link').onclick = e => { e.preventDefault(); guideShow(true); window.scrollTo(0, 0); };
 function runSearchFromFlow() { capOn('search') ? runJob('/api/run', { mode: 'weekly' }) : $('#sb-what').focus(); }
 
@@ -770,6 +788,8 @@ async function refresh() {
         ? S.schedule.text.replace(/^runs /, '') + ', even when the app is closed' : 'off (Settings > Daily search)'}.`
       + (S.cloud && S.cloud.connected ? ' Your online Job Agent searches on Cloudflare; this app fetches from it while it is open.' : '')
       + ' Nothing else.';
+  $('#g-bg').textContent = CLOUD ? 'The search runs on your own Cloudflare account.' : (S.schedule.on
+    ? 'The app while this tab is open, and the daily search you switched on.' : 'Only the app, and only while this tab is open.');
   $('#bg-short').textContent = CLOUD ? 'Searches on your Cloudflare account' : (S.schedule.on ? 'Runs only while open, plus a daily search' : 'Runs only while this tab is open');
   if (!CLOUD) $('#sch2').checked = !!S.schedule.on;
   const att = [], prof = [];
@@ -1388,7 +1408,8 @@ refresh().then(() => { loadPostings(); const [v, sub] = location.hash.slice(1).s
   let g = null; try { g = localStorage.getItem('ja-guide'); } catch (e) { }
   if (g === '0') guideShow(false);
   let keep = null; try { keep = localStorage.getItem('ja-info'); } catch (e) { }
-  if (keep === '1') infoOpen(true); });
+  if (keep === '1') infoOpen(true);
+  if (g !== '0') $('.trust').hidden = $('#info').hidden; });
 setInterval(() => { if (!jobTimer && document.visibilityState === 'visible') refresh(); }, 30000);
 </script>
 </body>

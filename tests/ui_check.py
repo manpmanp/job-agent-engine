@@ -92,6 +92,8 @@ def main():
             page = browser.new_page(viewport={"width": 1200, "height": 900})
             page.on("pageerror", lambda e: errors.append(str(e)))
             page.on("console", lambda m: errors.append(m.text) if m.type == "error" else None)
+            page.on("response", lambda r: errors.append(f"HTTP {r.status} {r.request.method} {r.url.split('?')[0]} (Host {r.request.headers.get('host', '?')})")
+                    if r.status == 403 else None)
             page.goto(base + "/")
             page.wait_for_selector(".post", timeout=20000)
             c["search_band"] = page.is_visible(".searchbar #sb-what") and page.is_visible("#btn-search")
