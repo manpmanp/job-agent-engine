@@ -69,6 +69,19 @@ def main():
         except Exception:
             time.sleep(0.5)
     out = {"system": platform.system(), "mode": a.browser, "checks": {}, "info": {}}
+    step = ["starting"]
+
+    def watchdog():   # a browser that stops answering would hang the job: report where it stopped instead
+        print(f"STUCK for 240 s at step: {step[0]}", flush=True)
+        out["info"]["stuck_at"] = step[0]
+        with open(a.out, "w", encoding="utf-8") as f:
+            json.dump(out, f, indent=1, sort_keys=True)
+        proc.kill()
+        os._exit(1)
+    import threading
+    timer = threading.Timer(240, watchdog)
+    timer.daemon = True
+    timer.start()
     c = out["checks"]
     errors = []
     shots = a.shots
@@ -94,6 +107,7 @@ def main():
             page.on("console", lambda m: errors.append(m.text) if m.type == "error" else None)
             page.on("response", lambda r: errors.append(f"HTTP {r.status} {r.request.method} {r.url.split('?')[0]} (Host {r.request.headers.get('host', '?')})")
                     if r.status == 403 else None)
+            step[0] = "first page"
             page.goto(base + "/")
             page.wait_for_selector(".post", timeout=20000)
             c["search_band"] = page.is_visible(".searchbar #sb-what") and page.is_visible("#btn-search")
@@ -106,13 +120,16 @@ def main():
             c["cards_with_monogram_and_deadline"] = page.eval_on_selector_all(".post", "ps => ps.filter(p => p.querySelector('.mono') && p.querySelector('.due')).length")
             c["accept_buttons"] = page.locator("button.yes").count()
             c["demo_tiles"] = page.locator(".g-demos .vt").count()
+            step[0] = "open demo film"
             page.click('.g-demos .vt[data-film="1"]')
             page.wait_for_timeout(2500)
             film = page.evaluate("""() => { const v = document.querySelector('#v-video'), tr = v.textTracks[0];
                 return { captions: tr ? tr.mode : null, cues: tr && tr.cues ? tr.cues.length : 0, ready: v.readyState, error: v.error ? v.error.code : null }; }""")
             c["demo_captions_on"] = film["captions"] == "showing" and film["cues"] > 5
+            step[0] = "captions switch"
             page.click("#v-cc")
             c["demo_captions_off"] = page.evaluate("document.querySelector('#v-video').textTracks[0].mode") == "hidden"
+            step[0] = "close film"
             page.keyboard.press("Escape")
             c["demo_closes"] = not page.is_visible("#vmodal")
             out["info"]["demo_video"] = film   # whether a browser build plays H.264 is up to the build, so it is reported, not compared
@@ -120,6 +137,7 @@ def main():
             c["desktop_no_sideways_scroll"] = not overflow(page)
             out["info"]["font"] = page.evaluate("getComputedStyle(document.body).fontFamily")
             snap(page, "jobs")
+            step[0] = "accepted list"
             page.click('#filters .chip[data-f="accepted"]')
             page.wait_for_timeout(500)
             c["accepted_file_tiles"] = page.locator(".file").count()
@@ -127,6 +145,7 @@ def main():
             page.click('#filters .chip[data-f="unmatched"]')
             page.wait_for_timeout(300)
             c["not_matched_view"] = page.locator("#plist .card").count() > 0
+            step[0] = "profile form"
             page.click('#nav button[data-v="setup"]')
             page.wait_for_timeout(1500)
             frame = page.frame_locator("#form")
@@ -143,6 +162,7 @@ def main():
             snap(page, "settings")
             page.close()
 
+            step[0] = "phone width"
             phone = browser.new_page(viewport={"width": 390, "height": 844})
             phone.on("pageerror", lambda e: errors.append(str(e)))
             phone.goto(base + "/")
@@ -152,6 +172,7 @@ def main():
             snap(phone, "phone")
             phone.close()
 
+            step[0] = "dark mode"
             ctx = browser.new_context(color_scheme="dark", viewport={"width": 1200, "height": 900})
             dark = ctx.new_page()
             dark.on("pageerror", lambda e: errors.append(str(e)))
@@ -164,6 +185,7 @@ def main():
             ctx.close()
             browser.close()
     finally:
+        timer.cancel()
         proc.kill()
         log.close()
     try:
