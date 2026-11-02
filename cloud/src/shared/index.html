@@ -303,6 +303,21 @@ button.b.no:hover { border-color:var(--stop); }
 .file:hover { background:var(--panel); box-shadow:inset 0 0 0 1px var(--accent-2); } .file .ic { color:var(--accent-2); }
 @media (max-width:560px) { .pbody { margin-left:0; } }
 @media (prefers-color-scheme: dark) { button.b.yes { color:#0C2A20; } .rail .chip[data-f="undecided"] b { color:#0F151C; } }
+
+/* first-page guide: what the app offers, and the four steps (a real sequence, so numbered) */
+.guide { margin-top:14px; padding:16px 18px; }
+.g-top { display:flex; gap:12px; align-items:flex-start; }
+.g-what { margin:0; flex:1; font-size:14.5px; max-width:78ch; }
+.ghost-b { background:none !important; border-color:transparent !important; color:var(--muted) !important; }
+.g-steps { list-style:none; counter-reset:g; margin:14px 0 0; padding:0; display:grid; grid-template-columns:repeat(4, 1fr); gap:10px; }
+.g-steps li { counter-increment:g; position:relative; padding:10px 12px 10px 44px; border-radius:12px; background:var(--bg); }
+.g-steps li::before { content:counter(g); position:absolute; left:12px; top:10px; width:22px; height:22px; border-radius:50%; display:grid; place-items:center;
+                      font-size:12px; font-weight:700; background:var(--soft); color:var(--accent); }
+.g-steps li b { display:block; font-size:14px; } .g-steps li span { display:block; font-size:12.5px; color:var(--muted); margin-top:2px; }
+.g-steps li.now { background:var(--soft); box-shadow:inset 0 0 0 2px var(--accent-2); }
+.g-steps li.now::before { background:var(--accent-2); color:#fff; }
+@media (max-width:860px) { .g-steps { grid-template-columns:1fr 1fr; } }
+@media (max-width:480px) { .g-steps { grid-template-columns:1fr; } }
 </style>
 </head>
 <body>
@@ -366,6 +381,17 @@ button.b.no:hover { border-color:var(--stop); }
       <a href="#" id="btn-verify" title="Check that the jobs in your list are still open">check that jobs are still open</a>
     </div>
   </div>
+  <div class="card guide" id="guide">
+    <div class="g-top"><p class="g-what"><b>Job Agent</b> finds job postings for you on public job sites and employers' career pages,
+      lets you sort them in seconds, and drafts a CV and cover letter for the ones you want. It all runs on your computer; you apply yourself.</p>
+      <button class="b sm ghost-b" id="guide-hide" title="Hide this guide (it comes back from the link at the bottom)">Hide</button></div>
+    <ol class="g-steps">
+      <li data-g="1"><b>Search</b><span>Type the jobs and places above, press Search. Tick "every morning" to let it run daily.</span></li>
+      <li data-g="2"><b>Decide</b><span>Accept the jobs you like, Reject the rest. Rejections teach later searches.</span></li>
+      <li data-g="3"><b>Documents</b><span>Under Accepted, make a CV and cover letter: a template, or a draft with your CV added.</span></li>
+      <li data-g="4"><b>Apply</b><span>Open the drafts, edit them, and send them yourself. Nothing is ever sent for you.</span></li>
+    </ol>
+  </div>
   <div id="home-setup"></div>
   <div id="attention"></div>
 
@@ -403,6 +429,7 @@ button.b.no:hover { border-color:var(--stop); }
     <span class="local-only"><svg class="ic"><use href="#i-globe"/></svg><a href="#" onclick="show('settings','network');return false">See what goes over the internet</a></span>
     <span><svg class="ic"><use href="#i-clock"/></svg><span id="bg-short"></span></span>
     <span class="spacer"></span>
+    <a href="#" id="guide-link" hidden>Show the guide</a>
     <a href="#" id="info-toggle">How it works and your privacy</a>
   </div>
   <div id="info" hidden>
@@ -692,6 +719,9 @@ function infoOpen(open) {
   try { localStorage.setItem('ja-info', open ? '1' : '0'); } catch (e) { }
 }
 $('#info-toggle').onclick = e => { e.preventDefault(); infoOpen($('#info').hidden); };
+function guideShow(on) { $('#guide').hidden = !on; $('#guide-link').hidden = on; try { localStorage.setItem('ja-guide', on ? '1' : '0'); } catch (e) { } }
+$('#guide-hide').onclick = () => guideShow(false);
+$('#guide-link').onclick = e => { e.preventDefault(); guideShow(true); window.scrollTo(0, 0); };
 function runSearchFromFlow() { capOn('search') ? runJob('/api/run', { mode: 'weekly' }) : $('#sb-what').focus(); }
 
 // ----------------------------------------------------------- jobs
@@ -726,9 +756,10 @@ async function refresh() {
   $('#search-desc').textContent = capOn('search')
     ? `${S.capabilities.search.why}. Full search on ${S.search_day}s${S.schedule.on ? ', automatically every morning' : ''}.`
     : 'Not set up yet.';
-  $('#home-setup').innerHTML = capOn('search') ? '' :
-    `<div class="card welcome"><b>Welcome.</b> Type the jobs you look for and where, then press <b>Search</b>.
-       Nothing is ever sent or applied for without you; read how below.</div>`;
+  $('#home-setup').innerHTML = '';
+  // the guide marks where you are: 1 nothing searched yet, 2 jobs to decide, 3 accepted jobs waiting for documents, 4 drafts made
+  const step = !capOn('search') || !c.active ? 1 : c.undecided ? 2 : c.accepted_waiting ? 3 : 4;
+  $$('#guide .g-steps li').forEach(li => li.classList.toggle('now', +li.dataset.g === step));
   if (!capOn('search')) infoOpen(true);
   $('#fl-new').textContent = c.undecided;
   $('#fl-search').textContent = S.schedule.on ? 'every morning by itself, or now' : 'when you press Search now';
@@ -1354,6 +1385,8 @@ refresh().then(() => { loadPostings(); const [v, sub] = location.hash.slice(1).s
     setTimeout(() => { $('#maint').scrollIntoView({ block: 'center' }); v === 'update' ? checkUpdate() : $('#un-open').click(); }, 300);
   } else show(v || 'postings', sub);
   loadSearchBar();
+  let g = null; try { g = localStorage.getItem('ja-guide'); } catch (e) { }
+  if (g === '0') guideShow(false);
   let keep = null; try { keep = localStorage.getItem('ja-info'); } catch (e) { }
   if (keep === '1') infoOpen(true); });
 setInterval(() => { if (!jobTimer && document.visibilityState === 'visible') refresh(); }, 30000);

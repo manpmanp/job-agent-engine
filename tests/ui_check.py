@@ -96,6 +96,8 @@ def main():
             page.wait_for_selector(".post", timeout=20000)
             c["search_band"] = page.is_visible(".searchbar #sb-what") and page.is_visible("#btn-search")
             c["search_words_shown"] = bool(page.input_value("#sb-what"))
+            c["guide_steps"] = page.locator("#guide .g-steps li").count()
+            c["guide_current_step"] = page.get_attribute("#guide .g-steps li.now", "data-g")
             c["rail_items"] = page.eval_on_selector_all("#filters .chip", "bs => bs.filter(b => getComputedStyle(b).display !== 'none').length")
             c["to_decide_count"] = page.text_content("#n-undecided")
             c["cards"] = page.locator(".post").count()
