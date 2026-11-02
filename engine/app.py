@@ -186,6 +186,11 @@ def _last_notes(home, n=14):
 
 
 # -------------------------------------------------------------- server
+FAVICON = ('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#2E6FB0" stroke-width="1.8" '
+           'stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="2.5" fill="#fff"/>'
+           '<path d="M9 7V5.5A1.5 1.5 0 0 1 10.5 4h3A1.5 1.5 0 0 1 15 5.5V7"/><path d="M3 12.5h18"/><circle cx="12" cy="12.5" r="1.6"/></svg>')
+
+
 class Presence:
     """Knows whether the app's page is still open, so the app can stop by
     itself when its last tab is closed instead of staying behind in the
@@ -437,6 +442,8 @@ def _make_handler(home, token, jobs, httpd_ref, presence=None):
                 return self._page(APP_HTML)
             if u.path == "/form":
                 return self._page(FORM, "window.JOB_AGENT_EMBEDDED = true;")
+            if u.path in ("/favicon.ico", "/favicon.svg"):    # browsers ask for it without the page's token
+                return self._send(200, FAVICON.encode(), "image/svg+xml")
             if u.path == "/api/ping":
                 return self._send(200, {"app": "job-agent-engine", "home": home.root})
             if u.path == "/file":

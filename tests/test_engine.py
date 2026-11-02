@@ -822,6 +822,11 @@ class TestApp(unittest.TestCase):
         code, r = self.j("/api/listings")
         self.assertEqual((code, len(r["listings"]), r["listings"][0]["why"]), (200, 1, "none of your keywords"))
 
+    def test_favicon_without_token(self):
+        import urllib.request
+        with urllib.request.urlopen(f"http://127.0.0.1:{self.port}/favicon.ico") as r:
+            self.assertEqual((r.status, r.headers.get("Content-Type")), (200, "image/svg+xml"))
+
     def test_network_api(self):
         code, r = self.j("/api/network?days=7")
         self.assertEqual(code, 200)
