@@ -154,6 +154,12 @@ def main():
     finally:
         proc.kill()
         log.close()
+    try:
+        refused = [l.strip() for l in open(log.name, encoding="utf-8", errors="replace") if l.startswith("refused:")]
+    except OSError:
+        refused = []
+    if refused:
+        out["info"]["refused_by_app"] = refused[:10]
     c["page_errors"] = len(errors)
     if errors:
         out["info"]["errors"] = errors[:10]

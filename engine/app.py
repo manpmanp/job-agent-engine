@@ -242,6 +242,9 @@ def _make_handler(home, token, jobs, httpd_ref, presence=None):
             return host in ("127.0.0.1", "localhost")
 
         def _send(self, code, body, ctype="application/json", extra=None):
+            if code == 403:   # refused requests are written to the app's output (never the token)
+                print(f"refused: {self.command} {self.path.split('?')[0]} (host {self.headers.get('Host')}, "
+                      f"{(self.headers.get('User-Agent') or '')[:60]})", flush=True)
             data = body if isinstance(body, bytes) else json.dumps(body, ensure_ascii=False, default=str).encode("utf-8")
             self.send_response(code)
             if "charset" not in ctype and (ctype.startswith("text/") or ctype == "application/json"):
