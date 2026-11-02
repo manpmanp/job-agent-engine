@@ -120,21 +120,6 @@ def main():
             c["cards"] = page.locator(".post").count()
             c["cards_with_monogram_and_deadline"] = page.eval_on_selector_all(".post", "ps => ps.filter(p => p.querySelector('.mono') && p.querySelector('.due')).length")
             c["accept_buttons"] = page.locator("button.yes").count()
-            c["demo_tiles"] = page.locator(".g-demos .vt").count()
-            step[0] = "open demo film"
-            page.click('.g-demos .vt[data-film="1"]')
-            page.wait_for_timeout(2500)
-            film = page.evaluate("""() => { const v = document.querySelector('#v-video'), tr = v.textTracks[0];
-                return { captions: tr ? tr.mode : null, cues: tr && tr.cues ? tr.cues.length : 0, ready: v.readyState, error: v.error ? v.error.code : null }; }""")
-            c["demo_captions_on"] = film["captions"] == "showing" and film["cues"] > 5
-            step[0] = "captions switch"
-            page.click("#v-cc")
-            c["demo_captions_off"] = page.evaluate("document.querySelector('#v-video').textTracks[0].mode") == "hidden"
-            step[0] = "close film"
-            page.keyboard.press("Escape")
-            c["demo_closes"] = not page.is_visible("#vmodal")
-            out["info"]["demo_video"] = film   # whether a browser build plays H.264 is up to the build, so it is reported, not compared
-            snap(page, "demo")
             c["desktop_no_sideways_scroll"] = not overflow(page)
             out["info"]["font"] = page.evaluate("getComputedStyle(document.body).fontFamily")
             snap(page, "jobs")
@@ -184,6 +169,32 @@ def main():
             c["dark_page_is_dark"] = bool(nums) and sum(nums) / 3 < 60
             snap(dark, "dark")
             ctx.close()
+
+            # the demo films, on their own page at the end; then the profile is opened again in the same page
+            page = browser.new_page(viewport={"width": 1200, "height": 900})
+            page.on("pageerror", lambda e: errors.append(str(e)))
+            page.goto(base + "/")
+            page.wait_for_selector(".post", timeout=20000)
+            c["demo_tiles"] = page.locator(".g-demos .vt").count()
+            step[0] = "open demo film"
+            page.click('.g-demos .vt[data-film="1"]')
+            page.wait_for_timeout(2500)
+            film = page.evaluate("""() => { const v = document.querySelector('#v-video'), tr = v.textTracks[0];
+                return { captions: tr ? tr.mode : null, cues: tr && tr.cues ? tr.cues.length : 0, ready: v.readyState, error: v.error ? v.error.code : null }; }""")
+            c["demo_captions_on"] = film["captions"] == "showing" and film["cues"] > 5
+            step[0] = "captions switch"
+            page.click("#v-cc")
+            c["demo_captions_off"] = page.evaluate("document.querySelector('#v-video').textTracks[0].mode") == "hidden"
+            step[0] = "close film"
+            page.keyboard.press("Escape")
+            c["demo_closes"] = not page.is_visible("#vmodal")
+            out["info"]["demo_video"] = film   # whether a browser build plays H.264 is up to the build, so it is reported, not compared
+            snap(page, "demo")
+            step[0] = "profile form after a film"
+            page.click('#nav button[data-v="setup"]')
+            page.wait_for_timeout(1500)
+            c["profile_form_after_film"] = page.frame_locator("#form").locator("textarea").count() > 0
+            page.close()
             browser.close()
     finally:
         timer.cancel()
