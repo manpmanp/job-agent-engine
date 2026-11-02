@@ -73,6 +73,7 @@ def main():
 
     def watchdog():   # a browser that stops answering would hang the job: report where it stopped instead
         print(f"STUCK for 240 s at step: {step[0]}", flush=True)
+        print(json.dumps(out, indent=1, sort_keys=True), flush=True)
         out["info"]["stuck_at"] = step[0]
         with open(a.out, "w", encoding="utf-8") as f:
             json.dump(out, f, indent=1, sort_keys=True)

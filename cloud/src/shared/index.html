@@ -808,7 +808,8 @@ function playFilm(n) {
   v.addEventListener('loadedmetadata', () => setCC(ccOn), { once: true });
   v.play().catch(() => { });
 }
-function closeFilm() { const v = $('#v-video'); v.pause(); $('#vmodal').classList.remove('on'); }
+// closing lets go of the film entirely, so no decoder keeps running in the background
+function closeFilm() { const v = $('#v-video'); v.pause(); v.innerHTML = ''; v.removeAttribute('src'); v.load(); $('#vmodal').classList.remove('on'); }
 $$('[data-film]').forEach(b => b.onclick = () => playFilm(b.dataset.film));
 $('#v-cc').onclick = () => setCC(!ccOn);
 $('#v-close').onclick = closeFilm;
