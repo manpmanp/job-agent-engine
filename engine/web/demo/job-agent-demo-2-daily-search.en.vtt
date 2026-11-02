@@ -1,0 +1,41 @@
+WEBVTT
+
+00:00:01.876 --> 00:00:05.781
+Job Agent: the daily search
+What to switch on, and what your computer needs
+
+00:00:05.781 --> 00:00:09.829
+Tick "every morning by itself"
+Right under the search box
+
+00:00:09.829 --> 00:00:16.631
+It searches at 08:02 every day
+Even when the app is closed. Full search on your search day, a quick refresh on the others.
+
+00:00:16.631 --> 00:00:21.072
+What your computer needs
+Only to be on at 08:02. Nothing to install: the app adds one entry to the system scheduler.
+
+00:00:21.072 --> 00:00:26.010
+On a Mac
+A Mac that was asleep runs it when it wakes. If "Background Items Added" appears, leave it allowed.
+
+00:00:26.010 --> 00:00:31.726
+On Windows and Linux
+If the computer is off at 08:02, that morning is skipped: press Search when you are back.
+
+00:00:31.726 --> 00:00:35.264
+Switch it off here
+That removes it from the system again. Uninstalling the app removes it too.
+
+00:00:35.264 --> 00:00:39.733
+Want it to search with your computer off?
+Put the daily search on your own Cloudflare account (the free plan is enough)
+
+00:00:39.733 --> 00:00:45.832
+See what the morning runs did
+Network activity lists every request, also those made while the app was closed
+
+00:00:45.832 --> 00:00:52.662
+Each morning: open the app
+The new jobs wait under To decide

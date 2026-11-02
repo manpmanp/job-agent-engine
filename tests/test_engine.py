@@ -830,7 +830,7 @@ class TestApp(unittest.TestCase):
         req = urllib.request.Request(base + "job-agent-demo-1-how-it-works.mp4", headers={"Range": "bytes=100-199"})
         with urllib.request.urlopen(req) as r:
             self.assertEqual((r.status, r.headers["Content-Range"], r.read()), (206, f"bytes 100-199/{len(full)}", full[100:200]))
-        with urllib.request.urlopen(base + "job-agent-demo-2-daily-search-and-settings.en.vtt") as r:
+        with urllib.request.urlopen(base + "job-agent-demo-2-daily-search.en.vtt") as r:
             self.assertTrue(r.read().startswith(b"WEBVTT"))
         for bad in ("../app.html", "..%2Fapp.html", "nothing.mp4", "x.html"):
             with self.assertRaises(urllib.error.HTTPError) as e:

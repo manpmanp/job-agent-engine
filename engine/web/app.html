@@ -309,21 +309,21 @@ button.b.no:hover { border-color:var(--stop); }
 .guide { margin-top:14px; padding:16px 18px; }
 .g-top { display:flex; gap:12px; align-items:flex-start; }
 /* the two demo films on the first page */
-.g-demos { display:grid; grid-template-columns:minmax(150px, .8fr) 1fr 1fr; gap:12px; align-items:center; margin:14px 0 2px; padding:12px;
+.g-demos { display:grid; grid-template-columns:repeat(3, 1fr); gap:10px 12px; align-items:center; margin:14px 0 2px; padding:12px;
   border-radius:12px; border:1px solid #e9b867; background:linear-gradient(100deg, #fdf3e1, var(--panel) 70%); }
-.g-dl b { display:block; font-size:15px; color:var(--accent); } .g-dl span { font-size:12.5px; color:var(--muted); }
+.g-dl { grid-column:1 / -1; display:flex; gap:10px; align-items:baseline; flex-wrap:wrap; }
+.g-dl b { font-size:15px; color:var(--accent); } .g-dl span { font-size:12.5px; color:var(--muted); }
 .vt { display:flex; gap:10px; align-items:center; text-align:left; padding:6px; border:1px solid var(--border); border-radius:10px;
   background:var(--panel); color:var(--text); font:inherit; cursor:pointer; min-width:0; }
 .vt:hover, .vt:focus-visible { border-color:#E7A23A; box-shadow:0 2px 10px rgba(231,162,58,.25); outline:none; }
-.vt-img { position:relative; flex:none; width:118px; aspect-ratio:1280/800; border-radius:7px; background:#16324F center/cover no-repeat; }
+.vt-img { position:relative; flex:none; width:104px; aspect-ratio:1280/800; border-radius:7px; background:#16324F center/cover no-repeat; }
 .vt-play { position:absolute; inset:0; margin:auto; width:34px; height:34px; border-radius:50%; background:#E7A23A; display:grid; place-items:center;
   box-shadow:0 2px 8px rgba(0,0,0,.3); }
 .vt-play svg { width:14px; height:14px; fill:#1d1a12; margin-left:2px; }
 .vt-len { position:absolute; right:4px; bottom:4px; padding:0 5px; border-radius:4px; background:rgba(0,0,0,.72); color:#fff; font-size:11px; line-height:16px; }
 .vt-t { min-width:0; } .vt-t b { display:block; font-size:14px; } .vt-t span { display:block; font-size:12.5px; color:var(--muted); }
 @media (prefers-color-scheme: dark) { .g-demos { border-color:#6b5226; background:linear-gradient(100deg, #2b2416, var(--panel) 70%); } }
-@media (max-width:860px) { .g-demos { grid-template-columns:1fr 1fr; } .g-dl { grid-column:1 / -1; } }
-@media (max-width:560px) { .g-demos { grid-template-columns:1fr; } }
+@media (max-width:860px) { .g-demos { grid-template-columns:1fr; } }
 .vmodal { position:fixed; inset:0; z-index:60; background:rgba(10,14,20,.78); display:none; align-items:center; justify-content:center; padding:16px; }
 .vmodal.on { display:flex; }
 .vbox { width:min(1100px, 100%); background:var(--panel); border-radius:14px; overflow:hidden; box-shadow:0 20px 60px rgba(0,0,0,.45); }
@@ -425,11 +425,13 @@ button.b.no:hover { border-color:var(--stop); }
       lets you sort them in seconds, and drafts a CV and cover letter for the ones you want. It all runs on your computer; you apply yourself.</p>
       <button class="b sm ghost-b" id="guide-hide" title="Hide this guide (it comes back from the link at the bottom)">Hide</button></div>
     <div class="g-demos local-only">
-      <div class="g-dl"><b>New here? Watch it work</b><span>Two short screen recordings with fictional data. Captions on or off.</span></div>
-      <button class="vt" data-film="1"><span class="vt-img" style="background-image:url(/demo/demo-1.jpg)"><span class="vt-play"><svg viewBox="0 0 10 12"><path d="M0 0v12l10-6z"/></svg></span><span class="vt-len">1:20</span></span>
-        <span class="vt-t"><b>How it works</b><span>From an empty start to your first CV and cover letter</span></span></button>
-      <button class="vt" data-film="2"><span class="vt-img" style="background-image:url(/demo/demo-2.jpg)"><span class="vt-play"><svg viewBox="0 0 10 12"><path d="M0 0v12l10-6z"/></svg></span><span class="vt-len">1:15</span></span>
-        <span class="vt-t"><b>Let it run by itself</b><span>The daily search, what your computer needs, and the settings</span></span></button>
+      <div class="g-dl"><b>New here? Watch it work</b><span>Short screen recordings with fictional data. Captions on or off.</span></div>
+      <button class="vt" data-film="1"><span class="vt-img" style="background-image:url(/demo/demo-1.jpg)"><span class="vt-play"><svg viewBox="0 0 10 12"><path d="M0 0v12l10-6z"/></svg></span><span class="vt-len">1:21</span></span>
+        <span class="vt-t"><b>How it works</b><span>From an empty start to your first documents</span></span></button>
+      <button class="vt" data-film="2"><span class="vt-img" style="background-image:url(/demo/demo-2.jpg)"><span class="vt-play"><svg viewBox="0 0 10 12"><path d="M0 0v12l10-6z"/></svg></span><span class="vt-len">0:53</span></span>
+        <span class="vt-t"><b>Let it run by itself</b><span>The daily search, and what your computer needs</span></span></button>
+      <button class="vt" data-film="3"><span class="vt-img" style="background-image:url(/demo/demo-3.jpg)"><span class="vt-play"><svg viewBox="0 0 10 12"><path d="M0 0v12l10-6z"/></svg></span><span class="vt-len">1:12</span></span>
+        <span class="vt-t"><b>Help from Claude</b><span>Tailored drafts: copy and paste, or your own API key</span></span></button>
     </div>
     <ol class="g-steps">
       <li data-g="1"><b>Search</b><span>Type the jobs and places above, press Search. Tick "every morning" to let it run daily.</span></li>
@@ -710,7 +712,7 @@ button.b.no:hover { border-color:var(--stop); }
 <div class="vmodal" id="vmodal" role="dialog" aria-modal="true" aria-labelledby="v-title">
   <div class="vbox">
     <div class="vhd"><b id="v-title"></b>
-      <div class="vtabs"><button class="b sm" data-film="1">How it works</button><button class="b sm" data-film="2">Let it run by itself</button></div>
+      <div class="vtabs"><button class="b sm" data-film="1">How it works</button><button class="b sm" data-film="2">Let it run by itself</button><button class="b sm" data-film="3">Help from Claude</button></div>
       <button class="cc" id="v-cc" aria-pressed="true" title="Captions on or off (key C)">CC <span id="v-cc-t">on</span></button>
       <button class="b sm" id="v-close">Close</button></div>
     <div class="vwrap"><video id="v-video" controls playsinline preload="metadata"></video></div>
@@ -788,7 +790,8 @@ $('#guide-hide').onclick = () => guideShow(false);
 $('#g-more').onclick = () => { infoOpen(true); $('#info').scrollIntoView({ behavior: 'smooth', block: 'start' }); };
 $('#guide-link').onclick = e => { e.preventDefault(); guideShow(true); window.scrollTo(0, 0); };
 // ----------------------------------------------------------- demo films (captions on by default; the choice is remembered)
-const FILMS = { 1: { title: 'How it works', file: 'job-agent-demo-1-how-it-works' }, 2: { title: 'Let it run by itself', file: 'job-agent-demo-2-daily-search-and-settings' } };
+const FILMS = { 1: { title: 'How it works', file: 'job-agent-demo-1-how-it-works' }, 2: { title: 'Let it run by itself', file: 'job-agent-demo-2-daily-search' },
+  3: { title: 'Help from Claude', file: 'job-agent-demo-3-help-from-claude' } };
 let ccOn = true; try { ccOn = localStorage.getItem('ja-cc') !== '0'; } catch (e) { }
 function setCC(on) {
   ccOn = on; try { localStorage.setItem('ja-cc', on ? '1' : '0'); } catch (e) { }
@@ -1100,7 +1103,7 @@ function renderDocs(el, q) {
         <button class="b" data-job onclick="tmplDoc(${i})">Make a template</button>
       </div>
       ${full ? '' : '<div class="muted small" style="margin-top:6px">Templates use the job\'s keywords and leave your experience as placeholders. Add your CV under My CV and profile for tailored drafts.</div>'}
-      <div id="paste-${i}"></div>
+      <div id="paste-${i}">${ANSWERED[p.key] || ''}</div>
       </div>
     </article>`;
   }).join('');
@@ -1140,12 +1143,15 @@ function pasteTailor(i) {
   $('#paste-' + i).innerHTML = `<label class="f">Claude's answer</label><textarea id="ans-${i}" placeholder="Paste the whole answer here"></textarea>
     <div class="row" style="margin-top:8px"><button class="b primary" onclick="useTailor(${i})">Make the documents</button></div><div id="ansr-${i}" class="small"></div>`;
 }
+// the result of a pasted answer stays under its job when the list is drawn again
+const ANSWERED = {};
 async function useTailor(i) {
   try {
-    const r = await api('/api/documents/answer', { key: window._acc[i].key, answer: $('#ans-' + i).value });
+    const key = window._acc[i].key;
+    const r = await api('/api/documents/answer', { key, answer: $('#ans-' + i).value });
     $('#ansr-' + i).innerHTML = (r.problems.length ? '<div class="err-line">' + r.problems.map(esc).join('<br>') + '</div>' : '<div class="ok-line">Documents written.</div>')
       + (r.report ? '<div class="muted" style="margin-top:6px;white-space:pre-wrap">' + esc(r.report) + '</div>' : '');
-    if (r.files.length) loadPostings();
+    if (r.files.length) { ANSWERED[key] = `<div class="small" style="margin-top:8px">${$('#ansr-' + i).innerHTML}</div>`; loadPostings(); }
   } catch (e) { $('#ansr-' + i).innerHTML = '<span class="err-line">' + esc(e.message) + '</span>'; }
 }
 async function copyProfilePrompt(id) {

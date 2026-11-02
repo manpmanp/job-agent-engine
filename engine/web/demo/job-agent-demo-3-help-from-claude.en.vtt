@@ -1,0 +1,49 @@
+WEBVTT
+
+00:00:01.748 --> 00:00:08.829
+Job Agent: help from Claude
+Optional. Without it you still get templates.
+
+00:00:08.829 --> 00:00:10.702
+Way 1: no key needed
+On an accepted job, press "Copy for Claude"
+
+00:00:10.702 --> 00:00:14.186
+It copies one message
+The job, your profile, how the documents are written, and the rule: never invent anything
+
+00:00:14.186 --> 00:00:20.392
+Paste it into a Claude chat
+Claude writes the CV and letter from your own material, then you copy the answer
+
+00:00:20.392 --> 00:00:22.781
+Paste the answer back
+Into the box under the job
+
+00:00:22.781 --> 00:00:26.593
+Make the documents
+The app checks the answer and writes the CV and letter in your layout
+
+00:00:26.593 --> 00:00:32.612
+A short report comes with it
+What was emphasized, and what was not claimed because your CV does not show it
+
+00:00:32.612 --> 00:00:37.835
+Read it, correct it, send it yourself
+A tailored draft built only from your own CV and profile
+
+00:00:37.835 --> 00:00:44.473
+The same for your CV
+My CV and profile: "Copy for Claude" reads an uploaded CV into your profile
+
+00:00:44.473 --> 00:00:52.905
+Way 2: your own Anthropic API key
+Settings > AI and services. Use is billed to your key.
+
+00:00:52.905 --> 00:01:00.985
+Then one click: "Write with AI"
+The draft is written through Anthropic's API and lands under the job
+
+00:01:00.985 --> 00:01:11.826
+Each request to Anthropic is listed
+Settings > Network activity names the material it carried

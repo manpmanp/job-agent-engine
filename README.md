@@ -24,9 +24,11 @@ added whenever you like.
 
 **Watch it work** (screen recordings with fictional data; captions can be
 switched on and off, and are also in the files below):
-[How it works](engine/web/demo/job-agent-demo-1-how-it-works.mp4) (1:20) and
-[Let it run by itself](engine/web/demo/job-agent-demo-2-daily-search-and-settings.mp4) (1:15),
-the daily search and what your computer needs. The app's first page plays both.
+[How it works](engine/web/demo/job-agent-demo-1-how-it-works.mp4) (1:21),
+[Let it run by itself](engine/web/demo/job-agent-demo-2-daily-search.mp4) (0:53): the daily
+search and what your computer needs, and
+[Help from Claude](engine/web/demo/job-agent-demo-3-help-from-claude.mp4) (1:12): tailored
+drafts by copy and paste or with your own API key. The app's first page plays all three.
 
 ---
 
