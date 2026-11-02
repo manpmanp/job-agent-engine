@@ -1,49 +1,53 @@
 WEBVTT
 
-00:00:01.748 --> 00:00:08.829
+00:00:01.883 --> 00:00:05.990
 Job Agent: help from Claude
 Optional. Without it you still get templates.
 
-00:00:08.829 --> 00:00:10.702
-Way 1: no key needed
-On an accepted job, press "Copy for Claude"
+00:00:05.990 --> 00:00:09.582
+Way 1: your own Anthropic API key
+Enter it under Settings > AI and services
 
-00:00:10.702 --> 00:00:14.186
-It copies one message
+00:00:09.582 --> 00:00:13.020
+Paste the key here
+You create it at console.anthropic.com. Use is billed to your key.
+
+00:00:13.020 --> 00:00:15.435
+Optional: let Claude review new jobs
+After each search, with a fit score if you include your profile
+
+00:00:15.435 --> 00:00:18.025
+Save
+The key stays on this computer and is never shown again
+
+00:00:18.025 --> 00:00:30.106
+Then, on an accepted job: "Write with AI"
+Claude writes the CV and letter from your own CV and profile
+
+00:00:30.106 --> 00:00:37.615
+It checks the draft and writes the files
+The report says what was emphasized, and what was not claimed because your CV does not show it
+
+00:00:37.615 --> 00:00:42.864
+Read it, correct it, send it yourself
+A tailored draft built only from your own material
+
+00:00:42.864 --> 00:00:49.527
+It can also read your CV into your profile
+My CV and profile: "Read with AI" next to an uploaded CV
+
+00:00:49.527 --> 00:00:55.725
+Way 2: no key needed
+The same draft by copy and paste in a Claude chat
+
+00:00:55.725 --> 00:00:58.933
+"Copy for Claude" copies one message
 The job, your profile, how the documents are written, and the rule: never invent anything
 
-00:00:14.186 --> 00:00:20.392
+00:00:58.933 --> 00:01:04.737
 Paste it into a Claude chat
-Claude writes the CV and letter from your own material, then you copy the answer
+Then copy Claude's whole answer
 
-00:00:20.392 --> 00:00:22.781
-Paste the answer back
-Into the box under the job
-
-00:00:22.781 --> 00:00:26.593
-Make the documents
-The app checks the answer and writes the CV and letter in your layout
-
-00:00:26.593 --> 00:00:32.612
-A short report comes with it
-What was emphasized, and what was not claimed because your CV does not show it
-
-00:00:32.612 --> 00:00:37.835
-Read it, correct it, send it yourself
-A tailored draft built only from your own CV and profile
-
-00:00:37.835 --> 00:00:44.473
-The same for your CV
-My CV and profile: "Copy for Claude" reads an uploaded CV into your profile
-
-00:00:44.473 --> 00:00:52.905
-Way 2: your own Anthropic API key
-Settings > AI and services. Use is billed to your key.
-
-00:00:52.905 --> 00:01:00.985
-Then one click: "Write with AI"
-The draft is written through Anthropic's API and lands under the job
-
-00:01:00.985 --> 00:01:11.826
-Each request to Anthropic is listed
-Settings > Network activity names the material it carried
+00:01:04.737 --> 00:01:16.441
+Paste the answer back and press "Make the documents"
+The same checks, the same files

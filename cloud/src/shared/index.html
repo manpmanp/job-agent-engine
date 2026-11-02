@@ -309,21 +309,22 @@ button.b.no:hover { border-color:var(--stop); }
 .guide { margin-top:14px; padding:16px 18px; }
 .g-top { display:flex; gap:12px; align-items:flex-start; }
 /* the two demo films on the first page */
-.g-demos { display:grid; grid-template-columns:repeat(3, 1fr); gap:10px 12px; align-items:center; margin:14px 0 2px; padding:12px;
+.g-demos { display:grid; grid-template-columns:repeat(4, 1fr); gap:10px 12px; align-items:stretch; margin:14px 0 2px; padding:12px;
   border-radius:12px; border:1px solid #e9b867; background:linear-gradient(100deg, #fdf3e1, var(--panel) 70%); }
 .g-dl { grid-column:1 / -1; display:flex; gap:10px; align-items:baseline; flex-wrap:wrap; }
 .g-dl b { font-size:15px; color:var(--accent); } .g-dl span { font-size:12.5px; color:var(--muted); }
 .vt { display:flex; gap:10px; align-items:center; text-align:left; padding:6px; border:1px solid var(--border); border-radius:10px;
   background:var(--panel); color:var(--text); font:inherit; cursor:pointer; min-width:0; }
 .vt:hover, .vt:focus-visible { border-color:#E7A23A; box-shadow:0 2px 10px rgba(231,162,58,.25); outline:none; }
-.vt-img { position:relative; flex:none; width:104px; aspect-ratio:1280/800; border-radius:7px; background:#16324F center/cover no-repeat; }
-.vt-play { position:absolute; inset:0; margin:auto; width:34px; height:34px; border-radius:50%; background:#E7A23A; display:grid; place-items:center;
+.vt-img { position:relative; flex:none; width:88px; aspect-ratio:1280/800; border-radius:7px; background:#16324F center/cover no-repeat; }
+.vt-play { position:absolute; inset:0; margin:auto; width:30px; height:30px; border-radius:50%; background:#E7A23A; display:grid; place-items:center;
   box-shadow:0 2px 8px rgba(0,0,0,.3); }
 .vt-play svg { width:14px; height:14px; fill:#1d1a12; margin-left:2px; }
 .vt-len { position:absolute; right:4px; bottom:4px; padding:0 5px; border-radius:4px; background:rgba(0,0,0,.72); color:#fff; font-size:11px; line-height:16px; }
 .vt-t { min-width:0; } .vt-t b { display:block; font-size:14px; } .vt-t span { display:block; font-size:12.5px; color:var(--muted); }
 @media (prefers-color-scheme: dark) { .g-demos { border-color:#6b5226; background:linear-gradient(100deg, #2b2416, var(--panel) 70%); } }
-@media (max-width:860px) { .g-demos { grid-template-columns:1fr; } }
+@media (max-width:1000px) { .g-demos { grid-template-columns:1fr 1fr; } }
+@media (max-width:600px) { .g-demos { grid-template-columns:1fr; } }
 .vmodal { position:fixed; inset:0; z-index:60; background:rgba(10,14,20,.78); display:none; align-items:center; justify-content:center; padding:16px; }
 .vmodal.on { display:flex; }
 .vbox { width:min(1100px, 100%); background:var(--panel); border-radius:14px; overflow:hidden; box-shadow:0 20px 60px rgba(0,0,0,.45); }
@@ -430,8 +431,10 @@ button.b.no:hover { border-color:var(--stop); }
         <span class="vt-t"><b>How it works</b><span>From an empty start to your first documents</span></span></button>
       <button class="vt" data-film="2"><span class="vt-img" style="background-image:url(/demo/demo-2.jpg)"><span class="vt-play"><svg viewBox="0 0 10 12"><path d="M0 0v12l10-6z"/></svg></span><span class="vt-len">0:53</span></span>
         <span class="vt-t"><b>Let it run by itself</b><span>The daily search, and what your computer needs</span></span></button>
-      <button class="vt" data-film="3"><span class="vt-img" style="background-image:url(/demo/demo-3.jpg)"><span class="vt-play"><svg viewBox="0 0 10 12"><path d="M0 0v12l10-6z"/></svg></span><span class="vt-len">1:12</span></span>
-        <span class="vt-t"><b>Help from Claude</b><span>Tailored drafts: copy and paste, or your own API key</span></span></button>
+      <button class="vt" data-film="3"><span class="vt-img" style="background-image:url(/demo/demo-3.jpg)"><span class="vt-play"><svg viewBox="0 0 10 12"><path d="M0 0v12l10-6z"/></svg></span><span class="vt-len">1:16</span></span>
+        <span class="vt-t"><b>Help from Claude</b><span>Tailored drafts with your API key, or by copy and paste</span></span></button>
+      <button class="vt" data-film="4"><span class="vt-img" style="background-image:url(/demo/demo-4.jpg)"><span class="vt-play"><svg viewBox="0 0 10 12"><path d="M0 0v12l10-6z"/></svg></span><span class="vt-len">0:43</span></span>
+        <span class="vt-t"><b>Get an API key</b><span>Where to make one, and where it goes in the app</span></span></button>
     </div>
     <ol class="g-steps">
       <li data-g="1"><b>Search</b><span>Type the jobs and places above, press Search. Tick "every morning" to let it run daily.</span></li>
@@ -629,7 +632,8 @@ button.b.no:hover { border-color:var(--stop); }
     <div class="card">
       <div class="local-only">
       <b>AI help (optional)</b>
-      <p class="muted small">With your own Anthropic API key, the app can read your CV into your profile, draft tailored CVs and cover letters, and review new jobs. This sends that material to Anthropic's API when you use it. Without a key, use "Copy for Claude" and any Claude chat instead.</p>
+      <p class="muted small">With your own Anthropic API key, the app can read your CV into your profile, draft tailored CVs and cover letters, and review new jobs. This sends that material to Anthropic's API when you use it. Without a key, use "Copy for Claude" and any Claude chat instead.
+        <a href="#" class="local-only" onclick="playFilm(4);return false">How to get a key (a 43-second film)</a></p>
       <label class="f" for="k-anthropic">Anthropic API key <span class="muted small" id="k-anthropic-s"></span></label>
       <input type="password" id="k-anthropic" placeholder="sk-ant-..." autocomplete="off">
       <div class="switch"><input type="checkbox" id="enr"><label for="enr">Review new jobs with AI after each search</label></div>
@@ -712,7 +716,7 @@ button.b.no:hover { border-color:var(--stop); }
 <div class="vmodal" id="vmodal" role="dialog" aria-modal="true" aria-labelledby="v-title">
   <div class="vbox">
     <div class="vhd"><b id="v-title"></b>
-      <div class="vtabs"><button class="b sm" data-film="1">How it works</button><button class="b sm" data-film="2">Let it run by itself</button><button class="b sm" data-film="3">Help from Claude</button></div>
+      <div class="vtabs"><button class="b sm" data-film="1">How it works</button><button class="b sm" data-film="2">Let it run by itself</button><button class="b sm" data-film="3">Help from Claude</button><button class="b sm" data-film="4">Get an API key</button></div>
       <button class="cc" id="v-cc" aria-pressed="true" title="Captions on or off (key C)">CC <span id="v-cc-t">on</span></button>
       <button class="b sm" id="v-close">Close</button></div>
     <div class="vwrap"><video id="v-video" controls playsinline preload="metadata"></video></div>
@@ -791,7 +795,8 @@ $('#g-more').onclick = () => { infoOpen(true); $('#info').scrollIntoView({ behav
 $('#guide-link').onclick = e => { e.preventDefault(); guideShow(true); window.scrollTo(0, 0); };
 // ----------------------------------------------------------- demo films (captions on by default; the choice is remembered)
 const FILMS = { 1: { title: 'How it works', file: 'job-agent-demo-1-how-it-works' }, 2: { title: 'Let it run by itself', file: 'job-agent-demo-2-daily-search' },
-  3: { title: 'Help from Claude', file: 'job-agent-demo-3-help-from-claude' } };
+  3: { title: 'Help from Claude', file: 'job-agent-demo-3-help-from-claude' },
+  4: { title: 'Get a Claude API key', file: 'job-agent-demo-4-get-an-api-key' } };
 let ccOn = true; try { ccOn = localStorage.getItem('ja-cc') !== '0'; } catch (e) { }
 function setCC(on) {
   ccOn = on; try { localStorage.setItem('ja-cc', on ? '1' : '0'); } catch (e) { }

@@ -1,0 +1,33 @@
+WEBVTT
+
+00:00:01.808 --> 00:00:06.013
+How to get a Claude API key
+Needed only for "Write with AI". Copy and paste in a Claude chat works without one.
+
+00:00:06.013 --> 00:00:10.221
+1. Open the Claude Console
+platform.claude.com. Sign in, or create an account with your e-mail address.
+
+00:00:10.221 --> 00:00:14.626
+2. Add credit
+The API is paid for separately from a Claude chat plan. Add prepaid credit in the billing settings.
+
+00:00:14.626 --> 00:00:19.035
+3. Create a key
+Settings, API keys, Create key. Name it, for example Job Agent.
+
+00:00:19.035 --> 00:00:23.447
+4. Copy it right away
+The key starts with sk-ant- and is shown only once
+
+00:00:23.447 --> 00:00:32.917
+5. Paste it into Job Agent
+Settings > AI and services
+
+00:00:32.917 --> 00:00:36.317
+Saved
+It stays in your agent folder on this computer and is never shown again
+
+00:00:36.317 --> 00:00:43.324
+Keep the key private
+Anyone with it can spend your credit. You can delete it in the Console at any time.
