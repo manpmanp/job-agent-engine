@@ -203,6 +203,106 @@ details.more > summary { cursor:pointer; }
          background:var(--soft); font-size:12px; color:var(--muted); }
 .trust > span { display:inline-flex; align-items:center; gap:6px; } .trust .ic { width:15px; height:15px; color:var(--accent-2); }
 @media (max-width:760px) { .sb { grid-template-columns:1fr; } .searchbar .b.primary { justify-content:center; } }
+
+/* ---------- visual identity (v2): ink and paper, colour only where it means something ---------- */
+:root { --bg:#F3F5F8; --panel:#fff; --border:#DCE2EA; --text:#17212B; --muted:#5B6878; --ink:#16324F; --accent:#1B3A5C; --accent-2:#2E6FB0;
+        --go:#1E8064; --go-soft:#E2F2EC; --stop:#B04049; --stop-soft:#F7E3E5; --amber:#E7A23A; --amber-soft:#FCF0DB; --soft:#E8EEF5;
+        --shadow:0 1px 2px rgba(22,50,79,.06), 0 4px 14px rgba(22,50,79,.05); }
+@media (prefers-color-scheme: dark) {
+  :root { --bg:#0F151C; --panel:#17202A; --border:#2A3542; --text:#E3E9F0; --muted:#97A4B4; --ink:#0B1C2D; --accent:#A9C7EA; --accent-2:#7FB2EA;
+          --go:#6BCBA8; --go-soft:#173328; --stop:#F0959C; --stop-soft:#3A1E22; --amber:#F0B85E; --amber-soft:#3A2D16; --soft:#1F2A36; --shadow:none; }
+}
+html, body { font:14.5px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif; }
+h1 { font-size:22px; font-weight:650; letter-spacing:-.01em; }
+header.top { background:var(--panel); }
+.brand { font-weight:700; letter-spacing:-.01em; }
+:focus-visible { outline:2px solid var(--accent-2); outline-offset:2px; }
+
+/* search band: solid ink, the one strong surface on the page */
+.searchbar { background:var(--ink); border-radius:16px; padding:18px 18px 14px; box-shadow:none; }
+.sbf span { font-weight:600; letter-spacing:0; font-size:12.5px; }
+.sbf input { border-radius:10px; }
+.searchbar .b.primary { background:var(--amber); border-color:var(--amber); color:#1d1a12; font-weight:700; }
+.searchbar .b.primary:hover { filter:brightness(1.05); }
+.sb-meta { color:rgba(255,255,255,.78); }
+
+/* board: a rail of lists on the left, the jobs on the right */
+.board { display:grid; grid-template-columns:230px 1fr; gap:22px; align-items:start; margin-top:18px; }
+.rail { display:flex; flex-direction:column; gap:2px; position:sticky; top:72px; }
+.rail .chip { all:unset; box-sizing:border-box; display:flex; align-items:center; gap:10px; padding:9px 12px; border-radius:10px; cursor:pointer;
+              color:var(--muted); font-size:14px; }
+.rail .chip:hover { background:var(--soft); color:var(--text); }
+.rail .chip.on { background:var(--panel); color:var(--text); font-weight:600; box-shadow:var(--shadow); }
+.rail .chip span { flex:1; } .rail .chip .ic { width:17px; height:17px; }
+.rail .chip b { font-weight:600; font-size:12px; min-width:22px; text-align:center; padding:1px 7px; border-radius:10px; background:var(--soft); color:var(--muted); }
+.rail .chip b:empty { display:none; }
+.rail .chip[data-f="undecided"] b { background:var(--accent-2); color:#fff; }
+.rail .chip:focus-visible { outline:2px solid var(--accent-2); }
+.feed { min-width:0; }
+.listhead { margin:0 0 12px; }
+.listhead input[type=search] { flex:1; max-width:none; background:var(--panel); }
+
+/* job card */
+.post { padding:16px 18px; border-radius:14px; box-shadow:var(--shadow); border-color:transparent; }
+.post.decided { opacity:.9; }
+.ph { display:flex; gap:14px; align-items:flex-start; }
+.mono { flex:none; width:44px; height:44px; border-radius:12px; display:grid; place-items:center; font-weight:700; font-size:15px; letter-spacing:.02em;
+        background:hsl(var(--h) 55% 93%); color:hsl(var(--h) 45% 32%); }
+@media (prefers-color-scheme: dark) { .mono { background:hsl(var(--h) 30% 22%); color:hsl(var(--h) 70% 82%); } }
+.pt { flex:1; min-width:0; }
+.post h3 { font-size:16.5px; font-weight:650; margin:0 0 2px; line-height:1.3; }
+.post .emp { color:var(--text); margin:0; font-size:14px; }
+.loc { display:flex; align-items:center; gap:4px; color:var(--muted); font-size:13px; margin-top:2px; }
+.loc .ic { width:14px; height:14px; }
+.due { flex:none; text-align:center; min-width:72px; padding:6px 8px; border-radius:10px; background:var(--soft); }
+.due b { display:block; font-size:20px; line-height:1.1; font-weight:700; color:var(--accent); }
+.due span { display:block; font-size:11px; color:var(--muted); }
+.due.soon { background:var(--amber-soft); } .due.soon b { color:#9A5B00; }
+@media (prefers-color-scheme: dark) { .due.soon b { color:var(--amber); } }
+.due.past { background:var(--stop-soft); } .due.past b { color:var(--stop); font-size:14px; }
+.due.nodl b { font-size:14px; font-weight:600; color:var(--muted); }
+.post .tags { margin:12px 0 4px 58px; } .post .skills { margin:4px 0 0 58px; }
+.pa { display:flex; align-items:center; gap:8px; margin:12px 0 0 58px; flex-wrap:wrap; }
+.readlink { display:inline-flex; align-items:center; gap:6px; font-weight:600; text-decoration:none; }
+.readlink:hover { text-decoration:underline; } .readlink .ic { width:15px; height:15px; }
+button.b.yes { background:var(--go); border-color:var(--go); color:#fff; font-weight:650; padding:8px 16px; }
+button.b.yes:hover { filter:brightness(1.07); }
+button.b.no { color:var(--stop); border-color:transparent; background:var(--stop-soft); }
+button.b.no:hover { border-color:var(--stop); }
+.post details.notes { margin-left:58px; margin-top:8px; }
+.post .reasons { margin-left:58px; }
+.tag { border-radius:7px; font-size:11.5px; padding:2px 8px; }
+
+/* empty list */
+.empty { padding:30px 16px; }
+.empty .art { width:120px; height:80px; fill:none; stroke:var(--accent-2); stroke-width:2.2; stroke-linecap:round; opacity:.55; display:block; margin:0 auto 10px; }
+.empty .et { font-size:15px; color:var(--text); font-weight:600; }
+
+/* sentence case for side-menu groups */
+.subnav.side .grp { text-transform:none; letter-spacing:0; font-size:12px; font-weight:600; }
+
+@media (max-width:860px) {
+  .board { grid-template-columns:1fr; gap:12px; }
+  .rail { flex-direction:row; overflow-x:auto; position:static; padding-bottom:4px; }
+  .rail .chip { flex:none; } .rail .chip span { flex:none; }
+}
+@media (max-width:560px) {
+  .post .tags, .post .skills, .pa, .post details.notes, .post .reasons { margin-left:0; }
+  .mono { width:38px; height:38px; font-size:13px; } .due { min-width:58px; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition:none !important; animation:none !important; } }
+
+.card { border-color:transparent; border-radius:14px; box-shadow:var(--shadow); }
+@media (prefers-color-scheme: dark) { .card { border-color:var(--border); } }
+.card.attn { border-left:4px solid var(--warn); } .card.welcome { border-left:4px solid var(--accent-2); }
+.step { background:var(--bg); } .flow-card, .promise { box-shadow:var(--shadow); }
+
+.pbody { margin-left:58px; } .pbody .tags { margin:10px 0 4px; }
+.files { display:flex; flex-wrap:wrap; gap:8px; margin:10px 0; }
+.file { display:inline-flex; align-items:center; gap:8px; padding:8px 12px; border-radius:10px; background:var(--soft); color:var(--text); text-decoration:none; font-size:13px; }
+.file:hover { background:var(--panel); box-shadow:inset 0 0 0 1px var(--accent-2); } .file .ic { color:var(--accent-2); }
+@media (max-width:560px) { .pbody { margin-left:0; } }
+@media (prefers-color-scheme: dark) { button.b.yes { color:#0C2A20; } .rail .chip[data-f="undecided"] b { color:#0F151C; } }
 </style>
 </head>
 <body>
@@ -226,6 +326,11 @@ details.more > summary { cursor:pointer; }
     <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></symbol>
     <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
     <symbol id="i-spark" viewBox="0 0 24 24"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6.3 6.3l2.4 2.4M15.3 15.3l2.4 2.4M6.3 17.7l2.4-2.4M15.3 8.7l2.4-2.4"/></symbol>
+    <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.3"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></symbol>
+    <symbol id="i-ok" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></symbol>
+    <symbol id="i-ext" viewBox="0 0 24 24"><path d="M14 4h6v6"/><path d="M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></symbol>
+    <symbol id="i-all" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></symbol>
     <symbol id="i-cloud" viewBox="0 0 24 24"><path d="M7 18.5h10a4 4 0 0 0 .6-8 5.5 5.5 0 0 0-10.6 1.5A3.3 3.3 0 0 0 7 18.5z"/></symbol>
   </defs>
 </svg>
@@ -264,17 +369,18 @@ details.more > summary { cursor:pointer; }
   <div id="home-setup"></div>
   <div id="attention"></div>
 
+  <div class="board">
+  <div class="rail" id="filters" role="navigation" aria-label="Lists">
+    <button class="chip on" data-f="undecided"><svg class="ic"><use href="#i-filter"/></svg><span>To decide</span><b id="n-undecided"></b></button>
+    <button class="chip" data-f="accepted"><svg class="ic"><use href="#i-doc"/></svg><span>Accepted and documents</span><b id="n-accepted"></b></button>
+    <button class="chip local-only" data-f="unmatched" title="Every other job the last search saw on each site"><svg class="ic"><use href="#i-search"/></svg><span>Not matched</span><b id="c-unmatched"></b></button>
+    <button class="chip" data-f="rejected"><svg class="ic"><use href="#i-x"/></svg><span>Rejected</span><b id="n-rejected"></b></button>
+    <button class="chip" data-f="expired"><svg class="ic"><use href="#i-clock"/></svg><span>Expired</span><b id="n-expired"></b></button>
+    <button class="chip" data-f="all"><svg class="ic"><use href="#i-all"/></svg><span>All</span><b id="n-all"></b></button>
+  </div>
+  <div class="feed">
   <div class="listhead">
-    <div class="chips" id="filters" style="margin:0">
-      <span class="chip on" data-f="undecided">To decide <b id="n-undecided"></b></span>
-      <span class="chip" data-f="accepted">Accepted and documents <b id="n-accepted"></b></span>
-      <span class="chip" data-f="rejected">Rejected</span>
-      <span class="chip local-only" data-f="unmatched" title="Every other job the last search saw on each site">Not matched <b id="c-unmatched" hidden></b></span>
-      <span class="chip" data-f="expired">Expired</span>
-      <span class="chip" data-f="all">All</span>
-    </div>
-    <span class="spacer"></span>
-    <input type="search" id="q" placeholder="Filter the list..." style="max-width:220px">
+    <input type="search" id="q" placeholder="Filter by title, employer or place">
     <button class="b sm" id="add-toggle"><svg class="ic"><use href="#i-plus"/></svg>Add a job link</button>
   </div>
   <div class="card" id="v-add" hidden>
@@ -288,6 +394,8 @@ details.more > summary { cursor:pointer; }
     <div class="row" style="margin-top:12px"><button class="b primary" id="btn-add">Read and add</button></div>
   </div>
   <div id="plist"></div>
+  </div>
+  </div>
 
   <div class="trust">
     <span><svg class="ic"><use href="#i-shield"/></svg>Nothing is sent without you</span>
@@ -714,8 +822,23 @@ let LST = null;
 async function loadListings() {
   if (CLOUD) return;
   try { LST = await api('/api/listings'); } catch (e) { LST = { listings: [] }; }
-  const c = $('#c-unmatched'); c.hidden = !LST.listings.length; c.textContent = '(' + LST.listings.length + ')';
+  const c = $('#c-unmatched'); c.textContent = LST.listings.length || '';
   if (filter === 'unmatched') renderPostings();
+}
+// A coloured monogram per employer (same colour every time), and the time left to apply.
+function mono(name) {
+  const words = String(name || '?').replace(/\b(AB|Inc|Ltd|GmbH|AG|A\/S|ASA|Oy|BV|SA|LLC|plc)\b\.?/g, '').trim().split(/\s+/).filter(Boolean);
+  const ini = ((words[0] || '?')[0] + ((words[1] || '')[0] || '')).toUpperCase();
+  let h = 0; for (const ch of String(name || '')) h = (h * 31 + ch.charCodeAt(0)) % 360;
+  return `<span class="mono" style="--h:${h}" aria-hidden="true">${esc(ini)}</span>`;
+}
+function dueBadge(p) {
+  if (p.deadline && /^\d{4}-\d{2}-\d{2}/.test(p.deadline)) {
+    const days = Math.ceil((new Date(p.deadline.slice(0, 10) + 'T23:59:59') - new Date()) / 86400000);
+    if (days < 0) return `<div class="due past"><b>closed</b><span>${esc(p.deadline.slice(0, 10))}</span></div>`;
+    return `<div class="due${days <= 7 ? ' soon' : ''}"><b>${days}</b><span>${days === 1 ? 'day' : 'days'} left</span></div>`;
+  }
+  return `<div class="due nodl"><b>open</b><span>${p.announced ? 'posted ' + esc(p.announced) : 'no deadline'}</span></div>`;
 }
 function renderUnmatched(q) {
   const items = (LST ? LST.listings : []).filter(x => !q || [x.title, x.employer, x.location, x.source, x.why].join(' ').toLowerCase().includes(q));
@@ -741,7 +864,10 @@ function renderPostings() {
   const q = $('#q').value.toLowerCase().trim();
   const nUnd = P.postings.filter(p => !decisionOf(p) && p.bucket !== 'expired').length;
   const nAcc = P.postings.filter(p => decisionOf(p) === 'accepted' && p.bucket !== 'expired').length;
-  $('#n-undecided').textContent = nUnd ? '(' + nUnd + ')' : ''; $('#n-accepted').textContent = nAcc ? '(' + nAcc + ')' : '';
+  const nRej = P.postings.filter(p => decisionOf(p) === 'rejected' && p.bucket !== 'expired').length;
+  const nExp = P.postings.filter(p => p.bucket === 'expired').length;
+  [['#n-undecided', nUnd], ['#n-accepted', nAcc], ['#n-rejected', nRej], ['#n-expired', nExp], ['#n-all', P.postings.length]]
+    .forEach(([s, n]) => $(s).textContent = n || '');
   if (filter === 'unmatched') return renderUnmatched(q);
   if (filter === 'accepted') return renderDocs($('#plist'), q);
   const newest = P.postings.reduce((m, p) => p.found > m ? p.found : m, '');
@@ -749,7 +875,8 @@ function renderPostings() {
     .filter(p => !q || [p.title, p.employer, p.location, p.category].join(' ').toLowerCase().includes(q))
     .sort((a, b) => (b.found || '').localeCompare(a.found || '') || (a.deadline || 'z').localeCompare(b.deadline || 'z'));
   if (!list.length) {
-    $('#plist').innerHTML = `<div class="card empty">${filter === 'undecided' ? 'Nothing to decide on right now.' : 'No postings here.'}
+    $('#plist').innerHTML = `<div class="card empty"><svg class="art" viewBox="0 0 120 80" aria-hidden="true"><rect x="8" y="14" width="64" height="52" rx="7"/><path d="M20 30h40M20 42h30M20 54h22"/><circle cx="84" cy="44" r="18"/><path d="m97 57 13 13"/></svg>
+      <div class="et">${filter === 'undecided' ? (P.postings.length ? 'All caught up: nothing waits for your decision.' : 'No jobs yet.') : 'Nothing in this list.'}</div>
       ${capOn('search') ? '<div style="margin-top:10px"><button class="b primary" onclick="$(\'#btn-search\').click()" data-job>Search now</button></div>' : ''}
       ${LST && LST.listings.length ? `<div class="small" style="margin-top:8px">${LST.listings.length} other job(s) were found but did not fit your words or places: <a href="#" onclick="filter='unmatched';renderPostings();return false">see them</a></div>` : ''}</div>`;
     return;
@@ -758,7 +885,7 @@ function renderPostings() {
     const d = decisionOf(p);
     const tags = [];
     if (p.found && p.found === newest && !d) tags.push('<span class="tag new">New</span>');
-    if (p.urgent) tags.push(`<span class="tag warn">${esc(p.urgent.replace(/^\W+/, ''))}</span>`);
+    if (p.urgent) tags.push(`<span class="tag warn">${esc(p.urgent.replace(/^\W+/, '').replace(/^ACT ASAP\s*/i, 'Apply soon '))}</span>`);
     if (p.senior_bucket === 'senior') tags.push(`<span class="tag warn">${esc(p.seniority)}: may be above your level</span>`);
     else if (p.seniority && p.seniority !== 'Not stated') tags.push(`<span class="tag">${esc(p.seniority)}</span>`);
     if (p.arrangement && p.arrangement !== 'Not stated') tags.push(`<span class="tag">${esc(p.arrangement)}</span>`);
@@ -768,18 +895,20 @@ function renderPostings() {
     if (d === 'rejected') tags.push(`<span class="tag bad">${esc(p.status)}</span>`);
     if (p.bucket === 'expired') tags.push('<span class="tag bad">Expired</span>');
     const k = esc(p.key);
-    return `<div class="card post" data-key="${k}">
-      <div class="row"><div style="flex:1;min-width:220px"><h3>${esc(p.title)}</h3>
-        <div class="emp">${esc(p.employer)}${p.location ? ' &middot; ' + esc(p.location) : ''}</div></div>
-        <div class="small muted" style="text-align:right">${p.deadline ? (/^\d{4}-/.test(p.deadline) ? 'Apply by <b>' + esc(p.deadline) + '</b>' : 'Deadline: ' + esc(p.deadline)) + '<br>' : ''}${p.announced ? 'Posted ' + esc(p.announced) : ''}</div></div>
+    return `<article class="card post${d ? ' decided ' + d : ''}" data-key="${k}">
+      <div class="ph">${mono(p.employer)}
+        <div class="pt"><h3>${esc(p.title)}</h3>
+          <div class="emp">${esc(p.employer)}</div>
+          ${p.location ? `<div class="loc"><svg class="ic"><use href="#i-pin"/></svg>${esc(p.location)}</div>` : ''}</div>
+        ${dueBadge(p)}</div>
       <div class="tags">${tags.join('')}</div>
       ${p.skills && !/not extracted/.test(p.skills) ? `<div class="skills">${esc(p.skills)}</div>` : ''}
-      <div class="row">
-        ${p.url ? `<a href="${esc(p.url)}" target="_blank" rel="noopener noreferrer">Open the posting</a>` : ''}
+      <div class="pa">
+        ${p.url ? `<a class="readlink" href="${esc(p.url)}" target="_blank" rel="noopener noreferrer"><svg class="ic"><use href="#i-ext"/></svg>Read the posting</a>` : ''}
         <span class="spacer"></span>
         ${p.bucket === 'expired' ? '' : d ? `<button class="b" onclick="decide(${i},'undo')">Undo</button>` :
-          `<button class="b good" onclick="decide(${i},'accepted')">Accept</button>
-           <button class="b bad" onclick="toggleReasons(${i})">Reject</button>`}
+          `<button class="b no" onclick="toggleReasons(${i})"><svg class="ic"><use href="#i-x"/></svg>Reject</button>
+           <button class="b yes" onclick="decide(${i},'accepted')"><svg class="ic"><use href="#i-ok"/></svg>Accept</button>`}
       </div>
       <div class="reasons" id="rs-${i}">
         <div class="small muted" style="margin-bottom:6px">Why? This teaches future searches what to avoid.</div>
@@ -789,7 +918,7 @@ function renderPostings() {
           <button class="b" onclick="toggleReasons(${i})">Cancel</button></div>
       </div>
       ${p.notes ? `<details class="notes"><summary>Notes</summary><div>${esc(p.notes.split(' | ').join('\n'))}</div></details>` : ''}
-    </div>`;
+    </article>`;
   }).join('');
   window._list = list;
 }
@@ -828,21 +957,28 @@ function renderDocs(el, q) {
   const full = capOn('tailoring_full');
   el.innerHTML = `<div class="row small muted" style="margin-bottom:8px">Drafts of your CV and cover letter, on your computer; nothing is ever sent.
       <span class="spacer"></span><button class="b sm" onclick="api('/api/open',{rel:'output'}).catch(e=>toast(e.message))"><svg class="ic"><use href="#i-folder"/></svg>Open the documents folder</button></div>` + acc.map((p, i) => {
-    const docs = p.docs.map(d => `<a href="${fileUrl(d.rel)}" target="_blank">${esc(d.name)}</a>`).join('<br>');
-    return `<div class="card">
-      <div class="row"><div style="flex:1"><b>${esc(p.title)}</b><div class="muted">${esc(p.employer)}${p.location ? ' &middot; ' + esc(p.location) : ''}${/^\d{4}-/.test(p.deadline || '') ? ' &middot; apply by ' + esc(p.deadline) : ''}</div></div>
-        ${p.drafted ? '<span class="tag good">Drafted</span>' : p.docs.length ? '<span class="tag">Templates only</span>' : '<span class="tag warn">No documents yet</span>'}</div>
+    const kind = n => /^CV_|^TEMPLATE_CV/.test(n) ? 'CV' : /^CL_|^TEMPLATE_CL/.test(n) ? 'Cover letter' : /^JD_/.test(n) ? 'Job ad (PDF)' : 'File';
+    const docs = p.docs.map(d => `<a class="file" href="${fileUrl(d.rel)}" target="_blank" title="${esc(d.name)}"><svg class="ic"><use href="#i-doc"/></svg>
+      <span><b>${kind(d.name)}</b>${/^TEMPLATE_/.test(d.name) ? ' template' : ''}</span></a>`).join('');
+    return `<article class="card post">
+      <div class="ph">${mono(p.employer)}
+        <div class="pt"><h3>${esc(p.title)}</h3><div class="emp">${esc(p.employer)}</div>
+          ${p.location ? `<div class="loc"><svg class="ic"><use href="#i-pin"/></svg>${esc(p.location)}</div>` : ''}</div>
+        ${dueBadge(p)}</div>
+      <div class="pbody">
+      <div class="tags">${p.drafted ? '<span class="tag good">Drafted</span>' : p.docs.length ? '<span class="tag">Templates only</span>' : '<span class="tag warn">No documents yet</span>'}</div>
       ${p.written_for ? docStyleRow(p, i) : ''}
-      <div class="small" style="margin:8px 0">${docs || '<span class="muted">No files yet.</span>'}</div>
+      <div class="files">${docs || '<span class="muted small">No files yet.</span>'}</div>
       <div class="row">
         ${full ? `${S.api_key ? `<button class="b primary" data-job onclick="aiDoc(${i})">Write with AI</button>` : ''}
           <button class="b ${S.api_key ? '' : 'primary'}" onclick="copyTailorPrompt(${i})">Copy for Claude</button>
           <button class="b" onclick="pasteTailor(${i})">Paste Claude's answer</button>` : ''}
         <button class="b" data-job onclick="tmplDoc(${i})">Make a template</button>
       </div>
-      ${full ? '' : '<div class="muted small" style="margin-top:6px">Templates use the posting\'s keywords and leave your experience as placeholders. Add your CV in Setup for tailored drafts.</div>'}
+      ${full ? '' : '<div class="muted small" style="margin-top:6px">Templates use the job\'s keywords and leave your experience as placeholders. Add your CV under My CV and profile for tailored drafts.</div>'}
       <div id="paste-${i}"></div>
-    </div>`;
+      </div>
+    </article>`;
   }).join('');
   window._acc = acc;
 }
