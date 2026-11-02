@@ -68,7 +68,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
-        with: { path: results, merge-multiple: true }
+        with: { pattern: "platform-*", path: results, merge-multiple: true }
       - name: Side by side
         run: |
           set -o pipefail
