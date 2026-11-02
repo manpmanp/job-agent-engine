@@ -822,6 +822,21 @@ class TestApp(unittest.TestCase):
         code, r = self.j("/api/listings")
         self.assertEqual((code, len(r["listings"]), r["listings"][0]["why"]), (200, 1, "none of your keywords"))
 
+    def test_demo_films_served_in_pieces(self):
+        import urllib.request, urllib.error
+        base = f"http://127.0.0.1:{self.port}/demo/"
+        full = urllib.request.urlopen(base + "job-agent-demo-1-how-it-works.mp4").read()
+        self.assertGreater(len(full), 100000)
+        req = urllib.request.Request(base + "job-agent-demo-1-how-it-works.mp4", headers={"Range": "bytes=100-199"})
+        with urllib.request.urlopen(req) as r:
+            self.assertEqual((r.status, r.headers["Content-Range"], r.read()), (206, f"bytes 100-199/{len(full)}", full[100:200]))
+        with urllib.request.urlopen(base + "job-agent-demo-2-daily-search-and-settings.en.vtt") as r:
+            self.assertTrue(r.read().startswith(b"WEBVTT"))
+        for bad in ("../app.html", "..%2Fapp.html", "nothing.mp4", "x.html"):
+            with self.assertRaises(urllib.error.HTTPError) as e:
+                urllib.request.urlopen(base + bad)
+            self.assertEqual(e.exception.code, 404)
+
     def test_favicon_without_token(self):
         import urllib.request
         with urllib.request.urlopen(f"http://127.0.0.1:{self.port}/favicon.ico") as r:

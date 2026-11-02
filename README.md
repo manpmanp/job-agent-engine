@@ -22,6 +22,12 @@ own **agent home** folder and is read at run time. To start you only need
 search keywords and locations. Everything else is optional and can be
 added whenever you like.
 
+**Watch it work** (screen recordings with fictional data; captions can be
+switched on and off, and are also in the files below):
+[How it works](engine/web/demo/job-agent-demo-1-how-it-works.mp4) (1:20) and
+[Let it run by itself](engine/web/demo/job-agent-demo-2-daily-search-and-settings.mp4) (1:15),
+the daily search and what your computer needs. The app's first page plays both.
+
 ---
 
 ## Get started

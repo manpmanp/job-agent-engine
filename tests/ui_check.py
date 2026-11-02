@@ -105,6 +105,18 @@ def main():
             c["cards"] = page.locator(".post").count()
             c["cards_with_monogram_and_deadline"] = page.eval_on_selector_all(".post", "ps => ps.filter(p => p.querySelector('.mono') && p.querySelector('.due')).length")
             c["accept_buttons"] = page.locator("button.yes").count()
+            c["demo_tiles"] = page.locator(".g-demos .vt").count()
+            page.click('.g-demos .vt[data-film="1"]')
+            page.wait_for_timeout(2500)
+            film = page.evaluate("""() => { const v = document.querySelector('#v-video'), tr = v.textTracks[0];
+                return { captions: tr ? tr.mode : null, cues: tr && tr.cues ? tr.cues.length : 0, ready: v.readyState, error: v.error ? v.error.code : null }; }""")
+            c["demo_captions_on"] = film["captions"] == "showing" and film["cues"] > 5
+            page.click("#v-cc")
+            c["demo_captions_off"] = page.evaluate("document.querySelector('#v-video').textTracks[0].mode") == "hidden"
+            page.keyboard.press("Escape")
+            c["demo_closes"] = not page.is_visible("#vmodal")
+            out["info"]["demo_video"] = film   # whether a browser build plays H.264 is up to the build, so it is reported, not compared
+            snap(page, "demo")
             c["desktop_no_sideways_scroll"] = not overflow(page)
             out["info"]["font"] = page.evaluate("getComputedStyle(document.body).fontFamily")
             snap(page, "jobs")

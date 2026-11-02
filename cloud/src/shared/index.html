@@ -308,6 +308,36 @@ button.b.no:hover { border-color:var(--stop); }
 /* first-page guide: what the app offers, and the four steps (a real sequence, so numbered) */
 .guide { margin-top:14px; padding:16px 18px; }
 .g-top { display:flex; gap:12px; align-items:flex-start; }
+/* the two demo films on the first page */
+.g-demos { display:grid; grid-template-columns:minmax(150px, .8fr) 1fr 1fr; gap:12px; align-items:center; margin:14px 0 2px; padding:12px;
+  border-radius:12px; border:1px solid #e9b867; background:linear-gradient(100deg, #fdf3e1, var(--panel) 70%); }
+.g-dl b { display:block; font-size:15px; color:var(--accent); } .g-dl span { font-size:12.5px; color:var(--muted); }
+.vt { display:flex; gap:10px; align-items:center; text-align:left; padding:6px; border:1px solid var(--border); border-radius:10px;
+  background:var(--panel); color:var(--text); font:inherit; cursor:pointer; min-width:0; }
+.vt:hover, .vt:focus-visible { border-color:#E7A23A; box-shadow:0 2px 10px rgba(231,162,58,.25); outline:none; }
+.vt-img { position:relative; flex:none; width:118px; aspect-ratio:1280/800; border-radius:7px; background:#16324F center/cover no-repeat; }
+.vt-play { position:absolute; inset:0; margin:auto; width:34px; height:34px; border-radius:50%; background:#E7A23A; display:grid; place-items:center;
+  box-shadow:0 2px 8px rgba(0,0,0,.3); }
+.vt-play svg { width:14px; height:14px; fill:#1d1a12; margin-left:2px; }
+.vt-len { position:absolute; right:4px; bottom:4px; padding:0 5px; border-radius:4px; background:rgba(0,0,0,.72); color:#fff; font-size:11px; line-height:16px; }
+.vt-t { min-width:0; } .vt-t b { display:block; font-size:14px; } .vt-t span { display:block; font-size:12.5px; color:var(--muted); }
+@media (prefers-color-scheme: dark) { .g-demos { border-color:#6b5226; background:linear-gradient(100deg, #2b2416, var(--panel) 70%); } }
+@media (max-width:860px) { .g-demos { grid-template-columns:1fr 1fr; } .g-dl { grid-column:1 / -1; } }
+@media (max-width:560px) { .g-demos { grid-template-columns:1fr; } }
+.vmodal { position:fixed; inset:0; z-index:60; background:rgba(10,14,20,.78); display:none; align-items:center; justify-content:center; padding:16px; }
+.vmodal.on { display:flex; }
+.vbox { width:min(1100px, 100%); background:var(--panel); border-radius:14px; overflow:hidden; box-shadow:0 20px 60px rgba(0,0,0,.45); }
+.vhd { display:flex; align-items:center; gap:8px; padding:10px 12px; border-bottom:1px solid var(--border); }
+.vhd b { flex:1; color:var(--accent); }
+.vwrap { position:relative; background:#000; }
+.vwrap video { display:block; width:100%; max-height:calc(100vh - 120px); aspect-ratio:1280/800; background:#000; }
+.vwrap video::cue { font:600 19px/1.35 -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; background:rgba(22,50,79,.9); color:#fff; }
+.cc { font:700 12px/1 -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; letter-spacing:.04em; padding:6px 9px; border-radius:6px; cursor:pointer;
+  border:1.5px solid var(--border); background:var(--panel); color:var(--muted); }
+.cc[aria-pressed="true"] { background:#E7A23A; border-color:#E7A23A; color:#1d1a12; }
+.vtabs { display:flex; gap:6px; }
+.vtabs .b.on { background:var(--accent); border-color:var(--accent); color:var(--panel); }
+@media (max-width:640px) { .vtabs { display:none; } }
 .g-what { margin:0; flex:1; font-size:14.5px; max-width:78ch; }
 .ghost-b { background:none !important; border-color:transparent !important; color:var(--muted) !important; }
 .g-steps { list-style:none; counter-reset:g; margin:14px 0 0; padding:0; display:grid; grid-template-columns:repeat(4, 1fr); gap:10px; }
@@ -394,6 +424,13 @@ button.b.no:hover { border-color:var(--stop); }
     <div class="g-top"><p class="g-what"><b>Job Agent</b> finds job postings for you on public job sites and employers' career pages,
       lets you sort them in seconds, and drafts a CV and cover letter for the ones you want. It all runs on your computer; you apply yourself.</p>
       <button class="b sm ghost-b" id="guide-hide" title="Hide this guide (it comes back from the link at the bottom)">Hide</button></div>
+    <div class="g-demos local-only">
+      <div class="g-dl"><b>New here? Watch it work</b><span>Two short screen recordings with fictional data. Captions on or off.</span></div>
+      <button class="vt" data-film="1"><span class="vt-img" style="background-image:url(/demo/demo-1.jpg)"><span class="vt-play"><svg viewBox="0 0 10 12"><path d="M0 0v12l10-6z"/></svg></span><span class="vt-len">1:20</span></span>
+        <span class="vt-t"><b>How it works</b><span>From an empty start to your first CV and cover letter</span></span></button>
+      <button class="vt" data-film="2"><span class="vt-img" style="background-image:url(/demo/demo-2.jpg)"><span class="vt-play"><svg viewBox="0 0 10 12"><path d="M0 0v12l10-6z"/></svg></span><span class="vt-len">1:15</span></span>
+        <span class="vt-t"><b>Let it run by itself</b><span>The daily search, what your computer needs, and the settings</span></span></button>
+    </div>
     <ol class="g-steps">
       <li data-g="1"><b>Search</b><span>Type the jobs and places above, press Search. Tick "every morning" to let it run daily.</span></li>
       <li data-g="2"><b>Decide</b><span>Accept the jobs you like, Reject the rest. Rejections teach later searches.</span></li>
@@ -670,6 +707,15 @@ button.b.no:hover { border-color:var(--stop); }
 </section>
 </main>
 
+<div class="vmodal" id="vmodal" role="dialog" aria-modal="true" aria-labelledby="v-title">
+  <div class="vbox">
+    <div class="vhd"><b id="v-title"></b>
+      <div class="vtabs"><button class="b sm" data-film="1">How it works</button><button class="b sm" data-film="2">Let it run by itself</button></div>
+      <button class="cc" id="v-cc" aria-pressed="true" title="Captions on or off (key C)">CC <span id="v-cc-t">on</span></button>
+      <button class="b sm" id="v-close">Close</button></div>
+    <div class="vwrap"><video id="v-video" controls playsinline preload="metadata"></video></div>
+  </div>
+</div>
 <div class="job" id="job"><div class="hd"><span class="dot" id="job-dot"></span><span id="job-label"></span><span class="spacer"></span>
   <button class="b" id="job-close" style="padding:4px 10px">Close</button></div><pre id="job-log"></pre></div>
 
@@ -741,6 +787,32 @@ function guideShow(on) { $('#guide').hidden = !on; $('#guide-link').hidden = on;
 $('#guide-hide').onclick = () => guideShow(false);
 $('#g-more').onclick = () => { infoOpen(true); $('#info').scrollIntoView({ behavior: 'smooth', block: 'start' }); };
 $('#guide-link').onclick = e => { e.preventDefault(); guideShow(true); window.scrollTo(0, 0); };
+// ----------------------------------------------------------- demo films (captions on by default; the choice is remembered)
+const FILMS = { 1: { title: 'How it works', file: 'job-agent-demo-1-how-it-works' }, 2: { title: 'Let it run by itself', file: 'job-agent-demo-2-daily-search-and-settings' } };
+let ccOn = true; try { ccOn = localStorage.getItem('ja-cc') !== '0'; } catch (e) { }
+function setCC(on) {
+  ccOn = on; try { localStorage.setItem('ja-cc', on ? '1' : '0'); } catch (e) { }
+  const tr = $('#v-video').textTracks[0]; if (tr) tr.mode = on ? 'showing' : 'hidden';
+  $('#v-cc').setAttribute('aria-pressed', on); $('#v-cc-t').textContent = on ? 'on' : 'off';
+}
+function playFilm(n) {
+  const f = FILMS[n], v = $('#v-video');
+  $('#v-title').textContent = f.title;
+  $$('#vmodal .vtabs button').forEach(b => b.classList.toggle('on', b.dataset.film === String(n)));
+  v.innerHTML = `<source src="/demo/${f.file}.mp4" type="video/mp4"><track kind="captions" srclang="en" label="English" src="/demo/${f.file}.en.vtt" default>`;
+  v.load(); $('#vmodal').classList.add('on');
+  v.textTracks.onaddtrack = () => setCC(ccOn); setCC(ccOn);
+  v.addEventListener('loadedmetadata', () => setCC(ccOn), { once: true });
+  v.play().catch(() => { });
+}
+function closeFilm() { const v = $('#v-video'); v.pause(); $('#vmodal').classList.remove('on'); }
+$$('[data-film]').forEach(b => b.onclick = () => playFilm(b.dataset.film));
+$('#v-cc').onclick = () => setCC(!ccOn);
+$('#v-close').onclick = closeFilm;
+$('#vmodal').onclick = e => { if (e.target === $('#vmodal')) closeFilm(); };
+$('#v-video').textTracks.addEventListener('change', () => { const tr = $('#v-video').textTracks[0]; if (tr && (tr.mode === 'showing') !== ccOn) setCC(tr.mode === 'showing'); });
+document.addEventListener('keydown', e => { if (!$('#vmodal').classList.contains('on')) return;
+  if (e.key === 'Escape') closeFilm(); else if ((e.key === 'c' || e.key === 'C') && !e.metaKey && !e.ctrlKey) setCC(!ccOn); });
 function runSearchFromFlow() { capOn('search') ? runJob('/api/run', { mode: 'weekly' }) : $('#sb-what').focus(); }
 
 // ----------------------------------------------------------- jobs

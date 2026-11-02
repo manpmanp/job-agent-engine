@@ -186,6 +186,7 @@ def _last_notes(home, n=14):
 
 
 # -------------------------------------------------------------- server
+DEMO_WEB = os.path.join(WEB_DIR, "demo")
 FAVICON = ('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#2E6FB0" stroke-width="1.8" '
            'stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="2.5" fill="#fff"/>'
            '<path d="M9 7V5.5A1.5 1.5 0 0 1 10.5 4h3A1.5 1.5 0 0 1 15 5.5V7"/><path d="M3 12.5h18"/><circle cx="12" cy="12.5" r="1.6"/></svg>')
@@ -275,6 +276,44 @@ def _make_handler(home, token, jobs, httpd_ref, presence=None):
             if n > MAX_BODY:
                 raise ValueError("request too large")
             return json.loads(self.rfile.read(n).decode("utf-8") or "{}")
+
+        def _demo_file(self, name):
+            types = {".mp4": "video/mp4", ".vtt": "text/vtt", ".jpg": "image/jpeg"}
+            ext = os.path.splitext(name)[1]
+            path = os.path.join(DEMO_WEB, name)
+            if "/" in name or "\\" in name or ext not in types or not os.path.isfile(path):
+                return self._send(404, {"error": "not found"})
+            size = os.path.getsize(path)
+            start, end = 0, size - 1
+            m = re.match(r"bytes=(\d*)-(\d*)$", self.headers.get("Range") or "")
+            if m and (m.group(1) or m.group(2)):    # browsers (Safari above all) fetch video in pieces
+                if m.group(1):
+                    start = int(m.group(1))
+                    end = min(int(m.group(2)), size - 1) if m.group(2) else size - 1
+                else:
+                    start = max(0, size - int(m.group(2)))
+                if start > end or start >= size:
+                    self.send_response(416)
+                    self.send_header("Content-Range", f"bytes */{size}")
+                    self.send_header("Content-Length", "0")
+                    self.end_headers()
+                    return
+            with open(path, "rb") as f:
+                f.seek(start)
+                data = f.read(end - start + 1)
+            self.send_response(206 if m and (m.group(1) or m.group(2)) else 200)
+            self.send_header("Content-Type", types[ext] + ("; charset=utf-8" if ext == ".vtt" else ""))
+            self.send_header("Accept-Ranges", "bytes")
+            if m and (m.group(1) or m.group(2)):
+                self.send_header("Content-Range", f"bytes {start}-{end}/{size}")
+            self.send_header("Cache-Control", "max-age=3600")
+            self.send_header("X-Content-Type-Options", "nosniff")
+            self.send_header("Content-Length", str(len(data)))
+            self.end_headers()
+            try:
+                self.wfile.write(data)
+            except (BrokenPipeError, ConnectionResetError):
+                pass
 
         def _page(self, path, extra_js=""):
             with open(path, "r", encoding="utf-8") as f:
@@ -442,6 +481,8 @@ def _make_handler(home, token, jobs, httpd_ref, presence=None):
                 return self._page(APP_HTML)
             if u.path == "/form":
                 return self._page(FORM, "window.JOB_AGENT_EMBEDDED = true;")
+            if u.path.startswith("/demo/"):    # the demo videos on the first page (no personal data; a <video> cannot send the token)
+                return self._demo_file(u.path[len("/demo/"):])
             if u.path in ("/favicon.ico", "/favicon.svg"):    # browsers ask for it without the page's token
                 return self._send(200, FAVICON.encode(), "image/svg+xml")
             if u.path == "/api/ping":
