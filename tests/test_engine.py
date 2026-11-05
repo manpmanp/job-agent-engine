@@ -373,13 +373,14 @@ class GuardTests(unittest.TestCase):
             self.skipTest("git not available")
         for k, v in (("user.email", "dev@example.com"), ("user.name", "Dev")):
             subprocess.run(["git", "-C", self.repo, "config", k, v], check=True)
-        self._old = guard.MARKERS
+        self._old = (guard.MARKERS, guard.LEARNED)
         guard.MARKERS = os.path.join(self.tmp, "markers.txt")
+        guard.LEARNED = os.path.join(self.tmp, "learned.txt")
         guard.add_marker("Robin Example")
         guard.add_marker("robin@example.org")
 
     def tearDown(self):
-        self.g.MARKERS = self._old
+        self.g.MARKERS, self.g.LEARNED = self._old
         shutil.rmtree(self.tmp, ignore_errors=True)
 
     def _stage(self, name, data):
@@ -392,12 +393,12 @@ class GuardTests(unittest.TestCase):
 
     def test_scan_words_office_files_and_names(self):
         rx = self.g._pattern(self.g.markers())
-        self.assertEqual(self.g.scan("a.txt", b"Written by ROBIN  example.", rx), ["ROBIN  example"])
+        self.assertEqual(self.g.scan("a.txt", b"Written by ROBIN  example.", rx), ["Robin Example"])
         self.assertEqual(self.g.scan("a.txt", b"Robin Examples is someone else", rx), [])
         from docx import Document
         d = Document(); d.add_paragraph("Contact: robin@example.org"); buf = __import__("io").BytesIO(); d.save(buf)
-        self.assertEqual(self.g.scan("cv.docx", buf.getvalue(), rx), ["robin@example.org"])
-        self.assertEqual(self.g.scan("CV_Robin_Example.pdf", b"", rx), ["Robin_Example"])
+        self.assertIn("robin@example.org", self.g.scan("cv.docx", buf.getvalue(), rx))
+        self.assertEqual(self.g.scan("CV_Robin_Example.pdf", b"", rx), ["Robin Example"])
 
     def test_pre_commit_and_message(self):
         self._stage("notes.md", b"nothing personal here")
@@ -409,8 +410,33 @@ class GuardTests(unittest.TestCase):
         open(msg, "w").write("Fix a typo\n")
         self.assertEqual(self.g.commit_msg(self.repo, msg), 0)
 
+    def test_learn_from_own_documents(self):
+        from docx import Document
+        docs = os.path.join(self.tmp, "mine"); os.makedirs(docs)
+        d = Document()
+        for line in ("Robin Example", "M.Sc. in Signal Processing, Kvarn Institute of Technology",
+                     "Thesis: Low-power filters for imaginary sensors",
+                     "I enjoy turning vague hardware ideas into working prototypes with the team.", "Work Experience"):
+            d.add_paragraph(line)
+        d.save(os.path.join(docs, "my_cv.docx"))
+        open(os.path.join(docs, "JD_Some_Job.pdf"), "wb").write(b"%PDF job ad text, not mine")
+        self._stage("engine/template.md", b"## Work Experience")      # text the engine itself uses is general
+        r = self.g.learn([docs], repo=self.repo)
+        learned = self.g._read_list(self.g.LEARNED)
+        self.assertIn("M.Sc. in Signal Processing, Kvarn Institute of Technology", learned)
+        self.assertIn("I enjoy turning vague hardware ideas into working prototypes with the team.", learned)
+        self.assertNotIn("Work Experience", learned)                # general text the engine itself uses
+        self.assertEqual(r["files"], 1)                             # job ads are not personal
+        self._stage("docs/y.md", b"thesis: low-power filters for imaginary sensors")
+        self.assertEqual(self.g.pre_commit(self.repo), 1)
+
+    def test_document_files_only_in_demo_and_templates(self):
+        self._stage("cv/my_cv.docx", b"PK")
+        self.assertEqual(self.g.pre_commit(self.repo), 1)
+
     def test_no_list_stops_every_commit(self):
         self.g.MARKERS = os.path.join(self.tmp, "none.txt")
+        self.g.LEARNED = os.path.join(self.tmp, "none2.txt")
         self._stage("a.md", b"x")
         self.assertEqual(self.g.pre_commit(self.repo), 1)
 

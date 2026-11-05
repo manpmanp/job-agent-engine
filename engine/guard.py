@@ -10,6 +10,8 @@
 """
     ./run.sh guard install      git hooks in this clone + your list of private details
     ./run.sh guard add TEXT     add one private detail to the list
+    ./run.sh guard learn [DIR]  learn your education, positions, thesis, characteristics and CV/letter
+                                wording from your own documents (default: your agent folder)
     ./run.sh guard status       hooks installed? how many details listed?
     ./run.sh guard check        scan every file in the repository now
     ./run.sh guard move-data    move your agent folder (for example ~/JobAgent) to my_agent/ here
@@ -23,6 +25,14 @@ list itself is never published. The hooks then refuse:
 - a commit message that contains one,
 - a push of commits that contain one.
 With no list, every commit is refused until the list exists.
+
+'guard learn' reads your own documents (CVs, letters, profile, characteristics,
+publication lists) and keeps their distinctive lines and sentences in
+private_markers_learned.txt next to your list: degree and thesis titles,
+institutions, positions, your wording. Text that the engine's own files
+already contain (section headings and the like) is left out as general.
+Job ads (JD_ files) are not read. Document files (Word, PDF, Excel, ...)
+may only be committed in the demo and template folders.
 """
 import json
 import os
@@ -36,7 +46,11 @@ from io import BytesIO
 
 ENGINE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 MARKERS = os.environ.get("JOB_AGENT_MARKERS") or os.path.join(os.path.expanduser("~"), ".config", "job-agent", "private_markers.txt")
+LEARNED = os.path.join(os.path.dirname(MARKERS), "private_markers_learned.txt")
 HOOK_TAG = "job-agent guard"
+# documents (CVs, letters, transcripts, reports ...) may only be committed where the engine keeps its fictional demo and blank templates
+DOC_TYPES = (".docx", ".doc", ".pdf", ".xlsx", ".xls", ".odt", ".ods", ".odp", ".pptx", ".ppt", ".rtf", ".pages", ".key", ".numbers")
+DOC_PLACES = ("docs/demo/", "engine/templates/", "engine/web/demo/")
 HOOKS = {
     "pre-commit": "pre-commit",
     "commit-msg": "commit-msg \"$1\"",
@@ -46,13 +60,20 @@ ZERO = "0" * 40
 
 
 # ------------------------------------------------------------------ markers
-def markers(path=None):
+def _read_list(path):
     try:
-        with open(path or MARKERS, encoding="utf-8") as f:
+        with open(path, encoding="utf-8") as f:
             lines = [l.strip() for l in f]
     except OSError:
         return []
     return [l for l in lines if l and not l.startswith("#") and len(l) >= 3]
+
+
+def markers(path=None):
+    """The private details: the ones you listed, plus the ones 'guard learn' took from your documents."""
+    if path:
+        return _read_list(path)
+    return _read_list(MARKERS) + _read_list(LEARNED)
 
 
 def add_marker(text, path=None):
@@ -77,17 +98,39 @@ def add_marker(text, path=None):
     return True
 
 
+def _tokens(s):
+    return re.findall(r"[^\W_]+", s.lower())
+
+
+class Matcher:
+    """Finds the listed details in a text as whole word sequences, ignoring case and the
+    separators between words: "Robin Example" matches "ROBIN example" and "CV_Robin_Example.pdf",
+    not "Robin Examples"."""
+
+    def __init__(self, marks):
+        self.items = []
+        for m in dict.fromkeys(marks):
+            toks = tuple(_tokens(m))
+            if toks:
+                self.items.append((m, toks, " " + " ".join(toks) + " "))
+
+    def find(self, text):
+        toks = _tokens(text)
+        if not toks:
+            return []
+        words, pairs, joined = set(toks), set(zip(toks, toks[1:])), " " + " ".join(toks) + " "
+        out = []
+        for m, mt, ms in self.items:
+            if len(mt) == 1:
+                if mt[0] in words:
+                    out.append(m)
+            elif (mt[0], mt[1]) in pairs and ms in joined:
+                out.append(m)
+        return out
+
+
 def _pattern(marks):
-    # whole words where the detail starts/ends with a letter or digit: "Anna" matches "Anna," but not "Annaberg"
-    parts = []
-    for m in sorted(set(marks), key=len, reverse=True):
-        p = re.escape(m).replace("\\ ", r"[\s_.-]+")
-        if m[:1].isalnum():
-            p = r"(?<![A-Za-z0-9])" + p
-        if m[-1:].isalnum():
-            p = p + r"(?![A-Za-z0-9])"
-        parts.append(p)
-    return re.compile("|".join(parts), re.IGNORECASE) if parts else None
+    return Matcher(marks) if marks else None
 
 
 # ------------------------------------------------------------------ reading files
@@ -100,8 +143,10 @@ def text_of(name, data):
     if low.endswith(OFFICE):
         try:
             z = zipfile.ZipFile(BytesIO(data))
-            raw = " ".join(z.read(n).decode("utf-8", "ignore") for n in z.namelist() if n.endswith(".xml"))
-            return re.sub(r"<[^>]+>", " ", raw)
+            raw = "\n".join(z.read(n).decode("utf-8", "ignore") for n in z.namelist()
+                             if n.endswith(".xml") and not n.startswith(("docProps/", "customXml/", "[Content_Types]")))
+            raw = re.sub(r"</(w:p|a:p|text:p|text:h|row|si|w:tr)>", "\n", raw)       # paragraph and row ends become line breaks
+            return re.sub(r"<[^>]+>", "", re.sub(r"<w:tab/>|<w:br/>", " ", raw))
         except (zipfile.BadZipFile, OSError, KeyError):
             return data.decode("utf-8", "ignore")
     if low.endswith(".pdf"):
@@ -119,8 +164,7 @@ def scan(name, data, rx):
     """The private details found in a file name or its content."""
     if rx is None:
         return []
-    found = {m.group(0) for m in rx.finditer(name)}
-    found |= {m.group(0) for m in rx.finditer(text_of(name, data))}
+    found = set(rx.find(name)) | set(rx.find(text_of(name, data)))
     return sorted(found, key=str.lower)
 
 
@@ -152,7 +196,7 @@ def pre_commit(repo):
     if not _need(rx):
         return 1
     names = [n for n in _git(repo, "diff", "--cached", "--name-only", "--diff-filter=ACMR", "-z").split("\0") if n]
-    hits = []
+    hits = [(n, ["a document file outside the demo and template folders"]) for n in names if _stray_document(n)]
     for n in names:
         words = scan(n, _git(repo, "show", f":{n}", data=True), rx)
         if words:
@@ -197,6 +241,8 @@ def pre_push(repo, lines):
             if w:
                 hits.append((f"message of {c[:7]}", w))
             for n in [x for x in _git(repo, "diff-tree", "--no-commit-id", "--name-only", "-r", "--root", "--diff-filter=ACMR", "-z", c).split("\0") if x]:
+                if _stray_document(n):
+                    hits.append((f"{n} in {c[:7]}", ["a document file outside the demo and template folders"]))
                 w = scan(n, _git(repo, "show", f"{c}:{n}", data=True), rx)
                 if w:
                     hits.append((f"{n} in {c[:7]}", w))
@@ -206,12 +252,111 @@ def pre_push(repo, lines):
     return 0
 
 
+def _stray_document(name):
+    n = name.replace("\\", "/")
+    return n.lower().endswith(DOC_TYPES) and not n.startswith(DOC_PLACES)
+
+
+# ------------------------------------------------------------------ learning details from your own documents
+LEARN_TYPES = (".docx", ".odt", ".pdf", ".md", ".txt", ".json", ".tex", ".html", ".csv", ".xlsx")
+SKIP_DIRS = {".git", "node_modules", "__pycache__", ".venv", "jd_source_text", "JD", "specs", "sync_logs", "search_progress", "weekly_summary"}
+EMAIL = re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}")
+PHONE = re.compile(r"\+?\d[\d ()-]{7,}\d")
+URL = re.compile(r"https?://[^\s)>\]\"']+")
+
+
+def _norm(s):
+    return " ".join(s.lower().split())
+
+
+def _candidates(text):
+    """Distinctive pieces of one document: addresses, numbers, links, short lines and sentences."""
+    out = set(EMAIL.findall(text))
+    out |= {p.strip() for p in PHONE.findall(text) if sum(ch.isdigit() for ch in p) >= 9}
+    out |= {u.rstrip(".,;") for u in URL.findall(text)}
+    for raw in re.split(r"[\r\n]+", text):
+        line = re.sub(r"^[\s\-\u2022*\u25cf#>|]+", "", raw).strip(" |\t")
+        words = line.split()
+        if 3 <= len(words) <= 14 and any(w[:1].isupper() for w in words) and sum(ch.isalpha() for ch in line) >= 12:
+            out.add(line)                                  # titles: degree, thesis, position, institution lines
+        for s in re.split(r"(?<=[.!?])\s+", line):
+            w = s.split()
+            if 7 <= len(w) <= 60:
+                out.add(s.strip())                         # sentences: summary, characteristics, letter wording
+    return out
+
+
+def _files(paths):
+    for root in paths:
+        root = os.path.abspath(os.path.expanduser(root))
+        if os.path.isfile(root):
+            yield root
+            continue
+        for d, subs, names in os.walk(root):
+            subs[:] = [s for s in subs if s not in SKIP_DIRS]
+            for n in names:
+                if n.lower().endswith(LEARN_TYPES) and not n.startswith((".", "~", "JD_")):
+                    yield os.path.join(d, n)
+
+
+def learn(paths, repo=ENGINE_DIR):
+    """Collects distinctive details from your own documents (CVs, letters, profile, characteristics)
+    into the learned list. Anything that already appears in the engine's own files is general text
+    and is left out. Returns {"files": n, "learned": n, "general": n}."""
+    found, n_files = set(), 0
+    for p in _files(paths):
+        try:
+            if os.path.getsize(p) > 20 * 1024 * 1024:
+                continue
+            with open(p, "rb") as f:
+                data = f.read()
+        except OSError:
+            continue
+        n_files += 1
+        found |= _candidates(text_of(os.path.basename(p), data))
+    corpus = []
+    for n in [x for x in _git(repo, "ls-files", "-z").split("\0") if x]:
+        try:
+            with open(os.path.join(repo, n), "rb") as f:
+                corpus.append(" ".join(_tokens(text_of(n, f.read()))))
+        except OSError:
+            pass
+    corpus = " " + " \n ".join(corpus) + " "
+    keep, general = [], 0
+    for c in sorted({" ".join(x.split()) for x in found}, key=str.lower):
+        if len(c) < 6 or len(c) > 300 or "\n" in c:
+            continue
+        toks = _tokens(c)
+        if len(toks) < 2 and not EMAIL.search(c) or (" " + " ".join(toks) + " ") in corpus:
+            general += 1
+            continue
+        keep.append(c)
+    os.makedirs(os.path.dirname(LEARNED), exist_ok=True)
+    with open(LEARNED, "w", encoding="utf-8") as f:
+        f.write("# Learned by ./run.sh guard learn from your own documents. Rewritten on every learn; edit "
+                f"{os.path.basename(MARKERS)} for your own additions.\n")
+        for c in keep:
+            f.write(c + "\n")
+    try:
+        os.chmod(LEARNED, 0o600)
+    except OSError:
+        pass
+    return {"files": n_files, "learned": len(keep), "general": general}
+
+
+def default_learn_paths():
+    s = _app_settings()
+    home = s.get("home") or os.path.join(ENGINE_DIR, "my_agent")
+    return [home] if os.path.isdir(home) else []
+
+
 def check_all(repo):
     """Scans every tracked file as it is now. Returns the hits."""
     rx = _pattern(markers())
     if rx is None:
         return None
-    hits = []
+    hits = [(n, ["a document file outside the demo and template folders"])
+            for n in [x for x in _git(repo, "ls-files", "-z").split("\0") if x] if _stray_document(n)]
     for n in [x for x in _git(repo, "ls-files", "-z").split("\0") if x]:
         p = os.path.join(repo, n)
         try:
@@ -374,6 +519,7 @@ def main(argv=None):
             print(f"added {_ask_markers()} detail(s) to {MARKERS}")
         n = len(markers())
         print(f"{n} private detail(s) listed in {MARKERS}" + ("" if n else "; commits are stopped until you add some: ./run.sh guard add \"text\""))
+        print("next: let it learn your education, positions and wording from your documents: ./run.sh guard learn <folder> ...")
         if n:
             hits = check_all(repo)
             print("the repository as it is now: clean" if not hits else "the repository as it is now contains private details:")
@@ -388,7 +534,22 @@ def main(argv=None):
         return 0
     if cmd == "status":
         print(f"hooks: {'installed' if installed(repo) else 'not installed (./run.sh guard install)'}")
-        print(f"private details listed: {len(markers())} ({MARKERS})")
+        print(f"private details you listed: {len(_read_list(MARKERS))} ({MARKERS})")
+        print(f"details learned from your documents: {len(_read_list(LEARNED))} ({LEARNED})")
+        return 0
+    if cmd == "learn":
+        paths = argv[1:] or default_learn_paths()
+        if not paths:
+            print("give the folders with your CVs, letters and profile: ./run.sh guard learn <folder> [<folder> ...]")
+            return 1
+        r = learn(paths, repo)
+        print(f"read {r['files']} document(s) in {', '.join(paths)}")
+        print(f"learned {r['learned']} private detail(s) (education, positions, wording, addresses ...) into {LEARNED}")
+        print(f"left out {r['general']} piece(s) that also appear in the engine's own files (general text)")
+        hits = check_all(repo)
+        print("the repository as it is now: clean" if not hits else "the repository as it is now contains private details:")
+        for where, words in hits or []:
+            print(f"  {where}: {', '.join(words[:5])}")
         return 0
     if cmd == "check":
         hits = check_all(repo)
