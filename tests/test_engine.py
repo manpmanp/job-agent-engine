@@ -506,7 +506,7 @@ class PersonalFilesTests(unittest.TestCase):
         res = subprocess.run(["git", "check-ignore", "--no-index", *names], cwd=os.path.dirname(HERE), capture_output=True, text=True)
         if res.returncode == 128:
             self.skipTest("not a git checkout")
-        self.assertEqual(sorted(res.stdout.split()), sorted(names))
+        self.assertEqual(sorted(res.stdout.splitlines()), sorted(names))
         for keep in ("engine/templates/state/Job_Search_Tracker.xlsx", "agent/AGENT_PROMPT.md",
                      "docs/demo/preview/CV_Nordlys_Semiconductors_AB_FPGA_Engineer_Linkoping_1001.docx"):
             kept = subprocess.run(["git", "check-ignore", "--no-index", keep], cwd=os.path.dirname(HERE), capture_output=True)
