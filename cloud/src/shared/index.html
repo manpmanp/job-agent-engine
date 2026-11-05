@@ -695,6 +695,13 @@ button.b.no:hover { border-color:var(--stop); }
       <div class="row" style="margin-top:10px" id="un-open-row"><button class="b bad" id="un-open">Uninstall...</button></div>
     </div>
     <div class="card local-only">
+      <b>Bring in an earlier agent</b>
+      <p class="muted small" style="margin:4px 0 0">Have an older Job Agent folder? Its jobs and your decisions, rejection reasons, notes, employers to watch and documents are added here, without duplicates. The older folder is only read, and the files here that change are first copied to <i>backups</i>. Turn off the older agent's daily run, so the two do not both search.</p>
+      <div class="row" style="margin-top:8px"><input type="text" id="im-folder" autocomplete="off" placeholder="The older agent's folder, for example /Users/you/job_agent" style="flex:1;min-width:220px">
+        <button class="b" id="im-check">Check</button><button class="b primary" id="im-go" hidden>Bring it in</button></div>
+      <pre class="small" id="im-r" style="margin-top:8px;white-space:pre-wrap" hidden></pre>
+    </div>
+    <div class="card local-only">
       <b>Start over</b>
       <p class="muted small" style="margin:4px 0 0">Resets the app to a fresh start. Nothing is deleted: what you reset is moved to a dated folder under <i>backups</i> in your agent folder, so you can get it back.</p>
       <div id="rs-box" hidden>
@@ -1301,6 +1308,21 @@ $('#un-go').onclick = async () => {
       <p class="muted">You can close this tab.</p></main>`;
   } catch (e) { toast(e.message); }
 };
+// bring in an earlier agent: Check shows what would be added, then Bring it in does it
+async function importAgent(dry) {
+  const folder = $('#im-folder').value.trim(), out = $('#im-r');
+  if (!folder) { $('#im-folder').focus(); return; }
+  out.hidden = false; out.textContent = dry ? 'Looking...' : 'Bringing it in...';
+  try {
+    const r = await api('/api/import', { folder, dry_run: dry });
+    out.textContent = r.lines.join('\n');
+    $('#im-go').hidden = !dry;
+    if (!dry) { toast('Earlier agent brought in'); loadPostings(); }
+  } catch (e) { out.textContent = e.message; $('#im-go').hidden = true; }
+}
+$('#im-check').onclick = () => importAgent(true);
+$('#im-go').onclick = () => importAgent(false);
+$('#im-folder').oninput = () => { $('#im-go').hidden = true; };
 $('#rs-open').onclick = async () => {
   try { const r = await api('/api/reset');
     $('#rs-parts').innerHTML = r.parts.map(p => `<div class="switch"><input type="checkbox" id="rs-${p.key}" data-part="${p.key}" checked><label for="rs-${p.key}">${esc(p.label)}</label></div>`).join('');

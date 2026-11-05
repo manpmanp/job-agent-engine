@@ -359,6 +359,107 @@ class JobSitesCatalogue(unittest.TestCase):
                 self.assertIn(s["access"], d["access_types"])
                 self.assertTrue(s["url"].startswith("https://"), s["url"])
 
+class ImportTests(unittest.TestCase):
+    """Bringing an earlier agent folder (old flat layout) into an agent home; fictional data only."""
+
+    def _row(self, url, title, status="New - needs review", **kw):
+        r = {"Date Found": "2026-09-01", "Title": title, "Employer": "Example AB", "Location": "Lund, Sweden",
+             "URL": url, "Status": status}
+        r.update(kw)
+        return r
+
+    def setUp(self):
+        from engine import home as home_mod, tracker as tr
+        self.tmp = tempfile.mkdtemp()
+        self.old = os.path.join(self.tmp, "old_agent")
+        os.makedirs(os.path.join(self.old, "scripts"))
+        os.makedirs(os.path.join(self.old, "output_files_gitignore"))
+        tr.update(os.path.join(self.old, "Job_Search_Tracker.xlsx"), [
+            self._row("https://example.com/a", "FPGA Engineer", "Rejected: Seniority level mismatch"),
+            self._row("https://example.com/b", "ASIC Designer", "Approved - ready for tailored documents", Notes="old note"),
+            self._row("https://example.com/c", "Verification Engineer", "Expired")])
+        with open(os.path.join(self.old, "Job_Search_Notes.txt"), "w") as f:
+            f.write("2026-09-01 earlier agent: first run\n")
+        with open(os.path.join(self.old, "rejection_patterns.csv"), "w") as f:
+            f.write("Date,Employer,Title,Category,Seniority Level,Location,Reason,Note,URL\n"
+                    "2026-09-01,Example AB,FPGA Engineer,FPGA,Senior,Lund,Seniority level mismatch,,https://example.com/a\n")
+        with open(os.path.join(self.old, "scripts", "employers.json"), "w") as f:
+            json.dump({"_comment": "x", "employers": [{"name": "Example AB", "urls": ["https://example.com/jobs"]},
+                                                      {"name": "Placeholder Systems", "urls": ["https://example.org/careers"]}]}, f)
+        for n in ("CV_Example_AB_ASIC_Designer.docx", "CL_Example_AB_ASIC_Designer.docx", "JD_Example_AB_ASIC_Designer.pdf", "notes.txt"):
+            open(os.path.join(self.old, "output_files_gitignore", n), "wb").write(b"x")
+        self.h = home_mod.Home(os.path.join(self.tmp, "home"))
+        cli.ensure_home(self.h)
+        # this home already found two of the same postings (one written differently) and one of its own
+        tr.update(self.h.path("tracker"), [self._row("http://www.example.com/a/", "FPGA  Engineer"),
+                                           self._row("https://example.com/b", "ASIC Designer", Notes=""),
+                                           self._row("https://example.com/d", "Embedded Engineer")])
+        with open(self.h.path("employers"), "w") as f:
+            json.dump({"mode": "extend", "employers": [{"name": "example ab", "urls": ["https://example.com/jobs", "https://example.com/more"]}], "exclude": []}, f)
+
+    def tearDown(self):
+        shutil.rmtree(self.tmp, ignore_errors=True)
+
+    def test_dry_run_changes_nothing(self):
+        from engine import importer, tracker as tr
+        before = open(self.h.path("tracker"), "rb").read()
+        rep = importer.plan(self.h, self.old)
+        self.assertEqual(open(self.h.path("tracker"), "rb").read(), before)
+        self.assertEqual((rep["tracker"]["added"], rep["tracker"]["decided"]), (1, 2))
+        self.assertEqual(rep["documents"], {"CV": 1, "CL": 1, "JD": 1})
+
+    def test_import_merges_and_is_repeatable(self):
+        from engine import importer, tracker as tr
+        rep = importer.run(self.h, self.old)
+        rows = {(r["URL"], r["Title"]): r for r in tr.read_all_rows(self.h.path("tracker"))}
+        self.assertEqual(len(rows), 4)                                   # a, b, c, d: no duplicates
+        a = [r for r in rows.values() if "FPGA" in r["Title"]][0]
+        self.assertTrue(a["Status"].startswith("Rejected"))              # the earlier decision wins over New
+        b = rows[("https://example.com/b", "ASIC Designer")]
+        self.assertEqual((b["Status"][:8], b["Notes"]), ("Approved", "old note"))
+        self.assertEqual(rows[("https://example.com/c", "Verification Engineer")]["Status"], "Expired")
+        self.assertIn("first run", open(self.h.path("notes")).read())
+        emp = json.load(open(self.h.path("employers")))
+        self.assertEqual(sorted(e["name"] for e in emp["employers"]), ["Placeholder Systems", "example ab"])
+        for kind, key in (("CV", "cv_out"), ("CL", "cl_out"), ("JD", "jd_out")):
+            self.assertEqual(len(os.listdir(self.h.path(key))), 1, kind)
+        self.assertTrue(rep["backup"] and os.path.isfile(os.path.join(rep["backup"], "state", "Job_Search_Tracker.xlsx")))
+        again = importer.run(self.h, self.old)
+        self.assertEqual((again["tracker"]["added"], again["tracker"]["decided"], again["rejection_log"]["added"],
+                          again["notes"]["added"], again["employers"]["added"], sum(again["documents"].values())), (0, 0, 0, False, 0, 0))
+        self.assertEqual(len(tr.read_all_rows(self.h.path("tracker"))), 4)
+        self.assertEqual(open(self.h.path("notes")).read().count("first run"), 1)
+        self.assertTrue(os.path.isfile(os.path.join(self.old, "Job_Search_Tracker.xlsx")))   # the old folder is only read
+
+    def test_import_through_the_app(self):
+        import threading, urllib.request
+        import socket
+        s = socket.socket(); s.bind(("127.0.0.1", 0)); port = s.getsockname()[1]; s.close()
+        srv = threading.Thread(target=lambda: app_mod.serve(self.h, port=port, open_browser=False, keep_running=True), daemon=True)
+        srv.start(); time.sleep(1.5)
+        page = urllib.request.urlopen(f"http://127.0.0.1:{port}/").read().decode()
+        tok = page.split('"token": "')[1].split('"')[0]
+        def post(body):
+            req = urllib.request.Request(f"http://127.0.0.1:{port}/api/import", data=json.dumps(body).encode(),
+                                         headers={"X-Agent-Token": tok, "Content-Type": "application/json"})
+            return json.load(urllib.request.urlopen(req))
+        r = post({"folder": self.old, "dry_run": True})
+        self.assertTrue(r["dry_run"] and r["lines"][0].startswith("Would import"))
+        r = post({"folder": self.old})
+        self.assertTrue(any("tracker" in l for l in r["lines"]))
+        self.assertEqual(len(tr.read_all_rows(self.h.path("tracker"))), 4)
+        urllib.request.urlopen(urllib.request.Request(f"http://127.0.0.1:{port}/api/quit", data=b"{}",
+                                                      headers={"X-Agent-Token": tok, "Content-Type": "application/json"}))
+
+    def test_refuses_own_home_and_empty_folder(self):
+        from engine import importer
+        with self.assertRaises(ValueError):
+            importer.run(self.h, self.h.root)
+        empty = os.path.join(self.tmp, "empty"); os.makedirs(empty)
+        with self.assertRaises(ValueError):
+            importer.run(self.h, empty)
+
+
 if __name__ == "__main__":
     unittest.main()
 

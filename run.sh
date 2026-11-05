@@ -10,7 +10,7 @@
 #
 # Single entry point for the job-search agent engine.
 #   ./run.sh [--home DIR] <command> [args]
-# Commands: --setup [--browser] (install + open the app), app, clean, release, form, fetch, test, init, status, plan, collect, verify, enrich, run,
+# Commands: --setup [--browser] (install + open the app), app, clean, release, form, fetch, test, init, status, plan, collect, verify, enrich, run, import,
 #           schedule, open, add-postings, weekly, sync, intake, tailor, checkpoint,
 #           note, demo. See docs/commands.md.
 set -euo pipefail

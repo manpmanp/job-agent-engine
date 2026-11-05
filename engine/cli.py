@@ -407,6 +407,23 @@ def cmd_reset(h, args):
     print(f"done; the previous files are in {res['backup']}" if res["backup"] else "done; there was nothing to move")
 
 
+def cmd_import(h, args):
+    from . import importer
+    try:
+        rep = importer.plan(h, args.folder)
+    except ValueError as e:
+        raise SystemExit(str(e))
+    for line in importer.describe(rep):
+        print(line)
+    if args.dry_run:
+        return
+    if not args.yes and input(f"Bring this into {h.root}? [y/N] ").strip().lower() not in ("y", "yes"):
+        print("nothing changed")
+        return
+    for line in importer.describe(importer.run(h, args.folder))[1:]:
+        print(line)
+
+
 def cmd_update(h, args):
     from . import maintenance as mt
     if args.check:
@@ -487,6 +504,9 @@ def main(argv=None):
     x.add_argument("--remove-engine", action="store_true", help="source folder: also delete the engine folder")
     x.add_argument("--keep-app", action="store_true", help="leave the program files (the Windows uninstaller removes them)")
     x.add_argument("--yes", action="store_true", help="do not ask")
+    x = sp.add_parser("import", help="bring in an earlier agent folder: tracker, rejection reasons, notes, employers, documents")
+    x.add_argument("folder"); x.add_argument("--dry-run", action="store_true", help="only say what would be brought in")
+    x.add_argument("--yes", action="store_true", help="do not ask")
     x = sp.add_parser("reset"); x.add_argument("--parts", help="comma list: settings,keys,profile,postings,documents (default: all)")
     x.add_argument("--yes", action="store_true", help="do not ask")
     sp.add_parser("open")
@@ -515,7 +535,7 @@ def main(argv=None):
      "weekly": cmd_weekly, "sync": cmd_sync, "intake": cmd_intake, "tailor": cmd_tailor,
      "checkpoint": cmd_checkpoint, "note": cmd_note, "collect": cmd_collect, "fetch": cmd_fetch, "verify": cmd_verify,
      "enrich": cmd_enrich, "run": cmd_run, "schedule": cmd_schedule, "open": cmd_open, "form": cmd_form, "app": cmd_app, "cloud": cmd_cloud, "reset": cmd_reset,
-     "update": cmd_update, "uninstall": cmd_uninstall}[args.cmd](h, args)
+     "import": cmd_import, "update": cmd_update, "uninstall": cmd_uninstall}[args.cmd](h, args)
 
 
 if __name__ == "__main__":

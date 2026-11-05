@@ -735,6 +735,16 @@ def _make_handler(home, token, jobs, httpd_ref, presence=None):
                              log=lines.append)
                 threading.Thread(target=lambda: (time.sleep(1), httpd_ref[0].shutdown()), daemon=True).start()
                 return self._send(200, {"ok": True, "log": lines})
+            if p == "/api/import":
+                from . import importer
+                if jobs.busy():
+                    return busy()
+                try:
+                    folder = str(body.get("folder") or "").strip()
+                    res = importer.run(home, folder, dry_run=bool(body.get("dry_run")))
+                except ValueError as e:
+                    return self._send(400, {"error": str(e)})
+                return self._send(200, {"lines": importer.describe(res), "dry_run": res["dry_run"]})
             if p == "/api/reset":
                 from . import reset as rs
                 if jobs.busy():
