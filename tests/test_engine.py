@@ -502,7 +502,7 @@ class PersonalFilesTests(unittest.TestCase):
         import subprocess
         names = ["somewhere/state/Job_Search_Tracker.xlsx", "x/inputs/secrets.json", "x/backups/a.txt", "old/output_files_gitignore/CV_a.docx",
                  "AGENT_PROMPT.md", "x/CL_Firm_Role.pdf", "JD_Firm_Role.pdf", "x/Interview_prep/n.md", "x/jd_source_text/a.txt",
-                 "lu411.tmp", "x/.~lock.CV_a.pdf#"]
+                 "lu411.tmp", "x/.~lock.CV_a.pdf#", "my_agent 2/inputs/search_config.json", "my_agent copy/x.txt"]
         res = subprocess.run(["git", "check-ignore", "--no-index", *names], cwd=os.path.dirname(HERE), capture_output=True, text=True)
         if res.returncode == 128:
             self.skipTest("not a git checkout")

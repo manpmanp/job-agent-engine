@@ -10,6 +10,8 @@
 # Personal data never belongs in this repo. Keep your agent home outside
 # it, or in my_agent/ which is ignored.
 /my_agent/
+# Finder and other copies of it ("my_agent 2", "my_agent copy", "my_agent-old")
+/my_agent*/
 # the agent's personal files, wherever an agent folder ends up (only the
 # blank templates and the fictional demo data are part of the engine)
 Job_Search_Tracker.xlsx
