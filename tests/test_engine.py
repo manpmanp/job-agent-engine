@@ -359,6 +359,102 @@ class JobSitesCatalogue(unittest.TestCase):
                 self.assertIn(s["access"], d["access_types"])
                 self.assertTrue(s["url"].startswith("https://"), s["url"])
 
+class GuardTests(unittest.TestCase):
+    """The privacy guard of a development clone; fictional details only."""
+
+    def setUp(self):
+        import subprocess
+        from engine import guard
+        self.g = guard
+        self.tmp = tempfile.mkdtemp()
+        self.repo = os.path.join(self.tmp, "repo")
+        os.makedirs(self.repo)
+        if subprocess.run(["git", "init", "-q", self.repo], capture_output=True).returncode != 0:
+            self.skipTest("git not available")
+        for k, v in (("user.email", "dev@example.com"), ("user.name", "Dev")):
+            subprocess.run(["git", "-C", self.repo, "config", k, v], check=True)
+        self._old = guard.MARKERS
+        guard.MARKERS = os.path.join(self.tmp, "markers.txt")
+        guard.add_marker("Robin Example")
+        guard.add_marker("robin@example.org")
+
+    def tearDown(self):
+        self.g.MARKERS = self._old
+        shutil.rmtree(self.tmp, ignore_errors=True)
+
+    def _stage(self, name, data):
+        import subprocess
+        p = os.path.join(self.repo, name)
+        os.makedirs(os.path.dirname(p), exist_ok=True)
+        with open(p, "wb") as f:
+            f.write(data)
+        subprocess.run(["git", "-C", self.repo, "add", name], check=True)
+
+    def test_scan_words_office_files_and_names(self):
+        rx = self.g._pattern(self.g.markers())
+        self.assertEqual(self.g.scan("a.txt", b"Written by ROBIN  example.", rx), ["ROBIN  example"])
+        self.assertEqual(self.g.scan("a.txt", b"Robin Examples is someone else", rx), [])
+        from docx import Document
+        d = Document(); d.add_paragraph("Contact: robin@example.org"); buf = __import__("io").BytesIO(); d.save(buf)
+        self.assertEqual(self.g.scan("cv.docx", buf.getvalue(), rx), ["robin@example.org"])
+        self.assertEqual(self.g.scan("CV_Robin_Example.pdf", b"", rx), ["Robin_Example"])
+
+    def test_pre_commit_and_message(self):
+        self._stage("notes.md", b"nothing personal here")
+        self.assertEqual(self.g.pre_commit(self.repo), 0)
+        self._stage("docs/x.md", b"mail robin@example.org")
+        self.assertEqual(self.g.pre_commit(self.repo), 1)
+        msg = os.path.join(self.tmp, "msg"); open(msg, "w").write("Tailored for Robin Example\n# a comment\n")
+        self.assertEqual(self.g.commit_msg(self.repo, msg), 1)
+        open(msg, "w").write("Fix a typo\n")
+        self.assertEqual(self.g.commit_msg(self.repo, msg), 0)
+
+    def test_no_list_stops_every_commit(self):
+        self.g.MARKERS = os.path.join(self.tmp, "none.txt")
+        self._stage("a.md", b"x")
+        self.assertEqual(self.g.pre_commit(self.repo), 1)
+
+    def test_pre_push_scans_the_commits(self):
+        import subprocess
+        self._stage("a.md", b"clean")
+        subprocess.run(["git", "-C", self.repo, "commit", "-qm", "one"], check=True)
+        base = self.g._git(self.repo, "rev-parse", "HEAD").strip()
+        self._stage("b.md", b"by Robin Example")
+        subprocess.run(["git", "-C", self.repo, "commit", "-qm", "two"], check=True)
+        head = self.g._git(self.repo, "rev-parse", "HEAD").strip()
+        self.assertEqual(self.g.pre_push(self.repo, [f"refs/heads/main {base} refs/heads/main {self.g.ZERO}"]), 0)
+        self.assertEqual(self.g.pre_push(self.repo, [f"refs/heads/main {head} refs/heads/main {base}"]), 1)
+
+    def test_install_writes_the_hooks(self):
+        self.assertFalse(self.g.installed(self.repo))
+        self.assertEqual(sorted(self.g.install(self.repo)), ["commit-msg", "pre-commit", "pre-push"])
+        self.assertTrue(self.g.installed(self.repo))
+        self.assertTrue(os.access(os.path.join(self.repo, ".git", "hooks", "pre-commit"), os.X_OK))
+
+    def test_move_data_into_my_agent(self):
+        from engine import home as home_mod, app as app_mod
+        with open(os.path.join(self.repo, ".gitignore"), "w") as f:
+            f.write("/my_agent/\n")
+        src = os.path.join(self.tmp, "JobAgent")
+        cli.ensure_home(home_mod.Home(src))
+        os.makedirs(os.path.join(self.repo, "my_agent", "state"))          # an earlier test folder
+        settings = os.path.join(self.tmp, "settings.json")
+        old_s, old_f = self.g.SETTINGS, app_mod.find_running
+        self.g.SETTINGS = settings
+        app_mod.find_running = lambda *a, **k: None
+        try:
+            json.dump({"home": src, "other": 1}, open(settings, "w"))
+            lines = self.g.move_data(engine_dir=self.repo)
+        finally:
+            self.g.SETTINGS, app_mod.find_running = old_s, old_f
+        dest = os.path.join(self.repo, "my_agent")
+        self.assertFalse(os.path.exists(src))
+        self.assertTrue(os.path.isfile(os.path.join(dest, "state", "Job_Search_Tracker.xlsx")))
+        self.assertTrue(any(n.endswith("_earlier_my_agent") for n in os.listdir(os.path.join(dest, "backups"))))
+        self.assertEqual(json.load(open(settings)), {"home": dest, "other": 1})
+        self.assertTrue(any("moved" in l for l in lines))
+
+
 class PersonalFilesTests(unittest.TestCase):
     """The public repository carries only blank templates and fictional demo data."""
 

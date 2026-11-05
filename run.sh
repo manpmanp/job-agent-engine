@@ -10,7 +10,7 @@
 #
 # Single entry point for the job-search agent engine.
 #   ./run.sh [--home DIR] <command> [args]
-# Commands: --setup [--browser] (install + open the app), app, clean, release, form, fetch, test, init, status, plan, collect, verify, enrich, run, import,
+# Commands: --setup [--browser] (install + open the app), app, clean, release, guard, form, fetch, test, init, status, plan, collect, verify, enrich, run, import,
 #           schedule, open, add-postings, weekly, sync, intake, tailor, checkpoint,
 #           note, demo. See docs/commands.md.
 set -euo pipefail
@@ -47,6 +47,17 @@ if [ "${1:-}" = "clean" ] || { [ "${1:-}" = "--home" ] && [ "${3:-}" = "clean" ]
   exit 0
 fi
 
+# "guard" (maintainers): keeps personal details out of the public repository.
+# install = git hooks that refuse commits and pushes containing any detail
+# listed in ~/.config/job-agent/private_markers.txt (outside the repo);
+# add "text", status, check (scan the repo now), move-data (move your agent
+# folder into the ignored my_agent/ and point the app there).
+if [ "${1:-}" = "guard" ]; then
+  shift
+  cd "$ENGINE_DIR"
+  PYTHONPATH="$ENGINE_DIR${PYTHONPATH:+:$PYTHONPATH}" exec "$PY" -m engine.guard "$@"
+fi
+
 # "release" (maintainers): publishes the version in engine/__init__.py.
 # Brings this folder up to date with GitHub, then tags that version on the
 # newest commit and pushes the tag; GitHub then builds the three packages
@@ -58,6 +69,11 @@ if [ "${1:-}" = "release" ]; then
   BRANCH="$(git rev-parse --abbrev-ref HEAD)"
   [ "$BRANCH" = "main" ] || { echo "switch to main first (now on $BRANCH)" >&2; exit 1; }
   git diff --quiet && git diff --cached --quiet || { echo "you have uncommitted changes; commit or discard them first" >&2; exit 1; }
+  # nothing personal may be published: the guard must be installed and the repository must scan clean
+  PYTHONPATH="$ENGINE_DIR" "$PY" -c "import sys; from engine import guard; sys.exit(0 if guard.installed() and guard.markers() else 1)" \
+    || { echo "the privacy guard is not set up in this clone: run ./run.sh guard install first" >&2; exit 1; }
+  PYTHONPATH="$ENGINE_DIR" "$PY" -m engine.guard check >/dev/null \
+    || { echo "private details found in the repository (see ./run.sh guard check); nothing was released" >&2; exit 1; }
   git fetch --quiet origin main --tags --force
   git pull --quiet --ff-only origin main || { echo "could not update from GitHub (local commits?)" >&2; exit 1; }
   VERSION="$(sed -n 's/^__version__ = "\(.*\)"/\1/p' engine/__init__.py)"
