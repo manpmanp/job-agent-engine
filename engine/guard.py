@@ -151,6 +151,8 @@ def text_of(name, data):
             return data.decode("utf-8", "ignore")
     if low.endswith(".pdf"):
         try:
+            import logging
+            logging.getLogger("pypdf").setLevel(logging.ERROR)    # damaged-but-readable PDFs: no warning per object
             from pypdf import PdfReader
             return "\n".join((pg.extract_text() or "") for pg in PdfReader(BytesIO(data)).pages)
         except Exception:
