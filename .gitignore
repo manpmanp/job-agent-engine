@@ -10,6 +10,21 @@
 # Personal data never belongs in this repo. Keep your agent home outside
 # it, or in my_agent/ which is ignored.
 /my_agent/
+# the agent's personal files, wherever an agent folder ends up (only the
+# blank templates and the fictional demo data are part of the engine)
+Job_Search_Tracker.xlsx
+Job_Search_Notes.txt
+rejection_patterns.csv
+decisions_sync.json
+secrets.json
+network_log.jsonl
+all_listings.json
+document_choices.json
+backups/
+output_files_gitignore/
+agent_home.json
+!/engine/templates/state/*
+!/docs/demo/data/*
 /docs/demo/home*/
 node_modules/
 /.venv/

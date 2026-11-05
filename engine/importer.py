@@ -164,6 +164,20 @@ def _norm_name(n):
     return " ".join(str(n or "").lower().split())
 
 
+def _inside_public_repo(root):
+    """True when root is inside a git working tree and git would not ignore files put there."""
+    import subprocess
+    probe = os.path.join(root, "state", "Job_Search_Tracker.xlsx")
+    try:
+        top = subprocess.run(["git", "-C", root, "rev-parse", "--show-toplevel"], capture_output=True, text=True, timeout=10)
+    except (OSError, subprocess.SubprocessError):
+        return False                       # no git here: nothing can be committed by accident
+    if top.returncode != 0:
+        return False
+    ign = subprocess.run(["git", "-C", root, "check-ignore", "-q", "--no-index", probe], capture_output=True, timeout=10)
+    return ign.returncode != 0
+
+
 # ------------------------------------------------------------------ the import
 def plan(home, src):
     """What an import would do, without changing anything."""
@@ -177,6 +191,10 @@ def run(home, src, dry_run=False):
         raise ValueError(f"no such folder: {src}")
     if os.path.realpath(src) == root:
         raise ValueError("that is this agent home itself")
+    if _inside_public_repo(root):
+        raise ValueError(f"this agent folder ({root}) is inside a git repository and not excluded from it, so the "
+                         "imported files could be committed and pushed. Use an agent folder outside the repository "
+                         "(for example ~/JobAgent) or one that .gitignore excludes (my_agent/).")
     found = locate(src)
     if not any([found["tracker"], found["notes"], found["rejection_log"], found["employers"]] + list(found["documents"].values())):
         raise ValueError(f"no agent files found in {src}")

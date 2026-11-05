@@ -359,6 +359,34 @@ class JobSitesCatalogue(unittest.TestCase):
                 self.assertIn(s["access"], d["access_types"])
                 self.assertTrue(s["url"].startswith("https://"), s["url"])
 
+class PersonalFilesTests(unittest.TestCase):
+    """The public repository carries only blank templates and fictional demo data."""
+
+    PERSONAL = ("Job_Search_Tracker.xlsx", "Job_Search_Notes.txt", "rejection_patterns.csv", "decisions_sync.json",
+                "secrets.json", "network_log.jsonl", "all_listings.json", "document_choices.json", "agent_home.json")
+    ALLOWED = ("engine/templates/", "docs/demo/data/")
+
+    def test_no_personal_files_tracked(self):
+        import subprocess
+        res = subprocess.run(["git", "ls-files"], cwd=os.path.dirname(HERE), capture_output=True, text=True)
+        if res.returncode != 0:
+            self.skipTest("not a git checkout")
+        bad = [f for f in res.stdout.splitlines()
+               if (os.path.basename(f) in self.PERSONAL or "/backups/" in "/" + f or "output_files_gitignore/" in f)
+               and not f.startswith(self.ALLOWED)]
+        self.assertEqual(bad, [])
+
+    def test_personal_files_ignored_anywhere(self):
+        import subprocess
+        names = ["somewhere/state/Job_Search_Tracker.xlsx", "x/inputs/secrets.json", "x/backups/a.txt", "old/output_files_gitignore/CV_a.docx"]
+        res = subprocess.run(["git", "check-ignore", "--no-index", *names], cwd=os.path.dirname(HERE), capture_output=True, text=True)
+        if res.returncode == 128:
+            self.skipTest("not a git checkout")
+        self.assertEqual(sorted(res.stdout.split()), sorted(names))
+        kept = subprocess.run(["git", "check-ignore", "--no-index", "engine/templates/state/Job_Search_Tracker.xlsx"], cwd=os.path.dirname(HERE), capture_output=True)
+        self.assertEqual(kept.returncode, 1)          # the blank template stays in the engine
+
+
 class ImportTests(unittest.TestCase):
     """Bringing an earlier agent folder (old flat layout) into an agent home; fictional data only."""
 
@@ -450,6 +478,22 @@ class ImportTests(unittest.TestCase):
         self.assertEqual(len(tr.read_all_rows(self.h.path("tracker"))), 4)
         urllib.request.urlopen(urllib.request.Request(f"http://127.0.0.1:{port}/api/quit", data=b"{}",
                                                       headers={"X-Agent-Token": tok, "Content-Type": "application/json"}))
+
+    def test_refuses_an_agent_folder_git_would_commit(self):
+        import subprocess
+        from engine import importer, home as home_mod
+        repo = os.path.join(self.tmp, "somerepo")
+        os.makedirs(repo)
+        if subprocess.run(["git", "init", "-q", repo], capture_output=True).returncode != 0:
+            self.skipTest("git not available")
+        h = home_mod.Home(os.path.join(repo, "agent"))
+        cli.ensure_home(h)
+        with self.assertRaises(ValueError) as e:
+            importer.run(h, self.old)
+        self.assertIn("git repository", str(e.exception))
+        with open(os.path.join(repo, ".gitignore"), "w") as f:
+            f.write("/agent/\n")
+        self.assertTrue(importer.plan(h, self.old)["tracker"])     # once ignored, it may be used
 
     def test_refuses_own_home_and_empty_folder(self):
         from engine import importer
