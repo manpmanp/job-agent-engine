@@ -23,8 +23,22 @@ document_choices.json
 backups/
 output_files_gitignore/
 agent_home.json
+# from the earlier agent folder: its prompt (holds personal details),
+# tailored documents, interview notes, job-ad texts, office leftovers
+AGENT_PROMPT.md
+CV_*
+CL_*
+JD_*
+TEMPLATE_CV_*
+TEMPLATE_CL_*
+Interview_prep/
+jd_source_text/
+*.tmp
+.~lock.*
 !/engine/templates/state/*
 !/docs/demo/data/*
+!/docs/demo/preview/*
+!/agent/AGENT_PROMPT.md
 /docs/demo/home*/
 node_modules/
 /.venv/

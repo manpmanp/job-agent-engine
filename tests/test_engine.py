@@ -474,13 +474,17 @@ class PersonalFilesTests(unittest.TestCase):
 
     def test_personal_files_ignored_anywhere(self):
         import subprocess
-        names = ["somewhere/state/Job_Search_Tracker.xlsx", "x/inputs/secrets.json", "x/backups/a.txt", "old/output_files_gitignore/CV_a.docx"]
+        names = ["somewhere/state/Job_Search_Tracker.xlsx", "x/inputs/secrets.json", "x/backups/a.txt", "old/output_files_gitignore/CV_a.docx",
+                 "AGENT_PROMPT.md", "x/CL_Firm_Role.pdf", "JD_Firm_Role.pdf", "x/Interview_prep/n.md", "x/jd_source_text/a.txt",
+                 "lu411.tmp", "x/.~lock.CV_a.pdf#"]
         res = subprocess.run(["git", "check-ignore", "--no-index", *names], cwd=os.path.dirname(HERE), capture_output=True, text=True)
         if res.returncode == 128:
             self.skipTest("not a git checkout")
         self.assertEqual(sorted(res.stdout.split()), sorted(names))
-        kept = subprocess.run(["git", "check-ignore", "--no-index", "engine/templates/state/Job_Search_Tracker.xlsx"], cwd=os.path.dirname(HERE), capture_output=True)
-        self.assertEqual(kept.returncode, 1)          # the blank template stays in the engine
+        for keep in ("engine/templates/state/Job_Search_Tracker.xlsx", "agent/AGENT_PROMPT.md",
+                     "docs/demo/preview/CV_Nordlys_Semiconductors_AB_FPGA_Engineer_Linkoping_1001.docx"):
+            kept = subprocess.run(["git", "check-ignore", "--no-index", keep], cwd=os.path.dirname(HERE), capture_output=True)
+            self.assertEqual(kept.returncode, 1, keep)    # blank templates and fictional demo files stay in the engine
 
 
 class ImportTests(unittest.TestCase):
